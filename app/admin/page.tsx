@@ -78,15 +78,7 @@ export default function AdminDashboardPage() {
       let publicImageUrl: string | null = null;
 
       if (imageFile) {
-        const ext = imageFile.name.split('.').pop() || 'jpg';
-        const fileName = `scene-${Date.now()}.${ext}`;
-        const { error: uploadErr } = await supabase.storage
-          .from('ppdt-scenes')
-          .upload(fileName, imageFile, { upsert: true });
-        if (uploadErr) throw uploadErr;
-
-        const { data: pub } = supabase.storage.from('ppdt-scenes').getPublicUrl(fileName);
-        publicImageUrl = pub.publicUrl;
+        publicImageUrl = await uploadViaApi('ppdt-scenes', imageFile);
       }
 
       const res = await fetch('/api/admin/scenarios', {
@@ -119,22 +111,18 @@ export default function AdminDashboardPage() {
 
   const handleSwapPicture = async (scenarioId: number, file: File) => {
     setStatusMsg('Uploading replacement picture...');
-    const ext = file.name.split('.').pop() || 'jpg';
-    const fileName = `scene-${scenarioId}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage
-      .from('ppdt-scenes')
-      .upload(fileName, file, { upsert: true });
-
-    if (error) {
-      setStatusMsg(`Upload failed: ${error.message}`);
+    let imageUrl: string;
+    try {
+      imageUrl = await uploadViaApi('ppdt-scenes', file);
+    } catch (err: any) {
+      setStatusMsg(`Upload failed: ${err.message}`);
       return;
     }
 
-    const { data: pub } = supabase.storage.from('ppdt-scenes').getPublicUrl(fileName);
     await fetch('/api/admin/scenarios', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: scenarioId, image_url: pub.publicUrl }),
+      body: JSON.stringify({ id: scenarioId, image_url: imageUrl }),
     });
     setStatusMsg(`Picture updated for Scenario #${scenarioId}!`);
     loadAdminData();
@@ -265,7 +253,13 @@ export default function AdminDashboardPage() {
       </div>
 
       {statusMsg && (
-        <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-700 text-emerald-300 text-xs font-bold">
+        <div
+          className={`p-3 rounded-xl border text-xs font-bold ${
+            /^(Error|Upload failed)/.test(statusMsg)
+              ? 'bg-red-950/60 border-red-700 text-red-300'
+              : 'bg-emerald-950/60 border-emerald-700 text-emerald-300'
+          }`}
+        >
           {statusMsg}
         </div>
       )}

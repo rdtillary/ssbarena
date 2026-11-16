@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { verifyAdmin } from '@/lib/admin-auth';
 
-const ALLOWED_BUCKETS = ['candidate-photos', 'ssb-centres'];
+const ALLOWED_BUCKETS = ['candidate-photos', 'ssb-centres', 'ppdt-scenes'];
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 const MAX_BYTES = 5 * 1024 * 1024;
 
