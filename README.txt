@@ -1,14 +1,14 @@
-SSB Arena update 3: Bulk Add (admin) + OIR sets from the database
+SSB Arena update: Bulk Add PPDT Photos (admin)
 
-1. Unzip. Drag the "app", "components" and "lib" folders into the ROOT of your GitHub repo
-   (Add file > Upload files). They replace the files with the same names.
-2. Render redeploys. No new SQL needed (oir_sets / oir_questions already exist in your schema).
-3. Open /admin > "Bulk Add".
+1. Unzip. Drag the "app" and "components" folders into the ROOT of your GitHub repo
+   (Add file > Upload files). They replace/add:
+     components/BulkPhotoPanel.tsx   (new)
+     app/admin/page.tsx              (replaced: now shows the new panel under Bulk Add)
+2. Render redeploys. No new SQL needed.
+3. Open /admin > "Bulk Add PPDT Photos".
 
 How to use:
-  a) Pick a tab (PPDT Stories / OIR Sets / Candidates / Pro Emails).
-  b) Click "Copy format for Claude". Paste it into Claude and add the website link after "Website:".
-  c) Copy Claude's JSON answer, paste it into the box, click Check, then Import.
-Existing titles are skipped, so pasting the same data twice is safe.
-
-Also in this zip: the AI grading model default is now openai/gpt-oss-120b.
+  a) Click "Choose photos" and select many images at once (files named like PPDT-1.webp).
+  b) A file is matched to the scenario whose title has the same number.
+     Set "Number offset" if they differ: PPDT-1.webp + offset 25 -> "Sample Story : 26".
+  c) Check the preview list, then click Upload.

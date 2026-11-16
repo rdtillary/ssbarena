@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { PPDTScenario, RecommendedCandidate } from '@/lib/types';
 import { SSB_CENTRES } from '@/lib/ssb-centres';
 import { BulkAddPanel } from '@/components/BulkAddPanel';
+import { BulkPhotoPanel } from '@/components/BulkPhotoPanel';
 
 interface OirRow {
   id: number;
@@ -297,6 +298,8 @@ export default function AdminDashboardPage() {
       )}
 
       <BulkAddPanel onDone={loadAdminData} />
+
+      <BulkPhotoPanel onDone={loadAdminData} />
 
       <form
         onSubmit={handleCreateScenario}
