@@ -6,11 +6,19 @@ import { ArrowLeft, Upload, Trash2, Lock, Unlock, UserCheck, PlusCircle, Award }
 import { createClient } from '@/lib/supabase/client';
 import { PPDTScenario, RecommendedCandidate } from '@/lib/types';
 import { SSB_CENTRES } from '@/lib/ssb-centres';
+import { BulkAddPanel } from '@/components/BulkAddPanel';
+
+interface OirRow {
+  id: number;
+  title: string;
+  is_free: boolean;
+}
 
 export default function AdminDashboardPage() {
   const supabase = createClient();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [scenarios, setScenarios] = useState<PPDTScenario[]>([]);
+  const [oirSets, setOirSets] = useState<OirRow[]>([]);
   const [statusMsg, setStatusMsg] = useState('');
 
   const [title, setTitle] = useState('');
@@ -47,6 +55,12 @@ export default function AdminDashboardPage() {
       .select('*')
       .order('id', { ascending: true });
     if (data) setScenarios(data);
+
+    const { data: oirRows } = await supabase
+      .from('oir_sets')
+      .select('id, title, is_free')
+      .order('id', { ascending: true });
+    if (oirRows) setOirSets(oirRows);
 
     const { data: candRows } = await supabase
       .from('recommended_candidates')
@@ -95,7 +109,10 @@ export default function AdminDashboardPage() {
         }),
       });
 
-      if (!res.ok) throw new Error('Failed to save scenario');
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to save scenario');
+      }
       setStatusMsg('Scenario & picture published live!');
       setTitle('');
       setCues('');
@@ -140,6 +157,21 @@ export default function AdminDashboardPage() {
   const deleteScenario = async (id: number) => {
     if (!confirm('Delete this PPDT scenario?')) return;
     await fetch(`/api/admin/scenarios?id=${id}`, { method: 'DELETE' });
+    loadAdminData();
+  };
+
+  const toggleOirFree = async (set: OirRow) => {
+    await fetch('/api/admin/oir', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: set.id, is_free: !set.is_free }),
+    });
+    loadAdminData();
+  };
+
+  const deleteOirSet = async (id: number) => {
+    if (!confirm('Delete this OIR set and all its questions?')) return;
+    await fetch(`/api/admin/oir?id=${id}`, { method: 'DELETE' });
     loadAdminData();
   };
 
@@ -263,6 +295,8 @@ export default function AdminDashboardPage() {
           {statusMsg}
         </div>
       )}
+
+      <BulkAddPanel onDone={loadAdminData} />
 
       <form
         onSubmit={handleCreateScenario}
@@ -484,9 +518,6 @@ export default function AdminDashboardPage() {
           <p className="text-xs font-black text-white flex items-center gap-1.5">
             <UserCheck className="w-4 h-4 text-emerald-400" /> Manually Unlock ₹199 Lifetime Pro Pass
           </p>
-          <p className="text-[11px] text-slate-400">
-            Useful if an aspirant pays you directly via UPI QR on Instagram/WhatsApp.
-          </p>
         </div>
         <input
           type="email"
@@ -505,9 +536,7 @@ export default function AdminDashboardPage() {
       </form>
 
       <div className="space-y-2.5">
-        <h2 className="text-base font-black text-white">
-          Manage Live PPDT Pictures ({scenarios.length})
-        </h2>
+        <h2 className="text-base font-black text-white">Manage Live PPDT Pictures ({scenarios.length})</h2>
         {scenarios.map((sc) => (
           <div
             key={sc.id}
@@ -559,6 +588,40 @@ export default function AdminDashboardPage() {
                 onClick={() => deleteScenario(sc.id)}
                 className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950"
                 title="Delete Scenario"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-2.5">
+        <h2 className="text-base font-black text-white">Imported OIR Sets ({oirSets.length})</h2>
+        {oirSets.length === 0 && (
+          <p className="text-xs text-slate-400">No imported sets yet. Use Bulk Add above.</p>
+        )}
+        {oirSets.map((set) => (
+          <div
+            key={set.id}
+            className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
+          >
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white truncate">{set.title}</p>
+              <p className="text-[11px] text-slate-400">{set.is_free ? 'Free' : 'Pro Locked'}</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => toggleOirFree(set)}
+                className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+                title="Toggle Free / Pro"
+              >
+                {set.is_free ? <Unlock className="w-4 h-4 text-emerald-400" /> : <Lock className="w-4 h-4 text-amber-400" />}
+              </button>
+              <button
+                onClick={() => deleteOirSet(set.id)}
+                className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950"
+                title="Delete set"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

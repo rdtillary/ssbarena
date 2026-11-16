@@ -1,13 +1,20 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, AlertTriangle, CheckCircle2, Share2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_OIR_SETS } from '@/lib/seed-data';
+import { OIRSet } from '@/lib/types';
 
 export default function OIRDrillPage() {
-  const oirSet = DEFAULT_OIR_SETS[0];
-  const questions = oirSet.questions;
+  const params = useParams();
+  const idParam = String(params.id || 'default');
+  const supabase = createClient();
+
+  const [oirSet, setOirSet] = useState<OIRSet | null>(null);
+  const [loadError, setLoadError] = useState('');
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -15,24 +22,71 @@ export default function OIRDrillPage() {
   const [totalSecondsLeft, setTotalSecondsLeft] = useState(600);
   const [submitted, setSubmitted] = useState(false);
 
+  // Load the set: database sets by numeric id, built-in benchmark as "default" (or legacy /oir/1).
   useEffect(() => {
-    if (submitted) return;
-    const interval = setInterval(() => {
-      setTotalSecondsLeft((prev) => {
-        if (prev <= 1) {
-          setSubmitted(true);
-          return 0;
+    (async () => {
+      if (/^\d+$/.test(idParam)) {
+        const { data } = await supabase
+          .from('oir_sets')
+          .select('*, oir_questions(*)')
+          .eq('id', Number(idParam))
+          .maybeSingle();
+        const qs = (data as any)?.oir_questions as any[] | undefined;
+        if (data && qs && qs.length) {
+          const questions = [...qs].sort((a, b) => a.question_number - b.question_number);
+          setTotalSecondsLeft(data.duration_seconds || 600);
+          setOirSet({
+            id: data.id,
+            title: data.title,
+            is_free: data.is_free,
+            duration_seconds: data.duration_seconds || 600,
+            questions,
+          });
+          return;
         }
-        return prev - 1;
-      });
+      }
+      if (idParam === 'default' || idParam === '1') {
+        const def = DEFAULT_OIR_SETS[0];
+        setTotalSecondsLeft(def.duration_seconds);
+        setOirSet(def);
+        return;
+      }
+      setLoadError('This drill could not be found.');
+    })();
+  }, [idParam]);
+
+  useEffect(() => {
+    if (!oirSet || submitted) return;
+    const interval = setInterval(() => {
+      setTotalSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
       setQuestionTimers((prev) => ({
         ...prev,
         [currentIdx]: (prev[currentIdx] || 0) + 1,
       }));
     }, 1000);
     return () => clearInterval(interval);
-  }, [currentIdx, submitted]);
+  }, [oirSet, currentIdx, submitted]);
 
+  useEffect(() => {
+    if (oirSet && !submitted && totalSecondsLeft === 0) setSubmitted(true);
+  }, [totalSecondsLeft, oirSet, submitted]);
+
+  if (loadError) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center space-y-3">
+        <p className="text-sm font-bold text-red-400">{loadError}</p>
+        <Link href="/" className="inline-block px-4 py-2 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold">
+          Back to Home
+        </Link>
+      </div>
+    );
+  }
+
+  if (!oirSet) {
+    return <div className="p-8 text-center text-slate-400 text-sm">Loading drill...</div>;
+  }
+
+  const questions = oirSet.questions;
   const currentQ = questions[currentIdx];
   const qSeconds = questionTimers[currentIdx] || 0;
 
@@ -42,7 +96,7 @@ export default function OIRDrillPage() {
   );
 
   const shareOnWhatsApp = () => {
-    const timeUsed = 600 - totalSecondsLeft;
+    const timeUsed = oirSet.duration_seconds - totalSecondsLeft;
     const mins = Math.floor(timeUsed / 60);
     const secs = timeUsed % 60;
     const text = encodeURIComponent(
@@ -53,11 +107,11 @@ export default function OIRDrillPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
-      <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+      <div className="flex items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
         <Link href="/" className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1">
           <ArrowLeft className="w-4 h-4" /> Exit
         </Link>
-        <span className="text-xs font-bold text-white">OIR Speed Set 01</span>
+        <span className="text-xs font-bold text-white truncate">{oirSet.title}</span>
         <span className="font-mono font-black text-sm text-amber-400">
           {String(Math.floor(totalSecondsLeft / 60)).padStart(2, '0')}:
           {String(totalSecondsLeft % 60).padStart(2, '0')}
@@ -177,7 +231,7 @@ export default function OIRDrillPage() {
                       </span>
                     )}
                   </p>
-                  <p className="text-slate-400">{q.explanation}</p>
+                  {q.explanation && <p className="text-slate-400">{q.explanation}</p>}
                 </div>
               );
             })}

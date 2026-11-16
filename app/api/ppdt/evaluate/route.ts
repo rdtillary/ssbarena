@@ -12,7 +12,7 @@ export const maxDuration = 60;
  */
 const GROQ = 'https://api.groq.com/openai/v1';
 const STT_MODEL = process.env.GROQ_STT_MODEL || 'whisper-large-v3-turbo';
-const LLM_MODEL = process.env.GROQ_LLM_MODEL || 'llama-3.3-70b-versatile';
+const LLM_MODEL = process.env.GROQ_LLM_MODEL || 'openai/gpt-oss-120b';
 
 // Nudges Whisper to keep "uh", "um" and repeated words instead of cleaning them up.
 const STT_PROMPT = 'Umm, let me think. Uh, so, the- the villager, uh, he, he was, um, standing there.';

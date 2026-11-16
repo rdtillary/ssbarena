@@ -1,8 +1,14 @@
-SSB Arena update: AI grading + less clutter
+SSB Arena update 3: Bulk Add (admin) + OIR sets from the database
 
 1. Unzip. Drag the "app", "components" and "lib" folders into the ROOT of your GitHub repo
-   (Add file > Upload files). They replace the old versions of the same files.
-2. Get a FREE key at https://console.groq.com (API Keys), no card needed.
-3. In Render > your service > Environment, add:   GROQ_API_KEY = <your key>
-   Optional: GROQ_STT_MODEL (default whisper-large-v3-turbo), GROQ_LLM_MODEL (default llama-3.3-70b-versatile)
-4. Save. Render redeploys. Test a PPDT narration.
+   (Add file > Upload files). They replace the files with the same names.
+2. Render redeploys. No new SQL needed (oir_sets / oir_questions already exist in your schema).
+3. Open /admin > "Bulk Add".
+
+How to use:
+  a) Pick a tab (PPDT Stories / OIR Sets / Candidates / Pro Emails).
+  b) Click "Copy format for Claude". Paste it into Claude and add the website link after "Website:".
+  c) Copy Claude's JSON answer, paste it into the box, click Check, then Import.
+Existing titles are skipped, so pasting the same data twice is safe.
+
+Also in this zip: the AI grading model default is now openai/gpt-oss-120b.

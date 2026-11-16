@@ -36,6 +36,7 @@ export default function HomePage() {
   const [reportingDate, setReportingDate] = useState('');
   const [centreImages, setCentreImages] = useState<Record<string, string>>({});
   const [candidates, setCandidates] = useState<RecommendedCandidate[]>([]);
+  const [dbOirSets, setDbOirSets] = useState<{ id: number; title: string; is_free: boolean }[]>([]);
   const [authOpen, setAuthOpen] = useState(false);
   const [proOpen, setProOpen] = useState(false);
 
@@ -52,6 +53,12 @@ export default function HomePage() {
     if (dbScenarios && dbScenarios.length > 0) {
       setScenarios(dbScenarios);
     }
+
+    const { data: oirRows } = await supabase
+      .from('oir_sets')
+      .select('id, title, is_free')
+      .order('id', { ascending: true });
+    if (oirRows) setDbOirSets(oirRows);
 
     const { data: centreRows } = await supabase.from('ssb_centres').select('code, image_url');
     if (centreRows) {
@@ -150,7 +157,7 @@ export default function HomePage() {
           <Play className="w-4 h-4 fill-current" /> Start Free PPDT #01
         </Link>
         <Link
-          href="/oir/1"
+          href="/oir/default"
           className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center gap-2 transition"
         >
           <Timer className="w-4 h-4 text-amber-400" /> Take 10-Min OIR Drill
@@ -165,6 +172,21 @@ export default function HomePage() {
     candidateChunks.push(candidates.slice(i, i + 4));
   }
   if (candidateChunks.length === 0) candidateChunks.push([]);
+
+  const oirList = [
+    ...DEFAULT_OIR_SETS.map((set) => ({
+      key: `default-${set.id}`,
+      href: '/oir/default',
+      title: set.title,
+      is_free: true,
+    })),
+    ...dbOirSets.map((set) => ({
+      key: `db-${set.id}`,
+      href: `/oir/${set.id}`,
+      title: set.title,
+      is_free: set.is_free,
+    })),
+  ];
 
   const slides = [
     heroSlide,
@@ -334,25 +356,43 @@ export default function HomePage() {
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white">OIR Speed Drills (10-Min Timer)</h2>
             <div className="grid sm:grid-cols-2 gap-3.5">
-              {DEFAULT_OIR_SETS.map((set) => (
-                <div
-                  key={set.id}
-                  className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
-                >
-                  <div>
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400">
-                      FREE BENCHMARK
-                    </span>
-                    <h3 className="text-sm font-bold text-white mt-1.5">{set.title}</h3>
-                  </div>
-                  <Link
-                    href={`/oir/${set.id}`}
-                    className="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shrink-0"
+              {oirList.map((set) => {
+                const locked = !set.is_free && !isPro;
+                return (
+                  <div
+                    key={set.key}
+                    className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
                   >
-                    Start OIR
-                  </Link>
-                </div>
-              ))}
+                    <div>
+                      <span
+                        className={`text-[10px] font-black px-2 py-0.5 rounded ${
+                          set.is_free
+                            ? 'bg-emerald-500/15 text-emerald-400'
+                            : 'bg-amber-500/15 text-amber-400'
+                        }`}
+                      >
+                        {set.is_free ? 'FREE' : 'PRO'}
+                      </span>
+                      <h3 className="text-sm font-bold text-white mt-1.5">{set.title}</h3>
+                    </div>
+                    {locked ? (
+                      <button
+                        onClick={() => setProOpen(true)}
+                        className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold flex items-center gap-1.5 shrink-0"
+                      >
+                        <Lock className="w-3.5 h-3.5" /> Unlock
+                      </button>
+                    ) : (
+                      <Link
+                        href={set.href}
+                        className="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shrink-0"
+                      >
+                        Start OIR
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
