@@ -29,10 +29,9 @@ export async function POST(req: Request) {
       .single();
 
     if (orderRow?.user_id) {
-      const expiresAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
       await admin
         .from('profiles')
-        .update({ is_pro: true, pro_expires_at: expiresAt })
+        .update({ is_pro: true, pro_expires_at: null })
         .eq('id', orderRow.user_id);
     }
   }

@@ -9,17 +9,21 @@ import {
   Timer,
   Archive,
   Shield,
-  Calendar,
   LogOut,
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS, DEFAULT_OIR_SETS } from '@/lib/seed-data';
-import { PPDTScenario, UserAttempt } from '@/lib/types';
+import { PRO_PRICE_INR } from '@/lib/config';
+import { getCentre } from '@/lib/ssb-centres';
+import { PPDTScenario, RecommendedCandidate, UserAttempt } from '@/lib/types';
 import { Logo } from '@/components/Logo';
 import { AuthModal } from '@/components/AuthModal';
 import { ProCheckoutModal } from '@/components/ProCheckoutModal';
+import { Carousel } from '@/components/Carousel';
+import { RecommendedSlide } from '@/components/RecommendedSlide';
+import { ReportingTimer } from '@/components/ReportingTimer';
 
 export default function HomePage() {
   const supabase = createClient();
@@ -28,9 +32,10 @@ export default function HomePage() {
   const [attempts, setAttempts] = useState<UserAttempt[]>([]);
   const [user, setUser] = useState<any>(null);
   const [isPro, setIsPro] = useState(false);
-  const [board, setBoard] = useState('34 SSB Allahabad');
-  const [daysLeft, setDaysLeft] = useState(21);
-  const [editingBoard, setEditingBoard] = useState(false);
+  const [centre, setCentre] = useState('');
+  const [reportingDate, setReportingDate] = useState('');
+  const [centreImages, setCentreImages] = useState<Record<string, string>>({});
+  const [candidates, setCandidates] = useState<RecommendedCandidate[]>([]);
   const [authOpen, setAuthOpen] = useState(false);
   const [proOpen, setProOpen] = useState(false);
 
@@ -48,6 +53,22 @@ export default function HomePage() {
       setScenarios(dbScenarios);
     }
 
+    const { data: centreRows } = await supabase.from('ssb_centres').select('code, image_url');
+    if (centreRows) {
+      const map: Record<string, string> = {};
+      centreRows.forEach((r: any) => {
+        if (r.image_url) map[r.code] = r.image_url;
+      });
+      setCentreImages(map);
+    }
+
+    const { data: candidateRows } = await supabase
+      .from('recommended_candidates')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('id', { ascending: true });
+    if (candidateRows) setCandidates(candidateRows);
+
     const { data: authData } = await supabase.auth.getUser();
     const currentUser = authData?.user || null;
     setUser(currentUser);
@@ -63,7 +84,10 @@ export default function HomePage() {
           profile.is_pro &&
           (!profile.pro_expires_at || new Date(profile.pro_expires_at) > new Date());
         setIsPro(Boolean(activePro));
-        if (profile.target_board) setBoard(profile.target_board);
+        if (profile.target_board && getCentre(profile.target_board)) {
+          setCentre(profile.target_board);
+          if (profile.reporting_date) setReportingDate(profile.reporting_date);
+        }
       }
 
       const { data: userAttempts } = await supabase
@@ -79,14 +103,79 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('ssb_arena_target') || 'null');
+      if (saved?.centre && getCentre(saved.centre)) {
+        setCentre(saved.centre);
+        setReportingDate(saved.date || '');
+      }
+    } catch {}
     loadData();
   }, []);
+
+  const handleSaveTarget = async (code: string, date: string) => {
+    setCentre(code);
+    setReportingDate(date);
+    try {
+      localStorage.setItem('ssb_arena_target', JSON.stringify({ centre: code, date }));
+    } catch {}
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ target_board: code, reporting_date: date })
+        .eq('id', user.id);
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setIsPro(false);
   };
+
+  const heroSlide = (
+    <section className="h-full flex flex-col justify-center p-6 sm:p-8 pb-10 sm:pb-12 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800">
+      <span className="self-start px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-bold mb-3">
+        NO TYPING • REAL PAPER &amp; VOICE NARRATION FLOW
+      </span>
+      <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+        Practice Real Day-1 SSB Screening Under Exact Exam Timers.
+      </h1>
+      <p className="text-slate-400 text-sm sm:text-base mt-3 max-w-2xl">
+        30-second hazy projector view → 1-minute character box → 4-minute{' '}
+        <strong className="text-slate-200">pen-on-paper</strong> story writing → 1-minute{' '}
+        <strong className="text-slate-200">spoken narration</strong> with automatic AI
+        transcription, OLQ grading &amp; saved audio vault.
+      </p>
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link
+          href="/ppdt/1"
+          className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm flex items-center gap-2 transition"
+        >
+          <Play className="w-4 h-4 fill-current" /> Start Free PPDT #01
+        </Link>
+        <Link
+          href="/oir/1"
+          className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center gap-2 transition"
+        >
+          <Timer className="w-4 h-4 text-amber-400" /> Take 10-Min OIR Drill
+        </Link>
+      </div>
+    </section>
+  );
+
+  // Recommended candidates: 4 per slide.
+  const candidateChunks: RecommendedCandidate[][] = [];
+  for (let i = 0; i < candidates.length; i += 4) {
+    candidateChunks.push(candidates.slice(i, i + 4));
+  }
+  if (candidateChunks.length === 0) candidateChunks.push([]);
+
+  const slides = [
+    heroSlide,
+    ...candidateChunks.map((chunk, i) => <RecommendedSlide key={i} candidates={chunk} />),
+  ];
 
   return (
     <div className="min-h-screen pb-20 md:pb-10">
@@ -129,7 +218,7 @@ export default function HomePage() {
                 onClick={() => setProOpen(true)}
                 className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition flex items-center gap-1"
               >
-                <Sparkles className="w-3.5 h-3.5" /> Pro ₹99
+                <Sparkles className="w-3.5 h-3.5" /> Pro ₹{PRO_PRICE_INR}
               </button>
             )}
 
@@ -154,101 +243,42 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 pt-6 space-y-6">
-        <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <Calendar className="w-4 h-4 text-amber-400" />
-            {editingBoard ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  value={board}
-                  onChange={(e) => setBoard(e.target.value)}
-                  className="px-2.5 py-1 rounded bg-slate-950 border border-slate-700 text-xs text-white"
-                />
-                <input
-                  type="number"
-                  min={1}
-                  max={180}
-                  value={daysLeft}
-                  onChange={(e) => setDaysLeft(Number(e.target.value))}
-                  className="w-16 px-2 py-1 rounded bg-slate-950 border border-slate-700 text-xs text-white"
-                />
-                <button
-                  onClick={() => setEditingBoard(false)}
-                  className="px-2.5 py-1 rounded bg-amber-500 text-slate-950 text-xs font-bold"
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setEditingBoard(true)}
-                className="text-left text-xs sm:text-sm font-semibold text-slate-200 hover:text-amber-400"
-              >
-                Target: <span className="text-amber-400 font-bold">{board}</span> •{' '}
-                <span className="text-white font-bold">{daysLeft} Days Left</span>{' '}
-                <span className="text-[11px] text-slate-500 underline ml-1">(Edit)</span>
-              </button>
-            )}
-          </div>
-          <span className="text-[11px] text-slate-400">
+        <div className="space-y-3">
+          {activeTab === 'home' && <Carousel slides={slides} />}
+
+          <ReportingTimer
+            centreCode={centre}
+            reportingDate={reportingDate}
+            imageUrl={centreImages[centre]}
+            onSave={handleSaveTarget}
+          />
+          <p className="text-[11px] text-slate-500 text-center">
             Keep a blank sheet &amp; pen ready before starting PPDT
-          </span>
+          </p>
         </div>
 
         {activeTab === 'home' && (
-          <div className="space-y-6">
-            <section className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800">
-              <span className="inline-block px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-bold mb-3">
-                NO TYPING • REAL PAPER &amp; VOICE NARRATION FLOW
-              </span>
-              <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-                Practice Real Day-1 SSB Screening Under Exact Exam Timers.
-              </h1>
-              <p className="text-slate-400 text-sm sm:text-base mt-3 max-w-2xl">
-                30-second hazy projector view → 1-minute character box → 4-minute{' '}
-                <strong className="text-slate-200">pen-on-paper</strong> story writing → 1-minute{' '}
-                <strong className="text-slate-200">spoken narration</strong> with automatic AI
-                transcription, OLQ grading &amp; saved audio vault.
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+              <p className="text-xs font-bold text-amber-400 uppercase">Step 1 • Paper Story</p>
+              <p className="text-sm font-bold text-white mt-1">Write on Real Paper (4 Min)</p>
+              <p className="text-xs text-slate-400 mt-1">
+                Builds real handwriting speed instead of unnatural keyboard typing.
               </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/ppdt/1"
-                  className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm flex items-center gap-2 transition"
-                >
-                  <Play className="w-4 h-4 fill-current" /> Start Free PPDT #01
-                </Link>
-                <Link
-                  href="/oir/1"
-                  className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center gap-2 transition"
-                >
-                  <Timer className="w-4 h-4 text-amber-400" /> Take 10-Min OIR Drill
-                </Link>
-              </div>
-            </section>
-
-            <div className="grid sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-xs font-bold text-amber-400 uppercase">Step 1 • Paper Story</p>
-                <p className="text-sm font-bold text-white mt-1">Write on Real Paper (4 Min)</p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Builds real handwriting speed instead of unnatural keyboard typing.
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-xs font-bold text-emerald-400 uppercase">Step 2 • Auto Transcript</p>
-                <p className="text-sm font-bold text-white mt-1">1-Min Voice Narration</p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Records your voice, converts speech to text live, and saves audio to your Vault.
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-xs font-bold text-sky-400 uppercase">Step 3 • AI OLQ Report</p>
-                <p className="text-sm font-bold text-white mt-1">Compare with Recommended Story</p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Evaluates WPM pace, filler words, hero action, and unlocks recommended responses.
-                </p>
-              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+              <p className="text-xs font-bold text-emerald-400 uppercase">Step 2 • Auto Transcript</p>
+              <p className="text-sm font-bold text-white mt-1">1-Min Voice Narration</p>
+              <p className="text-xs text-slate-400 mt-1">
+                Records your voice, converts speech to text live, and saves audio to your Vault.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+              <p className="text-xs font-bold text-sky-400 uppercase">Step 3 • AI OLQ Report</p>
+              <p className="text-sm font-bold text-white mt-1">Compare with Recommended Story</p>
+              <p className="text-xs text-slate-400 mt-1">
+                Evaluates WPM pace, filler words, hero action, and unlocks recommended responses.
+              </p>
             </div>
           </div>
         )}
@@ -264,7 +294,7 @@ export default function HomePage() {
                   onClick={() => setProOpen(true)}
                   className="text-xs font-bold text-amber-400 hover:underline"
                 >
-                  Unlock all for ₹99 →
+                  Unlock all for ₹{PRO_PRICE_INR} (lifetime) →
                 </button>
               )}
             </div>
@@ -286,7 +316,7 @@ export default function HomePage() {
                               : 'bg-amber-500/15 text-amber-400'
                           }`}
                         >
-                          {sc.is_free ? 'FREE' : 'PRO ₹99'}
+                          {sc.is_free ? 'FREE' : 'PRO'}
                         </span>
                         <span className="text-[11px] text-slate-500">{sc.difficulty}</span>
                       </div>

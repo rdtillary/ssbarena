@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
+import { PRO_PRICE_INR } from '@/lib/config';
 
 declare global {
   interface Window {
@@ -26,7 +27,7 @@ export function ProCheckoutModal({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const priceInr = Number(process.env.NEXT_PUBLIC_PRO_PRICE_INR || 99);
+  const priceInr = PRO_PRICE_INR;
 
   if (!open) return null;
 
@@ -62,7 +63,7 @@ export function ProCheckoutModal({
         amount: data.amount,
         currency: 'INR',
         name: 'SSB Arena',
-        description: '60-Day Pro Screening Pass (All PPDT + OIR + Audio Vault)',
+        description: 'Lifetime Pro Pass (All PPDT + OIR + Audio Vault)',
         order_id: data.orderId,
         prefill: { email: userEmail },
         theme: { color: '#F59E0B' },
@@ -102,7 +103,7 @@ export function ProCheckoutModal({
         </button>
 
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-semibold mb-3">
-          <Sparkles className="w-3.5 h-3.5" /> 60-DAY SCREENING PASS
+          <Sparkles className="w-3.5 h-3.5" /> LIFETIME PRO PASS
         </div>
 
         <h2 className="text-2xl font-black text-white">
@@ -115,7 +116,7 @@ export function ProCheckoutModal({
         <div className="my-5 p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-baseline justify-between">
           <div>
             <span className="text-3xl font-black text-amber-400">₹{priceInr}</span>
-            <span className="text-slate-400 text-xs ml-2">/ 60 days</span>
+            <span className="text-slate-400 text-xs ml-2">one-time • lifetime access</span>
           </div>
           <span className="text-xs text-emerald-400 font-medium">Instant Activation</span>
         </div>

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createAdminSupabase } from '@/lib/supabase/admin';
+import { PRO_PRICE_INR } from '@/lib/config';
 
 export async function POST() {
   const supabase = createServerSupabase();
@@ -12,7 +13,7 @@ export async function POST() {
     return NextResponse.json({ error: 'Please sign in first' }, { status: 401 });
   }
 
-  const priceInr = Number(process.env.NEXT_PUBLIC_PRO_PRICE_INR || 99);
+  const priceInr = PRO_PRICE_INR;
   const amountPaise = priceInr * 100;
 
   const razorpay = new Razorpay({

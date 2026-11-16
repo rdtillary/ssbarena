@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Upload, Trash2, Lock, Unlock, UserCheck, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Upload, Trash2, Lock, Unlock, UserCheck, PlusCircle, Award } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { PPDTScenario } from '@/lib/types';
+import { PPDTScenario, RecommendedCandidate } from '@/lib/types';
+import { SSB_CENTRES } from '@/lib/ssb-centres';
 
 export default function AdminDashboardPage() {
   const supabase = createClient();
@@ -23,6 +24,13 @@ export default function AdminDashboardPage() {
 
   const [proEmail, setProEmail] = useState('');
 
+  const [candidates, setCandidates] = useState<RecommendedCandidate[]>([]);
+  const [centreImages, setCentreImages] = useState<Record<string, string>>({});
+  const [candName, setCandName] = useState('');
+  const [candSsb, setCandSsb] = useState('');
+  const [candPhoto, setCandPhoto] = useState<File | null>(null);
+  const [candUploading, setCandUploading] = useState(false);
+
   const loadAdminData = async () => {
     const { data: authData } = await supabase.auth.getUser();
     const email = authData?.user?.email?.toLowerCase();
@@ -39,6 +47,22 @@ export default function AdminDashboardPage() {
       .select('*')
       .order('id', { ascending: true });
     if (data) setScenarios(data);
+
+    const { data: candRows } = await supabase
+      .from('recommended_candidates')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('id', { ascending: true });
+    if (candRows) setCandidates(candRows);
+
+    const { data: centreRows } = await supabase.from('ssb_centres').select('code, image_url');
+    if (centreRows) {
+      const map: Record<string, string> = {};
+      centreRows.forEach((r: any) => {
+        if (r.image_url) map[r.code] = r.image_url;
+      });
+      setCentreImages(map);
+    }
   };
 
   useEffect(() => {
@@ -141,6 +165,73 @@ export default function AdminDashboardPage() {
     const data = await res.json();
     setStatusMsg(data.message || data.error);
     setProEmail('');
+  };
+
+  const uploadViaApi = async (bucket: string, file: File): Promise<string> => {
+    const fd = new FormData();
+    fd.append('bucket', bucket);
+    fd.append('file', file);
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    return data.url as string;
+  };
+
+  const handleAddCandidate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!candPhoto) {
+      setStatusMsg('Please choose a photo for the candidate.');
+      return;
+    }
+    setCandUploading(true);
+    setStatusMsg('');
+    try {
+      const photoUrl = await uploadViaApi('candidate-photos', candPhoto);
+      const res = await fetch('/api/admin/candidates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: candName, ssb_name: candSsb, photo_url: photoUrl }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to save candidate');
+      }
+      setStatusMsg('Recommended candidate added to the homepage slideshow!');
+      setCandName('');
+      setCandSsb('');
+      setCandPhoto(null);
+      loadAdminData();
+    } catch (err: any) {
+      setStatusMsg(`Error: ${err.message}`);
+    } finally {
+      setCandUploading(false);
+    }
+  };
+
+  const deleteCandidate = async (id: number) => {
+    if (!confirm('Remove this candidate from the slideshow?')) return;
+    await fetch(`/api/admin/candidates?id=${id}`, { method: 'DELETE' });
+    loadAdminData();
+  };
+
+  const handleCentreImage = async (code: string, file: File) => {
+    setStatusMsg('Uploading SSB centre image...');
+    try {
+      const url = await uploadViaApi('ssb-centres', file);
+      const res = await fetch('/api/admin/centres', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, image_url: url }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to save image');
+      }
+      setStatusMsg('SSB centre image updated!');
+      loadAdminData();
+    } catch (err: any) {
+      setStatusMsg(`Error: ${err.message}`);
+    }
   };
 
   if (authorized === null) {
@@ -266,12 +357,138 @@ export default function AdminDashboardPage() {
       </form>
 
       <form
+        onSubmit={handleAddCandidate}
+        className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3.5"
+      >
+        <h2 className="text-base font-black text-white flex items-center gap-2">
+          <Award className="w-4 h-4 text-amber-400" /> Add Recommended Candidate (Homepage Slideshow)
+        </h2>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <input
+            required
+            placeholder="Candidate name"
+            value={candName}
+            onChange={(e) => setCandName(e.target.value)}
+            className="px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+          />
+          <input
+            required
+            list="ssb-centre-options"
+            placeholder="SSB they were recommended at"
+            value={candSsb}
+            onChange={(e) => setCandSsb(e.target.value)}
+            className="px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+          />
+          <datalist id="ssb-centre-options">
+            {SSB_CENTRES.map((c) => (
+              <option key={c.code} value={c.label} />
+            ))}
+          </datalist>
+        </div>
+
+        <div className="p-3 rounded-xl bg-slate-950 border border-dashed border-slate-700">
+          <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer">
+            <Upload className="w-4 h-4 text-amber-400" />
+            <span>
+              {candPhoto ? `Selected: ${candPhoto.name}` : "Choose candidate's photo (JPG/PNG/WebP, max 5 MB)"}
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              onChange={(e) => setCandPhoto(e.target.files?.[0] || null)}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        <button
+          type="submit"
+          disabled={candUploading}
+          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs disabled:opacity-50"
+        >
+          {candUploading ? 'Publishing...' : 'Add to Slideshow'}
+        </button>
+      </form>
+
+      <div className="space-y-2.5">
+        <h2 className="text-base font-black text-white">
+          Recommended Candidates in Slideshow ({candidates.length})
+        </h2>
+        {candidates.length === 0 && (
+          <p className="text-xs text-slate-400">No candidates yet. Add the first one above.</p>
+        )}
+        {candidates.map((c) => (
+          <div
+            key={c.id}
+            className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <img src={c.photo_url} alt={c.name} className="w-10 h-12 rounded object-cover" />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-white truncate">{c.name}</p>
+                <p className="text-[11px] text-amber-400 truncate">{c.ssb_name}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => deleteCandidate(c.id)}
+              className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950 shrink-0"
+              title="Remove candidate"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-2.5">
+        <h2 className="text-base font-black text-white">
+          SSB Centre Gate Images ({SSB_CENTRES.length})
+        </h2>
+        <div className="grid sm:grid-cols-2 gap-2.5">
+          {SSB_CENTRES.map((c) => (
+            <div
+              key={c.code}
+              className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                {centreImages[c.code] ? (
+                  <img
+                    src={centreImages[c.code]}
+                    alt={c.short}
+                    className="w-14 h-10 rounded object-cover"
+                  />
+                ) : (
+                  <div className="w-14 h-10 rounded bg-slate-800 flex items-center justify-center text-[10px] text-slate-400">
+                    No image
+                  </div>
+                )}
+                <p className="text-xs font-bold text-white truncate">{c.label}</p>
+              </div>
+              <label className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-400 cursor-pointer shrink-0">
+                {centreImages[c.code] ? 'Replace' : 'Upload'}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleCentreImage(c.code, f);
+                  }}
+                />
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <form
         onSubmit={handleGrantPro}
         className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center"
       >
         <div className="flex-1">
           <p className="text-xs font-black text-white flex items-center gap-1.5">
-            <UserCheck className="w-4 h-4 text-emerald-400" /> Manually Unlock ₹99 Pro Pass (60 Days)
+            <UserCheck className="w-4 h-4 text-emerald-400" /> Manually Unlock ₹199 Lifetime Pro Pass
           </p>
           <p className="text-[11px] text-slate-400">
             Useful if an aspirant pays you directly via UPI QR on Instagram/WhatsApp.
@@ -317,7 +534,7 @@ export default function AdminDashboardPage() {
               <div>
                 <p className="text-xs font-bold text-white">{sc.title}</p>
                 <p className="text-[11px] text-slate-400">
-                  {sc.is_free ? 'Free Scenario' : 'Pro ₹99 Locked'}
+                  {sc.is_free ? 'Free Scenario' : 'Pro Locked'}
                 </p>
               </div>
             </div>

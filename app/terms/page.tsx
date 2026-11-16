@@ -1,3 +1,5 @@
+import { PRO_PRICE_INR } from '@/lib/config';
+
 export default function TermsPage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-12 space-y-4 text-sm text-slate-300">
@@ -7,8 +9,9 @@ export default function TermsPage() {
         and is not affiliated with UPSC, the Ministry of Defence, or the Indian Armed Forces.
       </p>
       <p>
-        The ₹99 Pro Pass grants personal, non-transferable digital access for 60 calendar days
-        from payment confirmation. Sharing accounts or scraping test content is prohibited.
+        The ₹{PRO_PRICE_INR} Lifetime Pro Pass is a one-time payment that grants personal,
+        non-transferable digital access for as long as SSB Arena is operated, starting from
+        payment confirmation. Sharing accounts or scraping test content is prohibited.
       </p>
     </main>
   );
