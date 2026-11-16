@@ -41,13 +41,27 @@ export interface OIRSet {
   questions: OIRQuestion[];
 }
 
+/** One piece of the transcript: a spoken word, or a detected pause. */
+export interface TranscriptToken {
+  type: 'word' | 'filler' | 'stammer' | 'pause';
+  text: string; // the word, or e.g. "2.1s" for a pause
+  seconds?: number; // pause length
+}
+
 export interface EvaluationResult {
-  storyScore: number;
-  narrationScore: number;
-  totalScore: number;
+  valid: boolean; // false when no usable speech was detected
+  message?: string; // shown when valid is false
+  transcript: string;
+  tokens: TranscriptToken[];
+  storyScore: number; // /40 (AI graded)
+  narrationScore: number; // /20 (measured from the audio)
+  totalScore: number; // /60
   wpm: number;
   wordCount: number;
   fillerCount: number;
+  stammerCount: number;
+  pauseCount: number;
+  longestPause: number;
   breakdown: {
     heroClarity: number;
     pastPresentFuture: number;

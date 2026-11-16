@@ -141,12 +141,6 @@ export default function HomePage() {
       <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight">
         Practice Real Day-1 SSB Screening Under Exact Exam Timers.
       </h1>
-      <p className="text-slate-400 text-sm sm:text-base mt-3 max-w-2xl">
-        30-second hazy projector view → 1-minute character box → 4-minute{' '}
-        <strong className="text-slate-200">pen-on-paper</strong> story writing → 1-minute{' '}
-        <strong className="text-slate-200">spoken narration</strong> with automatic AI
-        transcription, OLQ grading &amp; saved audio vault.
-      </p>
 
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
@@ -262,23 +256,14 @@ export default function HomePage() {
             <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
               <p className="text-xs font-bold text-amber-400 uppercase">Step 1 • Paper Story</p>
               <p className="text-sm font-bold text-white mt-1">Write on Real Paper (4 Min)</p>
-              <p className="text-xs text-slate-400 mt-1">
-                Builds real handwriting speed instead of unnatural keyboard typing.
-              </p>
             </div>
             <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
               <p className="text-xs font-bold text-emerald-400 uppercase">Step 2 • Auto Transcript</p>
               <p className="text-sm font-bold text-white mt-1">1-Min Voice Narration</p>
-              <p className="text-xs text-slate-400 mt-1">
-                Records your voice, converts speech to text live, and saves audio to your Vault.
-              </p>
             </div>
             <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
               <p className="text-xs font-bold text-sky-400 uppercase">Step 3 • AI OLQ Report</p>
               <p className="text-sm font-bold text-white mt-1">Compare with Recommended Story</p>
-              <p className="text-xs text-slate-400 mt-1">
-                Evaluates WPM pace, filler words, hero action, and unlocks recommended responses.
-              </p>
             </div>
           </div>
         )}
@@ -321,9 +306,6 @@ export default function HomePage() {
                         <span className="text-[11px] text-slate-500">{sc.difficulty}</span>
                       </div>
                       <h3 className="text-sm font-bold text-white mt-1.5">{sc.title}</h3>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        30s View • 1m Box • 4m Paper • 1m Voice
-                      </p>
                     </div>
 
                     {locked ? (
@@ -362,9 +344,6 @@ export default function HomePage() {
                       FREE BENCHMARK
                     </span>
                     <h3 className="text-sm font-bold text-white mt-1.5">{set.title}</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      20 Questions • Live 45s+ Time-Trap Alerts
-                    </p>
                   </div>
                   <Link
                     href={`/oir/${set.id}`}
@@ -398,10 +377,6 @@ export default function HomePage() {
               <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 text-center">
                 <Mic className="w-8 h-8 text-slate-600 mx-auto mb-2" />
                 <p className="text-sm font-bold text-white">No recorded drills yet</p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Complete any PPDT drill to save your 1-minute narration audio, transcript, and AI
-                  score report here.
-                </p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -428,7 +403,6 @@ export default function HomePage() {
 
                     {att.transcript && (
                       <p className="text-xs text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800">
-                        <strong className="text-slate-400">Auto-Transcript: </strong>
                         {att.transcript}
                       </p>
                     )}
