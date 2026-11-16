@@ -74,3 +74,11 @@ export interface UserAttempt {
   payload?: any;
   created_at: string;
 }
+
+export interface RecommendedCandidate {
+  id: number;
+  name: string;
+  ssb_name: string;
+  photo_url: string;
+  sort_order?: number;
+}

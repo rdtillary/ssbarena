@@ -11,11 +11,10 @@ export async function POST(req: Request) {
 
   const { email } = await req.json();
   const admin = createAdminSupabase();
-  const expiresAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
 
   const { data: updated, error } = await admin
     .from('profiles')
-    .update({ is_pro: true, pro_expires_at: expiresAt })
+    .update({ is_pro: true, pro_expires_at: null })
     .eq('email', email.trim().toLowerCase())
     .select();
 
@@ -26,5 +25,5 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json({ message: `₹99 Pro Pass activated for ${email} (60 days)!` });
+  return NextResponse.json({ message: `Lifetime Pro Pass activated for ${email}!` });
 }
