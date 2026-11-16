@@ -25,24 +25,54 @@ export function AuthModal({ open, onClose, onAuthenticated }: Props) {
     setLoading(true);
     setMessage('');
 
-    const { error } = isSignUp
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password });
-
-    setLoading(false);
-    if (error) {
-      setMessage(error.message);
-    } else {
-      onAuthenticated();
-      onClose();
+    try {
+      if (isSignUp) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/` },
+        });
+        if (error) {
+          setMessage(error.message);
+        } else if (data.user && data.user.identities && data.user.identities.length === 0) {
+          // Supabase hides "already registered" by returning a user with no identities.
+          setMessage('This email is already registered. Please sign in instead.');
+          setIsSignUp(false);
+        } else if (!data.session) {
+          // "Confirm email" is enabled in Supabase: account exists but needs confirming first.
+          setMessage('Account created! Check your email (and spam folder) for a confirmation link, then sign in.');
+          setIsSignUp(false);
+        } else {
+          onAuthenticated();
+          onClose();
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setMessage(
+            error.message.toLowerCase().includes('email not confirmed')
+              ? 'Please confirm your email first. Check your inbox (and spam) for the confirmation link.'
+              : error.message
+          );
+        } else {
+          onAuthenticated();
+          onClose();
+        }
+      }
+    } catch (err: any) {
+      setMessage(err?.message || 'Could not reach the server. Check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
+    setMessage('');
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/` },
     });
+    if (error) setMessage(error.message);
   };
 
   return (
