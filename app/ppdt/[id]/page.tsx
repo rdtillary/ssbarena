@@ -29,9 +29,8 @@ export default function PPDTSimulatorPage() {
   const [phase, setPhase] = useState<Phase>('INTRO');
   const [secondsLeft, setSecondsLeft] = useState(30);
 
-  const [pins, setPins] = useState<CharacterPin[]>([
-    { id: 1, x: 45, y: 48, age: 24, sex: 'M', mood: '+', isHero: true },
-  ]);
+  // Starts empty: the candidate marks every character (and the hero) themselves.
+  const [pins, setPins] = useState<CharacterPin[]>([]);
   const [mainAction, setMainAction] = useState('');
 
   const [isRecording, setIsRecording] = useState(false);
@@ -175,7 +174,7 @@ export default function PPDTSimulatorPage() {
         body: JSON.stringify({
           transcript: finalTranscript,
           durationSeconds: actualDuration,
-          heroPin: pins.find((p) => p.isHero) || pins[0],
+          heroPin: pins.find((p) => p.isHero) || pins[0] || null,
           mainAction,
           scenarioTitle: scenario.title,
         }),
@@ -250,11 +249,11 @@ export default function PPDTSimulatorPage() {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-    setPins([
-      ...pins,
-      { id: pins.length + 1, x, y, age: 23, sex: 'M', mood: '+', isHero: false },
-    ]);
+    const nextId = pins.length ? Math.max(...pins.map((p) => p.id)) + 1 : 1;
+    setPins([...pins, { id: nextId, x, y, age: 23, sex: 'M', mood: '+', isHero: false }]);
   };
+
+  const removePin = (id: number) => setPins(pins.filter((p) => p.id !== id));
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
@@ -331,9 +330,18 @@ export default function PPDTSimulatorPage() {
             onClick={handleBoxClick}
             className="relative w-full h-44 bg-slate-950 border-2 border-dashed border-slate-700 rounded-xl cursor-crosshair overflow-hidden"
           >
+            {pins.length === 0 && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <p className="text-sm font-bold text-amber-400/80 animate-pulse">
+                  Click here and mark the character
+                </p>
+              </div>
+            )}
+
             {pins.map((p) => (
               <div
                 key={p.id}
+                onClick={(e) => e.stopPropagation()}
                 style={{ left: `${p.x}%`, top: `${p.y}%` }}
                 className={`-translate-x-1/2 -translate-y-1/2 absolute px-2 py-0.5 rounded-full text-[11px] font-black ${
                   p.isHero ? 'bg-amber-500 text-slate-950' : 'bg-slate-700 text-white'
@@ -345,19 +353,25 @@ export default function PPDTSimulatorPage() {
             ))}
           </div>
 
+          {pins.length > 0 && !pins.some((p) => p.isHero) && (
+            <p className="text-xs text-amber-300">
+              Now tap <strong>Set Hero</strong> on the main character below.
+            </p>
+          )}
+
           <div className="space-y-2">
             {pins.map((pin, index) => (
               <div
                 key={pin.id}
                 className="flex flex-wrap items-center gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs"
               >
-                <span className="font-bold text-slate-400">#{pin.id}</span>
+                <span className="font-bold text-slate-400">#{index + 1}</span>
                 <input
                   type="number"
                   value={pin.age}
                   onChange={(e) => {
                     const next = [...pins];
-                    next[index].age = Number(e.target.value);
+                    next[index] = { ...next[index], age: Number(e.target.value) };
                     setPins(next);
                   }}
                   className="w-14 px-2 py-1 rounded bg-slate-900 border border-slate-700 text-white"
@@ -366,7 +380,7 @@ export default function PPDTSimulatorPage() {
                   value={pin.sex}
                   onChange={(e) => {
                     const next = [...pins];
-                    next[index].sex = e.target.value as any;
+                    next[index] = { ...next[index], sex: e.target.value as any };
                     setPins(next);
                   }}
                   className="px-2 py-1 rounded bg-slate-900 border border-slate-700 text-white"
@@ -379,7 +393,7 @@ export default function PPDTSimulatorPage() {
                   value={pin.mood}
                   onChange={(e) => {
                     const next = [...pins];
-                    next[index].mood = e.target.value as any;
+                    next[index] = { ...next[index], mood: e.target.value as any };
                     setPins(next);
                   }}
                   className="px-2 py-1 rounded bg-slate-900 border border-slate-700 text-white"
@@ -398,6 +412,14 @@ export default function PPDTSimulatorPage() {
                   }`}
                 >
                   {pin.isHero ? '★ Hero' : 'Set Hero'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removePin(pin.id)}
+                  className="px-2 py-1 rounded bg-slate-800 text-red-400 font-bold"
+                  title="Remove"
+                >
+                  ✕
                 </button>
               </div>
             ))}
