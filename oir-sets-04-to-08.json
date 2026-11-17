@@ -1,0 +1,1237 @@
+[
+  {
+    "title": "OIR Practice Set 04 (Mixed Reasoning, 20 Qs)",
+    "is_free": true,
+    "duration_seconds": 600,
+    "questions": [
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 3, 6, 12, 24, 48, ?",
+        "options": [
+          "96",
+          "72",
+          "84",
+          "90"
+        ],
+        "correct_index": 0,
+        "explanation": "Each number doubles."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 5, 7, 11, 17, 25, ?",
+        "options": [
+          "33",
+          "37",
+          "31",
+          "35"
+        ],
+        "correct_index": 3,
+        "explanation": "Differences are 2, 4, 6, 8, 10."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 2, 6, 12, 20, 30, ?",
+        "options": [
+          "40",
+          "44",
+          "42",
+          "36"
+        ],
+        "correct_index": 2,
+        "explanation": "Terms are n(n+1); 6 x 7 = 42."
+      },
+      {
+        "category": "Letter Series",
+        "question_text": "Find the next letter: B, E, H, K, N, ?",
+        "options": [
+          "P",
+          "Q",
+          "R",
+          "O"
+        ],
+        "correct_index": 1,
+        "explanation": "Each letter moves +3."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Pilot : Aircraft :: Captain : ?",
+        "options": [
+          "Ship",
+          "Road",
+          "Station",
+          "Hospital"
+        ],
+        "correct_index": 0,
+        "explanation": "A pilot commands an aircraft; a captain commands a ship."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Hot : Cold :: Day : ?",
+        "options": [
+          "Sun",
+          "Light",
+          "Week",
+          "Night"
+        ],
+        "correct_index": 3,
+        "explanation": "Opposites."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which one does not belong to the group?",
+        "options": [
+          "Mango",
+          "Apple",
+          "Potato",
+          "Banana"
+        ],
+        "correct_index": 2,
+        "explanation": "Potato is a vegetable; the others are fruits."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which one does not belong to the group?",
+        "options": [
+          "Rifle",
+          "Helmet",
+          "Pistol",
+          "Carbine"
+        ],
+        "correct_index": 1,
+        "explanation": "The others are firearms."
+      },
+      {
+        "category": "Coding-Decoding",
+        "question_text": "If CAT is coded as DBU, how is DOG coded?",
+        "options": [
+          "EPH",
+          "EOH",
+          "DPH",
+          "FPI"
+        ],
+        "correct_index": 0,
+        "explanation": "Each letter moves +1."
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word comes LAST in the dictionary? Forest, Format, Fortune, Forward",
+        "options": [
+          "Forest",
+          "Format",
+          "Fortune",
+          "Forward"
+        ],
+        "correct_index": 3,
+        "explanation": "Forward has W after FOR, the latest letter."
+      },
+      {
+        "category": "Word Arrangement",
+        "question_text": "Write the SECOND letter of the rearranged word: ILDOERS",
+        "options": [
+          "L",
+          "I",
+          "O",
+          "D"
+        ],
+        "correct_index": 2,
+        "explanation": "ILDOERS = SOLDIER; second letter O."
+      },
+      {
+        "category": "Direction",
+        "question_text": "A man walks 5 km north, 3 km east, then 5 km south. How far and in which direction is he from the start?",
+        "options": [
+          "5 km North",
+          "3 km East",
+          "8 km",
+          "3 km West"
+        ],
+        "correct_index": 1,
+        "explanation": "North and south legs cancel, leaving 3 km East."
+      },
+      {
+        "category": "Blood Relations",
+        "question_text": "A is B's sister. C is B's mother. D is C's father. How is A related to D?",
+        "options": [
+          "Granddaughter",
+          "Daughter",
+          "Niece",
+          "Sister"
+        ],
+        "correct_index": 0,
+        "explanation": "D is A's mother's father."
+      },
+      {
+        "category": "Ranking",
+        "question_text": "Ravi is 7th from the top and 18th from the bottom. How many students are there?",
+        "options": [
+          "25",
+          "23",
+          "26",
+          "24"
+        ],
+        "correct_index": 3,
+        "explanation": "7 + 18 - 1 = 24."
+      },
+      {
+        "category": "Speed & Distance",
+        "question_text": "Convert 54 km/h into m/s.",
+        "options": [
+          "12 m/s",
+          "18 m/s",
+          "15 m/s",
+          "20 m/s"
+        ],
+        "correct_index": 2,
+        "explanation": "54 x 5/18 = 15."
+      },
+      {
+        "category": "Clock & Angle",
+        "question_text": "What is the angle between the clock hands at 4:00?",
+        "options": [
+          "90°",
+          "120°",
+          "100°",
+          "150°"
+        ],
+        "correct_index": 1,
+        "explanation": "4 x 30 = 120."
+      },
+      {
+        "category": "Calendar",
+        "question_text": "If today is Wednesday, what day will it be after 10 days?",
+        "options": [
+          "Saturday",
+          "Friday",
+          "Sunday",
+          "Thursday"
+        ],
+        "correct_index": 0,
+        "explanation": "10 mod 7 = 3; Wednesday + 3 = Saturday."
+      },
+      {
+        "category": "Logical Order",
+        "question_text": "Arrange: Childhood, Infancy, Adulthood, Old age. Which comes third?",
+        "options": [
+          "Childhood",
+          "Old age",
+          "Infancy",
+          "Adulthood"
+        ],
+        "correct_index": 3,
+        "explanation": "Order: Infancy, Childhood, Adulthood, Old age."
+      },
+      {
+        "category": "Counting",
+        "question_text": "How many times does the digit 3 appear in 13, 23, 33, 43?",
+        "options": [
+          "4",
+          "6",
+          "5",
+          "3"
+        ],
+        "correct_index": 2,
+        "explanation": "1 + 1 + 2 + 1 = 5."
+      },
+      {
+        "category": "Arithmetic",
+        "question_text": "If 8 pens cost ₹96, what is the cost of 5 pens?",
+        "options": [
+          "₹50",
+          "₹60",
+          "₹64",
+          "₹72"
+        ],
+        "correct_index": 1,
+        "explanation": "One pen costs ₹12; 5 x 12 = 60."
+      }
+    ]
+  },
+  {
+    "title": "OIR Practice Set 05 (Mixed Reasoning, 20 Qs)",
+    "is_free": false,
+    "duration_seconds": 600,
+    "questions": [
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 1, 4, 9, 16, 25, ?",
+        "options": [
+          "30",
+          "36",
+          "49",
+          "35"
+        ],
+        "correct_index": 1,
+        "explanation": "Perfect squares."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 100, 95, 85, 70, 50, ?",
+        "options": [
+          "25",
+          "20",
+          "30",
+          "15"
+        ],
+        "correct_index": 0,
+        "explanation": "Differences are 5, 10, 15, 20, 25."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 2, 3, 5, 8, 12, ?",
+        "options": [
+          "16",
+          "18",
+          "15",
+          "17"
+        ],
+        "correct_index": 3,
+        "explanation": "Differences are 1, 2, 3, 4, 5."
+      },
+      {
+        "category": "Letter Series",
+        "question_text": "Find the next letter: A, C, F, J, O, ?",
+        "options": [
+          "T",
+          "S",
+          "U",
+          "V"
+        ],
+        "correct_index": 2,
+        "explanation": "Jumps are +2, +3, +4, +5, +6."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Doctor : Hospital :: Teacher : ?",
+        "options": [
+          "Court",
+          "School",
+          "Market",
+          "Station"
+        ],
+        "correct_index": 1,
+        "explanation": "Place of work."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Thermometer : Temperature :: Compass : ?",
+        "options": [
+          "Direction",
+          "Speed",
+          "Weight",
+          "Time"
+        ],
+        "correct_index": 0,
+        "explanation": "Instrument and what it measures."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which one does not belong to the group?",
+        "options": [
+          "Sparrow",
+          "Eagle",
+          "Parrot",
+          "Bat"
+        ],
+        "correct_index": 3,
+        "explanation": "Bat is a mammal; the others are birds."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which number does not belong to the group? 27, 64, 125, 100",
+        "options": [
+          "27",
+          "64",
+          "100",
+          "125"
+        ],
+        "correct_index": 2,
+        "explanation": "The others are perfect cubes."
+      },
+      {
+        "category": "Coding-Decoding",
+        "question_text": "If TANK is coded as SZMJ, how is GUN coded?",
+        "options": [
+          "FUM",
+          "FTM",
+          "HVO",
+          "GTM"
+        ],
+        "correct_index": 1,
+        "explanation": "Each letter moves -1."
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word comes LAST in the dictionary? Tactic, Target, Tangent, Tablet",
+        "options": [
+          "Target",
+          "Tactic",
+          "Tangent",
+          "Tablet"
+        ],
+        "correct_index": 0,
+        "explanation": "TAR comes after TAN, TAC and TAB."
+      },
+      {
+        "category": "Sentence Arrangement",
+        "question_text": "Write the LAST letter of the rearranged sentence: morning every cadets march on parade",
+        "options": [
+          "E",
+          "N",
+          "D",
+          "G"
+        ],
+        "correct_index": 3,
+        "explanation": "Cadets march on parade every morning."
+      },
+      {
+        "category": "Direction",
+        "question_text": "Sameer walks 4 km south, turns left and walks 3 km. In which direction is he from the start?",
+        "options": [
+          "North-West",
+          "South-West",
+          "South-East",
+          "North-East"
+        ],
+        "correct_index": 2,
+        "explanation": "Facing south, left is east."
+      },
+      {
+        "category": "Blood Relations",
+        "question_text": "Pointing to a photo, Rita says: 'He is the son of my mother's only brother.' Who is he to Rita?",
+        "options": [
+          "Uncle",
+          "Cousin",
+          "Brother",
+          "Nephew"
+        ],
+        "correct_index": 1,
+        "explanation": "Her maternal uncle's son."
+      },
+      {
+        "category": "Ranking",
+        "question_text": "In a row of 31 cadets, Vikas is 12th from the left. What is his position from the right?",
+        "options": [
+          "20th",
+          "19th",
+          "21st",
+          "18th"
+        ],
+        "correct_index": 0,
+        "explanation": "31 - 12 + 1 = 20."
+      },
+      {
+        "category": "Arithmetic",
+        "question_text": "The average of 4 numbers is 15. A fifth number, 25, is added. What is the new average?",
+        "options": [
+          "16",
+          "18",
+          "20",
+          "17"
+        ],
+        "correct_index": 3,
+        "explanation": "(60 + 25) / 5 = 17."
+      },
+      {
+        "category": "Time & Work",
+        "question_text": "6 men finish a job in 10 days. How many days will 12 men take?",
+        "options": [
+          "4 days",
+          "6 days",
+          "5 days",
+          "8 days"
+        ],
+        "correct_index": 2,
+        "explanation": "Double the men, half the time."
+      },
+      {
+        "category": "Calendar",
+        "question_text": "1 January 2024 was a Monday. What day was 1 February 2024?",
+        "options": [
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Tuesday"
+        ],
+        "correct_index": 1,
+        "explanation": "31 days = 3 odd days; Monday + 3 = Thursday."
+      },
+      {
+        "category": "Alphabetical Order",
+        "question_text": "Arrange alphabetically: Zebra, Lion, Tiger, Deer, Cat. Which is in the middle?",
+        "options": [
+          "Lion",
+          "Deer",
+          "Tiger",
+          "Cat"
+        ],
+        "correct_index": 0,
+        "explanation": "Cat, Deer, Lion, Tiger, Zebra."
+      },
+      {
+        "category": "Counting",
+        "question_text": "How many different letters in CONFIDENCE appear more than once?",
+        "options": [
+          "2",
+          "4",
+          "5",
+          "3"
+        ],
+        "correct_index": 3,
+        "explanation": "C, N and E repeat."
+      },
+      {
+        "category": "Number Puzzle",
+        "question_text": "If 3 * 4 = 25 and 5 * 12 = 169, then 8 * 15 = ?",
+        "options": [
+          "233",
+          "169",
+          "289",
+          "243"
+        ],
+        "correct_index": 2,
+        "explanation": "a squared + b squared: 64 + 225 = 289."
+      }
+    ]
+  },
+  {
+    "title": "OIR Practice Set 06 (Mixed Reasoning, 20 Qs)",
+    "is_free": false,
+    "duration_seconds": 600,
+    "questions": [
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 7, 14, 28, 56, 112, ?",
+        "options": [
+          "196",
+          "168",
+          "224",
+          "228"
+        ],
+        "correct_index": 2,
+        "explanation": "Each number doubles."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 1, 2, 6, 24, 120, ?",
+        "options": [
+          "600",
+          "720",
+          "840",
+          "360"
+        ],
+        "correct_index": 1,
+        "explanation": "Multiply by 2, 3, 4, 5, 6."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 4, 9, 19, 39, 79, ?",
+        "options": [
+          "159",
+          "157",
+          "169",
+          "149"
+        ],
+        "correct_index": 0,
+        "explanation": "Multiply by 2 and add 1."
+      },
+      {
+        "category": "Letter Series",
+        "question_text": "Find the next letter: Z, X, U, Q, L, ?",
+        "options": [
+          "G",
+          "E",
+          "H",
+          "F"
+        ],
+        "correct_index": 3,
+        "explanation": "Jumps are -2, -3, -4, -5, -6."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Soldier : Barracks :: Aircraft : ?",
+        "options": [
+          "Garage",
+          "Harbour",
+          "Hangar",
+          "Depot"
+        ],
+        "correct_index": 2,
+        "explanation": "Where each is housed."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Kilogram : Weight :: Kilometre : ?",
+        "options": [
+          "Speed",
+          "Distance",
+          "Time",
+          "Area"
+        ],
+        "correct_index": 1,
+        "explanation": "Unit and quantity measured."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which city does not belong to the group? Delhi, Mumbai, Chennai, Lahore",
+        "options": [
+          "Lahore",
+          "Delhi",
+          "Mumbai",
+          "Chennai"
+        ],
+        "correct_index": 0,
+        "explanation": "Lahore is not in India."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which number does not belong to the group? 21, 35, 49, 51",
+        "options": [
+          "21",
+          "35",
+          "49",
+          "51"
+        ],
+        "correct_index": 3,
+        "explanation": "The others are multiples of 7."
+      },
+      {
+        "category": "Coding-Decoding",
+        "question_text": "If FIRE is written as GJSF, how is WATER written?",
+        "options": [
+          "XBUFR",
+          "VZSDQ",
+          "XBUFS",
+          "XCVGT"
+        ],
+        "correct_index": 2,
+        "explanation": "Each letter moves +1."
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word comes LAST in the dictionary? Mission, Missile, Mist, Mistake",
+        "options": [
+          "Mission",
+          "Mistake",
+          "Missile",
+          "Mist"
+        ],
+        "correct_index": 1,
+        "explanation": "MIST comes before MISTAKE; both after MISS-."
+      },
+      {
+        "category": "Word Arrangement",
+        "question_text": "Write the SECOND letter of the rearranged word: LTBETA",
+        "options": [
+          "A",
+          "L",
+          "T",
+          "E"
+        ],
+        "correct_index": 0,
+        "explanation": "LTBETA = BATTLE; second letter A."
+      },
+      {
+        "category": "Direction",
+        "question_text": "Rahul faces East, turns 90° right, then 180°, then 90° left. Which direction does he face?",
+        "options": [
+          "East",
+          "North",
+          "South",
+          "West"
+        ],
+        "correct_index": 3,
+        "explanation": "East, South, North, West."
+      },
+      {
+        "category": "Blood Relations",
+        "question_text": "P is Q's brother. Q is R's father. S is R's mother. How is S related to P?",
+        "options": [
+          "Sister",
+          "Cousin",
+          "Sister-in-law",
+          "Niece"
+        ],
+        "correct_index": 2,
+        "explanation": "S is the wife of P's brother."
+      },
+      {
+        "category": "Ranking",
+        "question_text": "Neha is 9th from the top. Priya is 5 ranks below her. The class has 30 students. What is Priya's rank from the bottom?",
+        "options": [
+          "16th",
+          "17th",
+          "18th",
+          "15th"
+        ],
+        "correct_index": 1,
+        "explanation": "Priya is 14th from top; 30 - 14 + 1 = 17."
+      },
+      {
+        "category": "Ratio",
+        "question_text": "The ages of two cadets are in the ratio 3:5 and sum to 40. What is the elder's age?",
+        "options": [
+          "25",
+          "24",
+          "20",
+          "30"
+        ],
+        "correct_index": 0,
+        "explanation": "5/8 of 40 = 25."
+      },
+      {
+        "category": "Speed & Distance",
+        "question_text": "A convoy travels at 40 km/h for 2 hours, then 60 km/h for 1 hour. Total distance?",
+        "options": [
+          "120 km",
+          "100 km",
+          "160 km",
+          "140 km"
+        ],
+        "correct_index": 3,
+        "explanation": "80 + 60 = 140."
+      },
+      {
+        "category": "Percentage",
+        "question_text": "20% of a number is 48. What is the number?",
+        "options": [
+          "200",
+          "250",
+          "240",
+          "96"
+        ],
+        "correct_index": 2,
+        "explanation": "48 / 0.2 = 240."
+      },
+      {
+        "category": "Syllogism",
+        "question_text": "Statements: All soldiers are brave. Some brave are tall. I. Some soldiers are tall. II. Some tall are brave.",
+        "options": [
+          "Only I follows",
+          "Only II follows",
+          "Both follow",
+          "Neither follows"
+        ],
+        "correct_index": 1,
+        "explanation": "II is the converse of 'Some brave are tall'."
+      },
+      {
+        "category": "Counting",
+        "question_text": "In 4 7 4 7 7 4 7 4 4 7, how many 7s are immediately followed by 4?",
+        "options": [
+          "3",
+          "2",
+          "4",
+          "5"
+        ],
+        "correct_index": 0,
+        "explanation": "Positions 2, 5 and 7."
+      },
+      {
+        "category": "Clock & Angle",
+        "question_text": "What is the angle between the clock hands at 2:00?",
+        "options": [
+          "30°",
+          "45°",
+          "90°",
+          "60°"
+        ],
+        "correct_index": 3,
+        "explanation": "2 x 30 = 60."
+      }
+    ]
+  },
+  {
+    "title": "OIR Practice Set 07 (Mixed Reasoning, 20 Qs)",
+    "is_free": false,
+    "duration_seconds": 600,
+    "questions": [
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 11, 13, 17, 19, 23, ?",
+        "options": [
+          "27",
+          "31",
+          "25",
+          "29"
+        ],
+        "correct_index": 3,
+        "explanation": "Consecutive prime numbers."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 3, 5, 9, 17, 33, ?",
+        "options": [
+          "63",
+          "66",
+          "65",
+          "49"
+        ],
+        "correct_index": 2,
+        "explanation": "Differences double: 2, 4, 8, 16, 32."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 6, 11, 21, 41, 81, ?",
+        "options": [
+          "151",
+          "161",
+          "160",
+          "171"
+        ],
+        "correct_index": 1,
+        "explanation": "Multiply by 2 and subtract 1."
+      },
+      {
+        "category": "Letter Series",
+        "question_text": "Find the next pair: AB, CD, EF, GH, ?",
+        "options": [
+          "IJ",
+          "HI",
+          "JK",
+          "IK"
+        ],
+        "correct_index": 0,
+        "explanation": "Consecutive letter pairs."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Sword : Sheath :: Pistol : ?",
+        "options": [
+          "Trigger",
+          "Barrel",
+          "Bullet",
+          "Holster"
+        ],
+        "correct_index": 3,
+        "explanation": "What each is carried in."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Eye : See :: Ear : ?",
+        "options": [
+          "Speak",
+          "Smell",
+          "Hear",
+          "Touch"
+        ],
+        "correct_index": 2,
+        "explanation": "Organ and its function."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which one does not belong to the group? Pen, Pencil, Chalk, Eraser",
+        "options": [
+          "Pen",
+          "Eraser",
+          "Pencil",
+          "Chalk"
+        ],
+        "correct_index": 1,
+        "explanation": "The others are used to write."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which one does not belong to the group? Square, Rectangle, Triangle, Sphere",
+        "options": [
+          "Sphere",
+          "Square",
+          "Rectangle",
+          "Triangle"
+        ],
+        "correct_index": 0,
+        "explanation": "Sphere is 3-dimensional."
+      },
+      {
+        "category": "Coding-Decoding",
+        "question_text": "If MOON is coded as 13151514 using letter positions, how is SUN coded?",
+        "options": [
+          "182113",
+          "192015",
+          "202114",
+          "192114"
+        ],
+        "correct_index": 3,
+        "explanation": "S=19, U=21, N=14."
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word comes LAST in the dictionary? Courage, Courtesy, Course, Court",
+        "options": [
+          "Courage",
+          "Course",
+          "Courtesy",
+          "Court"
+        ],
+        "correct_index": 2,
+        "explanation": "COURT comes before COURTESY."
+      },
+      {
+        "category": "Word Arrangement",
+        "question_text": "Write the THIRD letter of the rearranged word: LORTAP",
+        "options": [
+          "R",
+          "T",
+          "A",
+          "O"
+        ],
+        "correct_index": 1,
+        "explanation": "LORTAP = PATROL; third letter T."
+      },
+      {
+        "category": "Direction",
+        "question_text": "A walks 8 km west, turns right, walks 6 km, turns right, then walks 8 km. How far and in which direction is he from the start?",
+        "options": [
+          "6 km North",
+          "6 km South",
+          "8 km East",
+          "14 km North"
+        ],
+        "correct_index": 0,
+        "explanation": "West, north, east: the west and east legs cancel."
+      },
+      {
+        "category": "Blood Relations",
+        "question_text": "Raj's mother is the only daughter of Meena. How is Meena related to Raj?",
+        "options": [
+          "Mother",
+          "Aunt",
+          "Sister",
+          "Grandmother"
+        ],
+        "correct_index": 3,
+        "explanation": "Meena is his mother's mother."
+      },
+      {
+        "category": "Ranking",
+        "question_text": "Among 40 candidates, Ajay is 15th from the bottom. What is his rank from the top?",
+        "options": [
+          "25th",
+          "27th",
+          "26th",
+          "24th"
+        ],
+        "correct_index": 2,
+        "explanation": "40 - 15 + 1 = 26."
+      },
+      {
+        "category": "Simple Interest",
+        "question_text": "What is the simple interest on ₹2000 at 5% per annum for 3 years?",
+        "options": [
+          "₹250",
+          "₹300",
+          "₹350",
+          "₹400"
+        ],
+        "correct_index": 1,
+        "explanation": "2000 x 5 x 3 / 100 = 300."
+      },
+      {
+        "category": "Speed & Distance",
+        "question_text": "A cadet cycles 15 km in 45 minutes. What is the speed in km/h?",
+        "options": [
+          "20 km/h",
+          "18 km/h",
+          "22 km/h",
+          "25 km/h"
+        ],
+        "correct_index": 0,
+        "explanation": "15 / 0.75 = 20."
+      },
+      {
+        "category": "Calendar",
+        "question_text": "If 5 March 2025 was a Wednesday, what day was 5 April 2025?",
+        "options": [
+          "Friday",
+          "Sunday",
+          "Thursday",
+          "Saturday"
+        ],
+        "correct_index": 3,
+        "explanation": "31 days = 3 odd days."
+      },
+      {
+        "category": "Syllogism",
+        "question_text": "Statements: All pilots are officers. All officers are graduates. I. All pilots are graduates. II. All graduates are officers.",
+        "options": [
+          "Only II follows",
+          "Both follow",
+          "Only I follows",
+          "Neither follows"
+        ],
+        "correct_index": 2,
+        "explanation": "I follows by chaining; II is an invalid reversal."
+      },
+      {
+        "category": "Counting",
+        "question_text": "How many letters lie between D and J in the alphabet?",
+        "options": [
+          "4",
+          "5",
+          "6",
+          "7"
+        ],
+        "correct_index": 1,
+        "explanation": "E, F, G, H, I."
+      },
+      {
+        "category": "Number Puzzle",
+        "question_text": "If 2 # 3 = 12 and 4 # 5 = 40, then 6 # 7 = ?",
+        "options": [
+          "84",
+          "42",
+          "76",
+          "90"
+        ],
+        "correct_index": 0,
+        "explanation": "a x b x 2."
+      }
+    ]
+  },
+  {
+    "title": "OIR Practice Set 08 (Mixed Reasoning, 20 Qs)",
+    "is_free": false,
+    "duration_seconds": 600,
+    "questions": [
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 20, 18, 15, 11, 6, ?",
+        "options": [
+          "0",
+          "1",
+          "-1",
+          "2"
+        ],
+        "correct_index": 0,
+        "explanation": "Differences are -2, -3, -4, -5, -6."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 2, 5, 10, 17, 26, ?",
+        "options": [
+          "36",
+          "35",
+          "38",
+          "37"
+        ],
+        "correct_index": 3,
+        "explanation": "n squared + 1."
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Find the next number: 1, 3, 7, 15, 31, ?",
+        "options": [
+          "62",
+          "61",
+          "63",
+          "65"
+        ],
+        "correct_index": 2,
+        "explanation": "Multiply by 2 and add 1."
+      },
+      {
+        "category": "Letter Series",
+        "question_text": "Find the next letter: P, M, J, G, D, ?",
+        "options": [
+          "B",
+          "A",
+          "C",
+          "Z"
+        ],
+        "correct_index": 1,
+        "explanation": "Each letter moves -3."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Ocean : Water :: Desert : ?",
+        "options": [
+          "Sand",
+          "Camel",
+          "Heat",
+          "Oasis"
+        ],
+        "correct_index": 0,
+        "explanation": "What each is made of."
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Surgeon : Scalpel :: Soldier : ?",
+        "options": [
+          "Uniform",
+          "Barracks",
+          "Medal",
+          "Rifle"
+        ],
+        "correct_index": 3,
+        "explanation": "Professional and primary tool."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which one does not belong to the group? Brass, Bronze, Steel, Copper",
+        "options": [
+          "Brass",
+          "Bronze",
+          "Copper",
+          "Steel"
+        ],
+        "correct_index": 2,
+        "explanation": "Copper is a pure metal; the rest are alloys."
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which city does not belong to the group? Kolkata, Kochi, Visakhapatnam, Jaipur",
+        "options": [
+          "Kolkata",
+          "Jaipur",
+          "Kochi",
+          "Visakhapatnam"
+        ],
+        "correct_index": 1,
+        "explanation": "Jaipur is not a port city."
+      },
+      {
+        "category": "Coding-Decoding",
+        "question_text": "If TIGER is coded 20 9 7 5 18 using letter positions, how is LION coded?",
+        "options": [
+          "12 9 15 14",
+          "12 9 14 15",
+          "11 9 15 14",
+          "12 8 15 14"
+        ],
+        "correct_index": 0,
+        "explanation": "L=12, I=9, O=15, N=14."
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word comes LAST in the dictionary? Gallant, Galaxy, Gallery, Gallop",
+        "options": [
+          "Gallant",
+          "Galaxy",
+          "Gallery",
+          "Gallop"
+        ],
+        "correct_index": 3,
+        "explanation": "GALLO comes after GALLE, GALLA and GALAX."
+      },
+      {
+        "category": "Word Arrangement",
+        "question_text": "Write the FIRST letter of the rearranged word: FEENCDE",
+        "options": [
+          "F",
+          "E",
+          "D",
+          "C"
+        ],
+        "correct_index": 2,
+        "explanation": "FEENCDE = DEFENCE."
+      },
+      {
+        "category": "Direction",
+        "question_text": "Facing north, Rohan turns 135° clockwise. Which direction does he face now?",
+        "options": [
+          "South-West",
+          "South-East",
+          "East",
+          "North-East"
+        ],
+        "correct_index": 1,
+        "explanation": "North + 90° = East; +45° more = South-East."
+      },
+      {
+        "category": "Blood Relations",
+        "question_text": "Pointing to a man, Seema says: 'His mother is the only daughter of my mother.' How is the man related to Seema?",
+        "options": [
+          "Son",
+          "Brother",
+          "Nephew",
+          "Cousin"
+        ],
+        "correct_index": 0,
+        "explanation": "Her mother's only daughter is Seema herself."
+      },
+      {
+        "category": "Ranking",
+        "question_text": "In a queue of 40, Mohan is 8th from the front. Sohan stands 10 places behind Mohan. What is Sohan's position from the back?",
+        "options": [
+          "22nd",
+          "24th",
+          "21st",
+          "23rd"
+        ],
+        "correct_index": 3,
+        "explanation": "Sohan is 18th from front; 40 - 18 + 1 = 23."
+      },
+      {
+        "category": "Percentage",
+        "question_text": "A car's speed rises from 40 km/h to 50 km/h. What is the percentage increase?",
+        "options": [
+          "20%",
+          "10%",
+          "25%",
+          "30%"
+        ],
+        "correct_index": 2,
+        "explanation": "10 / 40 = 25%."
+      },
+      {
+        "category": "Time & Work",
+        "question_text": "A tap fills a tank in 12 hours and another empties it in 24 hours. Both are opened. How long to fill?",
+        "options": [
+          "18 hours",
+          "24 hours",
+          "36 hours",
+          "12 hours"
+        ],
+        "correct_index": 1,
+        "explanation": "1/12 - 1/24 = 1/24."
+      },
+      {
+        "category": "Calendar",
+        "question_text": "If 14 November 2026 is a Saturday, what day is 14 December 2026?",
+        "options": [
+          "Monday",
+          "Sunday",
+          "Tuesday",
+          "Wednesday"
+        ],
+        "correct_index": 0,
+        "explanation": "30 days = 2 odd days."
+      },
+      {
+        "category": "Syllogism",
+        "question_text": "Statements: Some cadets are athletes. All athletes are fit. I. Some cadets are fit. II. All cadets are fit.",
+        "options": [
+          "Only II follows",
+          "Both follow",
+          "Neither follows",
+          "Only I follows"
+        ],
+        "correct_index": 3,
+        "explanation": "The cadets who are athletes are fit."
+      },
+      {
+        "category": "Counting",
+        "question_text": "How many vowels are in the word INTELLIGENCE?",
+        "options": [
+          "4",
+          "6",
+          "5",
+          "7"
+        ],
+        "correct_index": 2,
+        "explanation": "I, E, I, E, E."
+      },
+      {
+        "category": "Number Puzzle",
+        "question_text": "If 5 + 3 = 28, 9 + 1 = 810 and 8 + 6 = 214, then 7 + 4 = ?",
+        "options": [
+          "113",
+          "311",
+          "341",
+          "211"
+        ],
+        "correct_index": 1,
+        "explanation": "Write (a - b) then (a + b): 3 and 11."
+      }
+    ]
+  }
+]

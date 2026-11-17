@@ -1,0 +1,659 @@
+[
+  {
+    "title": "OIR Practice Set 03 - WDA Test Series 14 (50 Qs, with figures)",
+    "is_free": false,
+    "duration_seconds": 1800,
+    "questions": [
+      {
+        "category": "Cubes & Dice",
+        "question_text": "Which one of the following cubes can possibly belong to Group A?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "Both 2 & 3"
+        ],
+        "correct_index": 1,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q01.jpg"
+      },
+      {
+        "category": "Statement Judgement",
+        "question_text": "Choose what applies best: Yesterday I saw an ice cube which had already melted due to heat of a nearby furnace.",
+        "options": [
+          "True",
+          "Probable",
+          "False",
+          "Absurd"
+        ],
+        "correct_index": 2,
+        "explanation": "Source key: False.",
+        "image_url": "/oir/wda14/q02.jpg"
+      },
+      {
+        "category": "Cubes & Dice",
+        "question_text": "Find if the two cubes are alike.",
+        "options": [
+          "Yes",
+          "No",
+          "Cannot be determined",
+          "None of these"
+        ],
+        "correct_index": 1,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q03.jpg"
+      },
+      {
+        "category": "Cubes & Dice",
+        "question_text": "Find if the two cubes are alike.",
+        "options": [
+          "Yes",
+          "No",
+          "Cannot be determined",
+          "None of these"
+        ],
+        "correct_index": 1,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q04.jpg"
+      },
+      {
+        "category": "Figure Series",
+        "question_text": "Which figure will come next in the series?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 0,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q05.jpg"
+      },
+      {
+        "category": "Classification",
+        "question_text": "Which two of the following figures belong to Class A?",
+        "options": [
+          "1 & 2",
+          "2 & 3",
+          "1 & 3",
+          "3 & 4"
+        ],
+        "correct_index": 0,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q06.jpg"
+      },
+      {
+        "category": "Figure Series",
+        "question_text": "Which figure will come next in the series?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 2,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q07.jpg"
+      },
+      {
+        "category": "Figure Series",
+        "question_text": "Which figure will come next in the series?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 1,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q08.jpg"
+      },
+      {
+        "category": "Sentence Arrangement",
+        "question_text": "Write the LAST letter of the rearranged sentence: the Parks and may there are gardens which be said lungs of to be this populous city",
+        "options": [
+          "C",
+          "T",
+          "Y",
+          "I"
+        ],
+        "correct_index": 2,
+        "explanation": "Parks and gardens may be said to be the lungs of this populous city; last letter Y.",
+        "image_url": "/oir/wda14/q09.jpg"
+      },
+      {
+        "category": "Word Arrangement",
+        "question_text": "Write the SECOND letter of the rearranged word. Simpson is coming home OONS.",
+        "options": [
+          "S",
+          "O",
+          "O",
+          "N"
+        ],
+        "correct_index": 1,
+        "explanation": "OONS = SOON; second letter O.",
+        "image_url": "/oir/wda14/q10.jpg"
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Handsaw is to Carpenter as Multimeter is to ____.",
+        "options": [
+          "Doctor",
+          "Electrician",
+          "Firemen",
+          "Mechanic"
+        ],
+        "correct_index": 1,
+        "explanation": "A handsaw is a carpenter's tool; a multimeter is an electrician's.",
+        "image_url": "/oir/wda14/q11.jpg"
+      },
+      {
+        "category": "Figure Analogy",
+        "question_text": "Which figure is most similar to the ones on the left, i.e. figure C?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 0,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q12.jpg"
+      },
+      {
+        "category": "Letter Series",
+        "question_text": "Which two sets of letters come next? ABD, DGK, HMS, MTB, ___, ___",
+        "options": [
+          "SLB, ZKW",
+          "SBL, ZKW",
+          "SBL, ZWK",
+          "BSL, ZKW"
+        ],
+        "correct_index": 1,
+        "explanation": "Letter jumps grow by 1 each step in all three positions.",
+        "image_url": "/oir/wda14/q13.jpg"
+      },
+      {
+        "category": "Figure Series",
+        "question_text": "Which figure will come next in the series?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 1,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q14.jpg"
+      },
+      {
+        "category": "Logical Order",
+        "question_text": "Which item will stand middle if arranged in proper order? (1) Destination (2) Booking (3) Boarding (4) Travel (5) Planning",
+        "options": [
+          "1 (Destination)",
+          "2 (Booking)",
+          "3 (Boarding)",
+          "4 (Travel)"
+        ],
+        "correct_index": 2,
+        "explanation": "Planning, Booking, Boarding, Travel, Destination; Boarding is in the middle.",
+        "image_url": "/oir/wda14/q15.jpg"
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which word does not belong to the same class as the others?",
+        "options": [
+          "Lizard",
+          "Earthworm",
+          "Oyster",
+          "Spider"
+        ],
+        "correct_index": 2,
+        "explanation": "As per the source answer key.",
+        "image_url": "/oir/wda14/q16.jpg"
+      },
+      {
+        "category": "Figure Series",
+        "question_text": "Which figure will come next in the series?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 0,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q17.jpg"
+      },
+      {
+        "category": "Sentence Formation",
+        "question_text": "Choose one word from each line to make a correct, true and meaningful sentence: He [went/brought/came/saw] chicken for [class/lunch/English/study] and [sent/came/gave/stole] it to all.",
+        "options": [
+          "2,3,2",
+          "2,3,4",
+          "2,2,3",
+          "2,1,2"
+        ],
+        "correct_index": 2,
+        "explanation": "He brought chicken for lunch and gave it to all.",
+        "image_url": "/oir/wda14/q18.jpg"
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word will come LAST in the dictionary?",
+        "options": [
+          "Waste",
+          "Water",
+          "Wonder",
+          "Well"
+        ],
+        "correct_index": 2,
+        "explanation": "Wonder comes last alphabetically.",
+        "image_url": "/oir/wda14/q19.jpg"
+      },
+      {
+        "category": "Number Puzzle",
+        "question_text": "What will come in place of the empty box in the given equation? (6 3 2 3 / x 8 x x / 3 _ 7 1)",
+        "options": [
+          "1",
+          "4",
+          "7",
+          "3"
+        ],
+        "correct_index": 1,
+        "explanation": "As per the source answer key.",
+        "image_url": "/oir/wda14/q20.jpg"
+      },
+      {
+        "category": "Figure Series",
+        "question_text": "Which figure will come next in the series?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 3,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q21.jpg"
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which group of numbers does not belong to the same class as the others?",
+        "options": [
+          "538",
+          "549",
+          "628",
+          "517"
+        ],
+        "correct_index": 3,
+        "explanation": "In the others the first two digits add up to the last digit; 5+1 is not 7.",
+        "image_url": "/oir/wda14/q22.jpg"
+      },
+      {
+        "category": "Number Puzzle",
+        "question_text": "What will come in place of the empty box in the given equation? (3 1 4 / 3 x x / _ 7 2)",
+        "options": [
+          "2",
+          "8",
+          "6",
+          "0"
+        ],
+        "correct_index": 2,
+        "explanation": "As per the source answer key.",
+        "image_url": "/oir/wda14/q23.jpg"
+      },
+      {
+        "category": "Letter Series",
+        "question_text": "Which will come next in the series? QAR, RAS, SAT, TAU, ?",
+        "options": [
+          "UAV",
+          "UAT",
+          "TAS",
+          "TAT"
+        ],
+        "correct_index": 0,
+        "explanation": "First and third letters move +1 each step: UAV.",
+        "image_url": "/oir/wda14/q24.jpg"
+      },
+      {
+        "category": "Classification",
+        "question_text": "Which two of the following figures belong to Class A?",
+        "options": [
+          "1 & 2",
+          "1 & 4",
+          "2 & 4",
+          "1 & 3"
+        ],
+        "correct_index": 3,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q25.jpg"
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word will come LAST in the dictionary?",
+        "options": [
+          "Entrance",
+          "Between",
+          "Bridge",
+          "Supervisor"
+        ],
+        "correct_index": 3,
+        "explanation": "Supervisor starts with S, the latest letter. (Source key says C; corrected.)",
+        "image_url": "/oir/wda14/q26.jpg"
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word will come LAST in the dictionary?",
+        "options": [
+          "Deeply",
+          "Determined",
+          "Diverse",
+          "Delight"
+        ],
+        "correct_index": 2,
+        "explanation": "Diverse (Di...) follows all the De... words. (Source key says B; corrected.)",
+        "image_url": "/oir/wda14/q27.jpg"
+      },
+      {
+        "category": "Counting",
+        "question_text": "How many 5's come just after 5 in the numbers shown?",
+        "options": [
+          "6",
+          "5",
+          "3",
+          "4"
+        ],
+        "correct_index": 3,
+        "explanation": "The pair 55 occurs 4 times.",
+        "image_url": "/oir/wda14/q28.jpg"
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word will come LAST in the dictionary?",
+        "options": [
+          "Part",
+          "Cavity",
+          "Helpful",
+          "Respiratory"
+        ],
+        "correct_index": 3,
+        "explanation": "Respiratory starts with R, the latest letter. (Source key says B; corrected.)",
+        "image_url": "/oir/wda14/q29.jpg"
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word will come LAST in the dictionary?",
+        "options": [
+          "Exit",
+          "Twist",
+          "Located",
+          "Discussing"
+        ],
+        "correct_index": 1,
+        "explanation": "Twist starts with T, the latest letter.",
+        "image_url": "/oir/wda14/q30.jpg"
+      },
+      {
+        "category": "Reasoning",
+        "question_text": "Choose the reason that best explains why the elephant population in Zinbaku kept falling despite the anti-poaching measures.",
+        "options": [
+          "Arrested poachers rarely got long prison terms",
+          "Demand for ivory fell after publicised campaigns",
+          "Elephant population in neighbouring Mombasa rose slightly",
+          "Thousands of acres of elephant habitat were cleared for farming"
+        ],
+        "correct_index": 3,
+        "explanation": "Loss of habitat explains the fall even after poaching was curbed.",
+        "image_url": "/oir/wda14/q31.jpg"
+      },
+      {
+        "category": "Dictionary Order",
+        "question_text": "Which word will come LAST in the dictionary?",
+        "options": [
+          "Surface",
+          "apex",
+          "upper",
+          "plural"
+        ],
+        "correct_index": 2,
+        "explanation": "Upper starts with U, the latest letter. (Source key says A; corrected.)",
+        "image_url": "/oir/wda14/q32.jpg"
+      },
+      {
+        "category": "Mathematical Reasoning",
+        "question_text": "In a parking lot there are two and four wheelers, 200 vehicles in total with 580 wheels. How many four wheelers are there?",
+        "options": [
+          "110",
+          "180",
+          "100",
+          "90"
+        ],
+        "correct_index": 3,
+        "explanation": "x+y=200 and 2x+4y=580 give y=90.",
+        "image_url": "/oir/wda14/q33.jpg"
+      },
+      {
+        "category": "Classification",
+        "question_text": "Which two of the following figures belong to Class A?",
+        "options": [
+          "1 & 2",
+          "1 & 4",
+          "1 & 3",
+          "2 & 3"
+        ],
+        "correct_index": 2,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q34.jpg"
+      },
+      {
+        "category": "Classification",
+        "question_text": "Which two of the following figures belong to Class A?",
+        "options": [
+          "1 & 3",
+          "1 & 2",
+          "1 & 4",
+          "2 & 3"
+        ],
+        "correct_index": 0,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q35.jpg"
+      },
+      {
+        "category": "Figure Analogy",
+        "question_text": "Which figure is most similar to the ones on the left, i.e. figure C?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 1,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q36.jpg"
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Curb is to Spur as Revere is to ____.",
+        "options": [
+          "Renounce",
+          "Another",
+          "Forgo",
+          "Flout"
+        ],
+        "correct_index": 3,
+        "explanation": "Curb and spur are opposites; the opposite of revere is flout.",
+        "image_url": "/oir/wda14/q37.jpg"
+      },
+      {
+        "category": "Classification",
+        "question_text": "Which two of the following figures belong to Class A?",
+        "options": [
+          "1 & 4",
+          "1 & 3",
+          "2 & 4",
+          "1 & 2"
+        ],
+        "correct_index": 3,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q38.jpg"
+      },
+      {
+        "category": "Classification",
+        "question_text": "Which two of the following figures belong to Class A?",
+        "options": [
+          "1 & 3",
+          "1 & 4",
+          "1 & 2",
+          "2 & 4"
+        ],
+        "correct_index": 1,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q39.jpg"
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which word does not belong to the same class as the others?",
+        "options": [
+          "Cat",
+          "Tiger",
+          "Lynx",
+          "Fox"
+        ],
+        "correct_index": 3,
+        "explanation": "Cat, tiger and lynx are felines; fox is a canine.",
+        "image_url": "/oir/wda14/q40.jpg"
+      },
+      {
+        "category": "Word Arrangement",
+        "question_text": "Write the SECOND letter of the rearranged word. Her attention shifted to her PLAOTP once more",
+        "options": [
+          "L",
+          "A",
+          "P",
+          "O"
+        ],
+        "correct_index": 1,
+        "explanation": "PLAOTP = LAPTOP; second letter A.",
+        "image_url": "/oir/wda14/q41.jpg"
+      },
+      {
+        "category": "Sentence Arrangement",
+        "question_text": "Write the LAST letter of the rearranged sentence: Entirely blame the we public cannot",
+        "options": [
+          "E",
+          "W",
+          "T",
+          "Y"
+        ],
+        "correct_index": 3,
+        "explanation": "We cannot blame the public entirely; last letter Y.",
+        "image_url": "/oir/wda14/q42.jpg"
+      },
+      {
+        "category": "Figure Analogy",
+        "question_text": "Which figure is most similar to the ones on the left, i.e. figure C?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 0,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q43.jpg"
+      },
+      {
+        "category": "Figure Analogy",
+        "question_text": "Which figure is most similar to the ones on the left, i.e. figure C?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct_index": 3,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q44.jpg"
+      },
+      {
+        "category": "Number Series",
+        "question_text": "Which two numbers will come next? 48, 24, 96, ___, ___",
+        "options": [
+          "48, 192",
+          "192, 48",
+          "50, 192",
+          "48, 190"
+        ],
+        "correct_index": 0,
+        "explanation": "Alternately halve and multiply by 4: 48, 192.",
+        "image_url": "/oir/wda14/q45.jpg"
+      },
+      {
+        "category": "Analogy",
+        "question_text": "Radio is to Listener as Film is to ____.",
+        "options": [
+          "Producer",
+          "Actor",
+          "Viewer",
+          "Director"
+        ],
+        "correct_index": 2,
+        "explanation": "A radio serves a listener; a film serves a viewer.",
+        "image_url": "/oir/wda14/q46.jpg"
+      },
+      {
+        "category": "Classification",
+        "question_text": "Which two of the following figures belong to Class A?",
+        "options": [
+          "1 & 2",
+          "1 & 4",
+          "2 & 3",
+          "1 & 3"
+        ],
+        "correct_index": 3,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q47.jpg"
+      },
+      {
+        "category": "Classification",
+        "question_text": "Which two of the following figures belong to Class A?",
+        "options": [
+          "2 & 3",
+          "1 & 2",
+          "1 & 4",
+          "3 & 4"
+        ],
+        "correct_index": 0,
+        "explanation": "As per the source answer key (figure based).",
+        "image_url": "/oir/wda14/q48.jpg"
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which group of letters does not belong to the same class as the others?",
+        "options": [
+          "EHGJ",
+          "KNMP",
+          "LONQ",
+          "STUV"
+        ],
+        "correct_index": 3,
+        "explanation": "The others follow +3, -1, +2; STUV does not.",
+        "image_url": "/oir/wda14/q49.jpg"
+      },
+      {
+        "category": "Odd One Out",
+        "question_text": "Which word does not belong to the same class as the others?",
+        "options": [
+          "Crow",
+          "Sparrow",
+          "Ostrich",
+          "Cuckoo"
+        ],
+        "correct_index": 2,
+        "explanation": "Ostrich is flightless; the rest fly. (Source key says D; changed.)",
+        "image_url": "/oir/wda14/q50.jpg"
+      }
+    ]
+  }
+]

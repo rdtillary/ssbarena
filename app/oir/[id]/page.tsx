@@ -8,6 +8,20 @@ import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_OIR_SETS } from '@/lib/seed-data';
 import { OIRSet } from '@/lib/types';
 
+// Figure questions carry an image (the cropped question from the source paper).
+function QuestionImage({ src }: { src?: string | null }) {
+  if (!src) return null;
+  return (
+    <a href={src} target="_blank" rel="noreferrer" className="block">
+      <img
+        src={src}
+        alt="Question figure"
+        className="w-full max-w-xl mx-auto rounded-lg bg-white border border-slate-700"
+      />
+    </a>
+  );
+}
+
 export default function OIRDrillPage() {
   const params = useParams();
   const idParam = String(params.id || 'default');
@@ -22,7 +36,6 @@ export default function OIRDrillPage() {
   const [totalSecondsLeft, setTotalSecondsLeft] = useState(600);
   const [submitted, setSubmitted] = useState(false);
 
-  // Load the set: database sets by numeric id, built-in benchmark as "default" (or legacy /oir/1).
   useEffect(() => {
     (async () => {
       if (/^\d+$/.test(idParam)) {
@@ -89,6 +102,7 @@ export default function OIRDrillPage() {
   const questions = oirSet.questions;
   const currentQ = questions[currentIdx];
   const qSeconds = questionTimers[currentIdx] || 0;
+  const imgOf = (q: any): string | null => q?.image_url || null;
 
   const score = questions.reduce(
     (acc, q, idx) => (answers[idx] === q.correct_index ? acc + 1 : acc),
@@ -137,7 +151,11 @@ export default function OIRDrillPage() {
             </span>
           </div>
 
-          <p className="text-base font-bold text-white leading-relaxed">{currentQ.question_text}</p>
+          {imgOf(currentQ) ? (
+            <QuestionImage src={imgOf(currentQ)} />
+          ) : (
+            <p className="text-base font-bold text-white leading-relaxed">{currentQ.question_text}</p>
+          )}
 
           <div className="space-y-2.5">
             {currentQ.options.map((opt, idx) => {
@@ -209,15 +227,16 @@ export default function OIRDrillPage() {
               const correct = userAns === q.correct_index;
               const spent = questionTimers[idx] || 0;
               return (
-                <div key={q.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1.5">
-                  <div className="flex items-center justify-between">
+                <div key={q.id ?? idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-white">
-                      Q{q.question_number}. {q.question_text}
+                      Q{q.question_number}. {imgOf(q) ? q.category : q.question_text}
                     </span>
                     <span className={spent >= 45 ? 'text-red-400 font-bold' : 'text-slate-400'}>
                       {spent}s
                     </span>
                   </div>
+                  {imgOf(q) && <QuestionImage src={imgOf(q)} />}
                   <p className={correct ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
                     {correct ? (
                       <span className="inline-flex items-center gap-1">

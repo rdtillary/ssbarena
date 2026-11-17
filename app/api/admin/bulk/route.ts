@@ -22,6 +22,8 @@ const int = (v: unknown, def: number, lo: number, hi: number) => {
   return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : def;
 };
 const isUrl = (v: string) => /^https?:\/\/\S+$/i.test(v);
+// Question images: full https link, or a file inside /public such as /oir/wda14/q01.jpg
+const isImage = (v: string) => isUrl(v) || /^\/(?!\/)[\w\-./]+$/.test(v);
 const asArray = (d: any): any[] => (Array.isArray(d) ? d : d && typeof d === 'object' ? [d] : []);
 const fail = (msg: string): Report => ({ added: 0, skipped: [], errors: [msg], summary: 'Nothing imported.' });
 
@@ -123,11 +125,14 @@ async function bulkOir(admin: Admin, data: any, dryRun: boolean): Promise<Report
       const text = str(q?.question_text);
       const options = Array.isArray(q?.options) ? q.options.map(str) : [];
       const ci = correctIndex(q || {});
+      const image = str(q?.image_url);
       if (!text) qErrors.push(`${label} Q${n}: "question_text" is missing.`);
       else if (options.length < 2 || options.length > 6 || options.some((o: string) => !o))
         qErrors.push(`${label} Q${n}: needs 2-6 non-empty options.`);
       else if (ci < 0 || ci >= options.length)
         qErrors.push(`${label} Q${n}: correct answer is missing or out of range.`);
+      if (image && !isImage(image))
+        qErrors.push(`${label} Q${n}: "image_url" must be an https link or a /path inside public.`);
       return {
         question_number: n,
         category: str(q?.category) || 'General',
@@ -135,6 +140,7 @@ async function bulkOir(admin: Admin, data: any, dryRun: boolean): Promise<Report
         options,
         correct_index: ci,
         explanation: str(q?.explanation),
+        image_url: image || null,
       };
     });
 
