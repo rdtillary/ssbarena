@@ -12,6 +12,7 @@ import {
   LogOut,
   CheckCircle2,
   Sparkles,
+  MessageCircle,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS, DEFAULT_OIR_SETS } from '@/lib/seed-data';
@@ -24,6 +25,7 @@ import { ProCheckoutModal } from '@/components/ProCheckoutModal';
 import { Carousel } from '@/components/Carousel';
 import { RecommendedSlide } from '@/components/RecommendedSlide';
 import { ReportingTimer } from '@/components/ReportingTimer';
+import { ContactCadetModal } from '@/components/ContactCadetModal';
 
 export default function HomePage() {
   const supabase = createClient();
@@ -39,6 +41,7 @@ export default function HomePage() {
   const [dbOirSets, setDbOirSets] = useState<{ id: number; title: string; is_free: boolean }[]>([]);
   const [authOpen, setAuthOpen] = useState(false);
   const [proOpen, setProOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const isAdmin =
     user?.email &&
@@ -263,6 +266,16 @@ export default function HomePage() {
 
       <main className="max-w-5xl mx-auto px-4 pt-6 space-y-6">
         <div className="space-y-3">
+          {activeTab === 'home' && (
+            <button
+              type="button"
+              onClick={() => setContactOpen(true)}
+              className="w-full py-3 rounded-xl bg-slate-900 border border-amber-500/40 hover:border-amber-500 text-amber-400 font-black text-sm flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" /> Contact Recommended Candidates
+            </button>
+          )}
+
           {activeTab === 'home' && <Carousel slides={slides} />}
 
           <ReportingTimer
@@ -503,6 +516,12 @@ export default function HomePage() {
         onClose={() => setProOpen(false)}
         userEmail={user?.email}
         onSuccess={loadData}
+        onRequireAuth={() => setAuthOpen(true)}
+      />
+      <ContactCadetModal
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+        signedIn={Boolean(user)}
         onRequireAuth={() => setAuthOpen(true)}
       />
     </div>

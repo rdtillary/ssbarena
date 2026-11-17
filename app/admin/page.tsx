@@ -8,6 +8,7 @@ import { PPDTScenario, RecommendedCandidate } from '@/lib/types';
 import { SSB_CENTRES } from '@/lib/ssb-centres';
 import { BulkAddPanel } from '@/components/BulkAddPanel';
 import { BulkPhotoPanel } from '@/components/BulkPhotoPanel';
+import { AdminInbox } from '@/components/AdminInbox';
 
 interface OirRow {
   id: number;
@@ -296,6 +297,8 @@ export default function AdminDashboardPage() {
           {statusMsg}
         </div>
       )}
+
+      <AdminInbox />
 
       <BulkAddPanel onDone={loadAdminData} />
 
