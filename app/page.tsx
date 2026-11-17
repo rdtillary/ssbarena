@@ -141,7 +141,10 @@ export default function HomePage() {
   };
 
   const heroSlide = (
-    <section className="h-full flex flex-col justify-center p-6 sm:p-8 pb-10 sm:pb-12 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800">
+    <section className="relative isolate overflow-hidden h-full flex flex-col justify-center p-6 sm:p-8 pb-10 sm:pb-12 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800">
+      <div aria-hidden className="hero-photo absolute inset-0 -z-10" />
+      <div aria-hidden className="hero-shade absolute inset-0 -z-10" />
+      <div aria-hidden className="hero-glow absolute inset-0 -z-10 pointer-events-none" />
       <span className="self-start px-3 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-bold mb-3">
         NO TYPING • REAL PAPER &amp; VOICE NARRATION FLOW
       </span>
@@ -314,20 +317,36 @@ export default function HomePage() {
                     key={sc.id}
                     className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
                   >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-[10px] font-black px-2 py-0.5 rounded ${
-                            sc.is_free
-                              ? 'bg-emerald-500/15 text-emerald-400'
-                              : 'bg-amber-500/15 text-amber-400'
+                    <div className="flex items-center gap-3 min-w-0">
+                      {sc.image_url ? (
+                        <img
+                          src={sc.image_url}
+                          alt={sc.title}
+                          loading="lazy"
+                          className={`w-16 h-12 rounded-lg object-cover grayscale shrink-0 ring-1 ring-white/10 ${
+                            locked ? 'blur-[3px] opacity-80' : ''
                           }`}
-                        >
-                          {sc.is_free ? 'FREE' : 'PRO'}
-                        </span>
-                        <span className="text-[11px] text-slate-500">{sc.difficulty}</span>
+                        />
+                      ) : (
+                        <div className="w-16 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] text-slate-400 shrink-0 ring-1 ring-white/10">
+                          Preset
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[10px] font-black px-2 py-0.5 rounded ${
+                              sc.is_free
+                                ? 'bg-emerald-500/15 text-emerald-400'
+                                : 'bg-amber-500/15 text-amber-400'
+                            }`}
+                          >
+                            {sc.is_free ? 'FREE' : 'PRO'}
+                          </span>
+                          <span className="text-[11px] text-slate-500">{sc.difficulty}</span>
+                        </div>
+                        <h3 className="text-sm font-bold text-white mt-1.5">{sc.title}</h3>
                       </div>
-                      <h3 className="text-sm font-bold text-white mt-1.5">{sc.title}</h3>
                     </div>
 
                     {locked ? (
