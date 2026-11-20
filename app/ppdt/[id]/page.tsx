@@ -56,6 +56,7 @@ export default function PPDTSimulatorPage() {
   const finishingRef = useRef(false);
   const blobRef = useRef<Blob | null>(null);
   const durationRef = useRef(0);
+  const savedRef = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -186,7 +187,11 @@ export default function PPDTSimulatorPage() {
 
       const evalData = data as EvaluationResult;
       setReport(evalData);
-      if (evalData.valid) await saveAttempt(evalData, blob);
+      // Save each graded attempt exactly once (a Retry of the grading must not duplicate it).
+      if (evalData.valid && !savedRef.current) {
+        savedRef.current = true;
+        await saveAttempt(evalData, blob);
+      }
     } catch (err: any) {
       setEvalError(err?.message || 'Evaluation failed. Please retry.');
     } finally {
@@ -198,6 +203,21 @@ export default function PPDTSimulatorPage() {
     const { data: authData } = await supabase.auth.getUser();
     const user = authData?.user;
     let uploadedAudioUrl: string | null = null;
+
+    // Everything needed to show the full result later.
+    const payload = {
+      pins,
+      mainAction,
+      breakdown: evalData.breakdown,
+      strengths: evalData.strengths,
+      improvements: evalData.improvements,
+      wpm: evalData.wpm,
+      wordCount: evalData.wordCount,
+      longestPause: evalData.longestPause,
+      stammerCount: evalData.stammerCount,
+      pauseCount: evalData.pauseCount,
+      fillerCount: evalData.fillerCount,
+    };
 
     if (user && blob) {
       const ext = (mimeRef.current || '').includes('mp4') ? 'mp4' : 'webm';
@@ -213,7 +233,7 @@ export default function PPDTSimulatorPage() {
     }
 
     if (user) {
-      await supabase.from('user_attempts').insert({
+      const { error } = await supabase.from('user_attempts').insert({
         user_id: user.id,
         attempt_type: 'PPDT',
         scenario_id: scenario.id,
@@ -224,16 +244,9 @@ export default function PPDTSimulatorPage() {
         max_score: 60,
         transcript: evalData.transcript,
         audio_url: uploadedAudioUrl,
-        payload: {
-          pins,
-          mainAction,
-          breakdown: evalData.breakdown,
-          stammerCount: evalData.stammerCount,
-          pauseCount: evalData.pauseCount,
-          fillerCount: evalData.fillerCount,
-        },
+        payload,
       });
-      setSavedNotice('Saved to your Vault.');
+      setSavedNotice(error ? 'Could not save this result. Please check your connection.' : 'Result saved to your account.');
     } else {
       try {
         const existing = JSON.parse(localStorage.getItem('ssb_arena_guest_vault') || '[]');
@@ -247,11 +260,12 @@ export default function PPDTSimulatorPage() {
           total_score: evalData.totalScore,
           max_score: 60,
           transcript: evalData.transcript,
+          payload,
           created_at: new Date().toISOString(),
         });
-        localStorage.setItem('ssb_arena_guest_vault', JSON.stringify(existing.slice(0, 15)));
+        localStorage.setItem('ssb_arena_guest_vault', JSON.stringify(existing.slice(0, 60)));
       } catch {}
-      setSavedNotice('Saved on this device. Sign in to keep audio permanently.');
+      setSavedNotice('Saved on this device. Sign in to keep results and audio permanently.');
     }
   };
 
@@ -658,6 +672,21 @@ export default function PPDTSimulatorPage() {
                             <p key={i} className="text-slate-300">• {imp}</p>
                           ))}
                         </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" /> Retry this picture
+                        </button>
+                        <Link
+                          href="/"
+                          className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold"
+                        >
+                          Back to Home
+                        </Link>
                       </div>
                     </div>
 
