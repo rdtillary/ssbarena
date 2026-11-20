@@ -1,0 +1,12 @@
+{
+  "appId": "com.ssbarena.app",
+  "appName": "SSB Arena",
+  "webDir": "www",
+  "server": {
+    "url": "https://ssbarena.onrender.com",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Sparkles,
   MessageCircle,
+  Download,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS, DEFAULT_OIR_SETS } from '@/lib/seed-data';
@@ -219,6 +220,12 @@ export default function HomePage() {
                 {tab}
               </button>
             ))}
+            <Link
+              href="/download"
+              className="px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300 flex items-center gap-1"
+            >
+              <Download className="w-3.5 h-3.5" /> Download APK
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -486,7 +493,7 @@ export default function HomePage() {
         )}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-slate-950/95 backdrop-blur border-t border-slate-800 grid grid-cols-4 h-14">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-slate-950/95 backdrop-blur border-t border-slate-800 grid grid-cols-5 h-14">
         {[
           { id: 'home', label: 'Home', icon: Shield },
           { id: 'ppdt', label: 'PPDT', icon: Play },
@@ -508,6 +515,13 @@ export default function HomePage() {
             </button>
           );
         })}
+        <Link
+          href="/download"
+          className="flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold text-amber-400"
+        >
+          <Download className="w-4 h-4" />
+          APK
+        </Link>
       </nav>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onAuthenticated={loadData} />
