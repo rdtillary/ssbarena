@@ -1,0 +1,98 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/build-apk.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install Capacitor
+        working-directory: mobile
+        run: npm install
+
+      - name: Create Android project
+        working-directory: mobile
+        run: npx cap add android
+
+      - name: Allow microphone (PPDT voice narration)
+        working-directory: mobile
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />#' "$MANIFEST"
+          grep -n "uses-permission" "$MANIFEST"
+
+      - name: Set version (increases every build so updates install)
+        working-directory: mobile
+        run: |
+          sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+          grep -n "versionCode\|versionName" android/app/build.gradle
+
+      - name: Optional custom icon (mobile/resources/icon.png, 1024x1024)
+        if: hashFiles('mobile/resources/icon.png') != ''
+        continue-on-error: true
+        working-directory: mobile
+        run: npx --yes @capacitor/assets generate --android --iconBackgroundColor '#090D16'
+
+      - name: Use fixed signing key (so every build can update the previous one)
+        run: |
+          mkdir -p ~/.android
+          cp mobile/signing/debug.keystore ~/.android/debug.keystore
+
+      - name: Sync web config into Android project
+        working-directory: mobile
+        run: npx cap sync android
+
+      - name: Build APK
+        working-directory: mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Collect APK
+        run: |
+          mkdir -p public/downloads
+          cp mobile/android/app/build/outputs/apk/debug/app-debug.apk public/downloads/ssb-arena.apk
+          ls -lh public/downloads/ssb-arena.apk
+
+      - name: Keep a copy in the workflow run
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssb-arena-apk
+          path: public/downloads/ssb-arena.apk
+
+      - name: Publish APK to the website folder
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/downloads/ssb-arena.apk
+          git commit -m "Update Android APK (build ${{ github.run_number }})" || echo "No changes"
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}
