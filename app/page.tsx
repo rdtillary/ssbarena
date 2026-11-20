@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Play,
@@ -12,8 +12,7 @@ import {
   LogOut,
   CheckCircle2,
   Sparkles,
-  RotateCcw,
-  BarChart3,
+  MessageCircle,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS, DEFAULT_OIR_SETS } from '@/lib/seed-data';
@@ -22,10 +21,11 @@ import { getCentre } from '@/lib/ssb-centres';
 import { PPDTScenario, RecommendedCandidate, UserAttempt } from '@/lib/types';
 import { Logo } from '@/components/Logo';
 import { AuthModal } from '@/components/AuthModal';
-import { ProCheckoutModal } from '@/components/ProCheckoutModal';
+import { UpiPayModal } from '@/components/UpiPayModal';
 import { Carousel } from '@/components/Carousel';
 import { RecommendedSlide } from '@/components/RecommendedSlide';
 import { ReportingTimer } from '@/components/ReportingTimer';
+import { ContactCadetModal } from '@/components/ContactCadetModal';
 
 export default function HomePage() {
   const supabase = createClient();
@@ -41,28 +41,12 @@ export default function HomePage() {
   const [dbOirSets, setDbOirSets] = useState<{ id: number; title: string; is_free: boolean }[]>([]);
   const [authOpen, setAuthOpen] = useState(false);
   const [proOpen, setProOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const isAdmin =
     user?.email &&
     process.env.NEXT_PUBLIC_ADMIN_EMAIL &&
     user.email.toLowerCase() === process.env.NEXT_PUBLIC_ADMIN_EMAIL.toLowerCase();
-
-  // For every PPDT picture: how many times it was attempted, and the best total score.
-  const ppdtStats = useMemo(() => {
-    const map: Record<number, { count: number; best: number; max: number }> = {};
-    attempts.forEach((a) => {
-      if (a.attempt_type !== 'PPDT') return;
-      const cur = map[a.scenario_id];
-      const score = Number(a.total_score) || 0;
-      const max = Number(a.max_score) || 60;
-      if (!cur) map[a.scenario_id] = { count: 1, best: score, max };
-      else {
-        cur.count += 1;
-        if (score > cur.best) cur.best = score;
-      }
-    });
-    return map;
-  }, [attempts]);
 
   const loadData = async () => {
     const { data: dbScenarios } = await supabase
@@ -123,12 +107,8 @@ export default function HomePage() {
         .order('created_at', { ascending: false });
       if (userAttempts) setAttempts(userAttempts);
     } else {
-      try {
-        const localVault = JSON.parse(localStorage.getItem('ssb_arena_guest_vault') || '[]');
-        setAttempts(localVault);
-      } catch {
-        setAttempts([]);
-      }
+      const localVault = JSON.parse(localStorage.getItem('ssb_arena_guest_vault') || '[]');
+      setAttempts(localVault);
     }
   };
 
@@ -161,7 +141,6 @@ export default function HomePage() {
     await supabase.auth.signOut();
     setUser(null);
     setIsPro(false);
-    loadData();
   };
 
   const heroSlide = (
@@ -287,6 +266,16 @@ export default function HomePage() {
 
       <main className="max-w-5xl mx-auto px-4 pt-6 space-y-6">
         <div className="space-y-3">
+          {activeTab === 'home' && (
+            <button
+              type="button"
+              onClick={() => setContactOpen(true)}
+              className="w-full py-3 rounded-xl bg-slate-900 border border-amber-500/40 hover:border-amber-500 text-amber-400 font-black text-sm flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" /> Contact Recommended Candidates
+            </button>
+          )}
+
           {activeTab === 'home' && <Carousel slides={slides} />}
 
           <ReportingTimer
@@ -336,7 +325,6 @@ export default function HomePage() {
             <div className="grid sm:grid-cols-2 gap-3.5">
               {scenarios.map((sc) => {
                 const locked = !sc.is_free && !isPro;
-                const stat = ppdtStats[sc.id];
                 return (
                   <div
                     key={sc.id}
@@ -358,7 +346,7 @@ export default function HomePage() {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
                           <span
                             className={`text-[10px] font-black px-2 py-0.5 rounded ${
                               sc.is_free
@@ -369,18 +357,8 @@ export default function HomePage() {
                             {sc.is_free ? 'FREE' : 'PRO'}
                           </span>
                           <span className="text-[11px] text-slate-500">{sc.difficulty}</span>
-                          {stat && (
-                            <span className="text-[10px] font-black px-2 py-0.5 rounded bg-sky-500/15 text-sky-300">
-                              Score {stat.best}/{stat.max}
-                            </span>
-                          )}
                         </div>
                         <h3 className="text-sm font-bold text-white mt-1.5">{sc.title}</h3>
-                        {stat && (
-                          <p className="text-[10px] text-slate-500 mt-0.5">
-                            Attempted {stat.count} time{stat.count === 1 ? '' : 's'} • best score shown
-                          </p>
-                        )}
                       </div>
                     </div>
 
@@ -391,21 +369,6 @@ export default function HomePage() {
                       >
                         <Lock className="w-3.5 h-3.5" /> Unlock
                       </button>
-                    ) : stat ? (
-                      <div className="flex flex-col gap-1.5 shrink-0">
-                        <Link
-                          href={`/ppdt/${sc.id}`}
-                          className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center justify-center gap-1.5"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" /> Retry
-                        </Link>
-                        <Link
-                          href={`/ppdt/${sc.id}/results`}
-                          className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5"
-                        >
-                          <BarChart3 className="w-3.5 h-3.5" /> Results
-                        </Link>
-                      </div>
                     ) : (
                       <Link
                         href={`/ppdt/${sc.id}`}
@@ -500,9 +463,6 @@ export default function HomePage() {
                           {att.attempt_type}
                         </span>
                         <h3 className="text-sm font-bold text-white">{att.scenario_title}</h3>
-                        <p className="text-[10px] text-slate-500">
-                          {new Date(att.created_at).toLocaleString()}
-                        </p>
                       </div>
                       <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-black">
                         {att.total_score} / {att.max_score}
@@ -517,15 +477,6 @@ export default function HomePage() {
                       <p className="text-xs text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800">
                         {att.transcript}
                       </p>
-                    )}
-
-                    {att.attempt_type === 'PPDT' && (
-                      <Link
-                        href={`/ppdt/${att.scenario_id}/results`}
-                        className="inline-block text-xs font-bold text-sky-300 hover:underline"
-                      >
-                        Full results →
-                      </Link>
                     )}
                   </div>
                 ))}
@@ -560,11 +511,16 @@ export default function HomePage() {
       </nav>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onAuthenticated={loadData} />
-      <ProCheckoutModal
+      <UpiPayModal
         open={proOpen}
         onClose={() => setProOpen(false)}
-        userEmail={user?.email}
-        onSuccess={loadData}
+        signedIn={Boolean(user)}
+        onRequireAuth={() => setAuthOpen(true)}
+      />
+      <ContactCadetModal
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+        signedIn={Boolean(user)}
         onRequireAuth={() => setAuthOpen(true)}
       />
     </div>
