@@ -525,7 +525,7 @@ export default function AdminDashboardPage() {
       >
         <div className="flex-1">
           <p className="text-xs font-black text-white flex items-center gap-1.5">
-            <UserCheck className="w-4 h-4 text-emerald-400" /> Manually Unlock ₹199 Lifetime Pro Pass
+            <UserCheck className="w-4 h-4 text-emerald-400" /> Manually Unlock Pro Pass
           </p>
         </div>
         <input

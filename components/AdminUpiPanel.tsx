@@ -31,7 +31,7 @@ export function AdminUpiPanel() {
   }, [load]);
 
   const act = async (id: number, action: 'approve' | 'reject') => {
-    if (action === 'approve' && !confirm('Did you check this UTR in your bank/UPI app? Approve and unlock Pro?')) return;
+    if (action === 'approve' && !confirm('Did you check this UTR in your bank/UPI app? Approve and give 30 days of Pro?')) return;
     setBusy(id);
     setError('');
     try {
@@ -64,7 +64,7 @@ export function AdminUpiPanel() {
         )}
       </h2>
       <p className="text-[11px] text-slate-400">
-        Match the UTR with your bank/UPI app history, then press Approve to unlock lifetime Pro.
+        Match the UTR with your bank/UPI app history, then press Approve to give 30 days of Pro (adds on top if already active).
       </p>
       {error && <p className="text-xs text-red-400">{error}</p>}
 

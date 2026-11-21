@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS, DEFAULT_OIR_SETS } from '@/lib/seed-data';
-import { PRO_PRICE_INR } from '@/lib/config';
+import { PRO_PRICE_INR } from '@/lib/pricing';
 import { getCentre } from '@/lib/ssb-centres';
 import { PPDTScenario, RecommendedCandidate, UserAttempt } from '@/lib/types';
 import { Logo } from '@/components/Logo';
@@ -247,7 +247,7 @@ export default function HomePage() {
                 onClick={() => setProOpen(true)}
                 className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition flex items-center gap-1"
               >
-                <Sparkles className="w-3.5 h-3.5" /> Pro ₹{PRO_PRICE_INR}
+                <Sparkles className="w-3.5 h-3.5" /> Pro ₹{PRO_PRICE_INR}/mo
               </button>
             )}
 
@@ -324,7 +324,7 @@ export default function HomePage() {
                   onClick={() => setProOpen(true)}
                   className="text-xs font-bold text-amber-400 hover:underline"
                 >
-                  Unlock all for ₹{PRO_PRICE_INR} (lifetime) →
+                  Unlock all for ₹{PRO_PRICE_INR}/month →
                 </button>
               )}
             </div>
@@ -484,6 +484,15 @@ export default function HomePage() {
                       <p className="text-xs text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800">
                         {att.transcript}
                       </p>
+                    )}
+
+                    {user && att.id && att.transcript && (
+                      <Link
+                        href={`/report/${att.id}`}
+                        className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" /> View Full 15-OLQ Report
+                      </Link>
                     )}
                   </div>
                 ))}

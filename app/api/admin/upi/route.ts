@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { verifyAdmin } from '@/lib/admin-auth';
+import { PRO_PERIOD_DAYS } from '@/lib/pricing';
 
 export const runtime = 'nodejs';
 
@@ -54,9 +55,20 @@ export async function POST(req: Request) {
   }
 
   if (action === 'approve') {
+    // Monthly pass: extend from the current expiry if still active, otherwise from today.
+    const { data: prof } = await admin
+      .from('profiles')
+      .select('pro_expires_at')
+      .eq('id', pay.user_id)
+      .single();
+    const now = Date.now();
+    const currentEnd = prof?.pro_expires_at ? new Date(prof.pro_expires_at).getTime() : 0;
+    const base = currentEnd > now ? currentEnd : now;
+    const newEnd = new Date(base + PRO_PERIOD_DAYS * 24 * 60 * 60 * 1000).toISOString();
+
     const { error: proErr } = await admin
       .from('profiles')
-      .update({ is_pro: true, pro_expires_at: null })
+      .update({ is_pro: true, pro_expires_at: newEnd })
       .eq('id', pay.user_id);
     if (proErr) return NextResponse.json({ error: proErr.message }, { status: 400 });
   }

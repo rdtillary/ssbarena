@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { X, Copy, Check, Smartphone } from 'lucide-react';
-import { PRO_PRICE_INR } from '@/lib/config';
+import { PRO_PRICE_INR, PRO_PERIOD_DAYS, ORIGINAL_PRICE_INR } from '@/lib/pricing';
 
 interface Props {
   open: boolean;
@@ -90,10 +90,17 @@ export function UpiPayModal({ open, onClose, signedIn, onRequireAuth }: Props) {
 
         <div className="p-5 space-y-4">
           <div>
-            <h2 className="text-lg font-black text-white">Get Lifetime Pro — ₹{PRO_PRICE_INR}</h2>
+            <h2 className="text-lg font-black text-white flex items-baseline gap-2 flex-wrap">
+              <span>SSB Arena Pro</span>
+              {ORIGINAL_PRICE_INR ? (
+                <span className="text-sm font-bold text-slate-500 line-through">₹{ORIGINAL_PRICE_INR}</span>
+              ) : null}
+              <span className="text-amber-400">₹{PRO_PRICE_INR}</span>
+              <span className="text-xs font-bold text-slate-400">/ month</span>
+            </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Pay by UPI, then enter the transaction number. Pro is activated after we confirm
-              your payment.
+              Pay by UPI, then enter the transaction number. Pro is activated for {PRO_PERIOD_DAYS} days
+              after we confirm your payment. Renew the same way each month.
             </p>
           </div>
 

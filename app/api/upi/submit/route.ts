@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createAdminSupabase } from '@/lib/supabase/admin';
-import { PRO_PRICE_INR } from '@/lib/config';
+import { PRO_PRICE_INR } from '@/lib/pricing';
 
 export const runtime = 'nodejs';
 
