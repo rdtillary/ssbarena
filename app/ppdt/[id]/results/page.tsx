@@ -7,6 +7,7 @@ import { ArrowLeft, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS } from '@/lib/seed-data';
 import { PPDTScenario, UserAttempt } from '@/lib/types';
+import { OlqAnalysis } from '@/components/OlqAnalysis';
 
 const BREAKDOWN_LABELS: Record<string, [string, number]> = {
   heroClarity: ['Hero clarity', 10],
@@ -97,6 +98,20 @@ export default function PPDTResultsPage() {
           <RotateCcw className="w-3.5 h-3.5" /> Retry
         </Link>
       </div>
+
+      {att.payload?.olq ? (
+        <OlqAnalysis olq={att.payload.olq} />
+      ) : (
+        att.transcript &&
+        att.id && (
+          <Link
+            href={`/report/${att.id}`}
+            className="block p-4 rounded-2xl bg-slate-900 border border-amber-500/40 text-center text-sm font-black text-amber-400 hover:border-amber-500"
+          >
+            Generate the 15-OLQ analysis for this attempt →
+          </Link>
+        )
+      )}
 
       <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">

@@ -72,6 +72,11 @@ export interface EvaluationResult {
   };
   strengths: string[];
   improvements: string[];
+  /** 15 Officer Like Qualities, each scored 0-100 by the AI (with a one-line remark). */
+  olq?: {
+    scores: Record<string, number>;
+    remarks: Record<string, string>;
+  };
 }
 
 export interface UserAttempt {

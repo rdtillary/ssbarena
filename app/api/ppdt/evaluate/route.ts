@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { EvaluationResult, TranscriptToken } from '@/lib/types';
+import { OLQS } from '@/lib/olq';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -188,8 +189,10 @@ Score each dimension as an integer from 0 to 10:
 - practicalAction: concrete, realistic, organised actions (no luck, miracles, violence, or moral lectures)
 - structurePacing: logical flow, complete ending, suitable length (about 80-140 words in one minute)
 Also give up to 3 short strengths and up to 3 specific, actionable improvements that refer to what the candidate actually said.
-Return ONLY valid JSON in exactly this shape:
-{"heroClarity":0,"pastPresentFuture":0,"practicalAction":0,"structurePacing":0,"strengths":["..."],"improvements":["..."]}`;
+Additionally, judge the candidate on the 15 Officer Like Qualities (OLQs): ${OLQS.join(', ')}.
+Score EACH OLQ as an integer from 0 to 100, strictly: 50-60 is average, 70+ is good, 85+ is exceptional and needs clear evidence in the story. If a quality is not visible in the transcript give a modest 35-50. Abusive, off-topic or empty stories must score very low on every quality. Give a one-line remark (max 20 words) per OLQ in "olqRemarks".
+Return ONLY valid JSON in exactly this shape (use the OLQ names exactly as written above as keys):
+{"heroClarity":0,"pastPresentFuture":0,"practicalAction":0,"structurePacing":0,"strengths":["..."],"improvements":["..."],"olq":{"<OLQ name>":0},"olqRemarks":{"<OLQ name>":"..."}}`;
 
   const user = JSON.stringify({
     scenarioTitle: input.scenarioTitle,
@@ -229,6 +232,21 @@ Return ONLY valid JSON in exactly this shape:
   const list = (v: unknown) =>
     Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s.trim()).slice(0, 3).map(String) : [];
 
+  // 15 OLQs, 0-100 each. Only returned if the AI actually produced them.
+  let olq: { scores: Record<string, number>; remarks: Record<string, string> } | undefined;
+  if (parsed.olq && typeof parsed.olq === 'object') {
+    const scores: Record<string, number> = {};
+    const remarks: Record<string, string> = {};
+    let found = 0;
+    for (const name of OLQS) {
+      const n = Number((parsed.olq as any)[name]);
+      if (Number.isFinite(n)) found++;
+      scores[name] = clamp(Math.round(Number.isFinite(n) ? n : 0), 0, 100);
+      remarks[name] = String(parsed.olqRemarks?.[name] ?? '').slice(0, 200);
+    }
+    if (found >= 10) olq = { scores, remarks };
+  }
+
   return {
     heroClarity: dim(parsed.heroClarity),
     pastPresentFuture: dim(parsed.pastPresentFuture),
@@ -236,6 +254,7 @@ Return ONLY valid JSON in exactly this shape:
     structurePacing: dim(parsed.structurePacing),
     strengths: list(parsed.strengths),
     improvements: list(parsed.improvements),
+    olq,
   };
 }
 
@@ -371,6 +390,7 @@ export async function POST(req: Request) {
       },
       strengths: strengths.slice(0, 5),
       improvements: improvements.slice(0, 6),
+      olq: ai.olq,
     };
     return NextResponse.json(result);
   } catch (err: any) {

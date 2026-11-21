@@ -16,6 +16,7 @@ import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS } from '@/lib/seed-data';
 import { CharacterPin, EvaluationResult, PPDTScenario } from '@/lib/types';
 import { HazyProjectorCanvas } from '@/components/HazyProjectorCanvas';
+import { OlqAnalysis } from '@/components/OlqAnalysis';
 
 type Phase = 'INTRO' | 'OBSERVE_30S' | 'CHARACTER_60S' | 'PAPER_WRITE_240S' | 'NARRATE_60S' | 'REPORT';
 
@@ -211,6 +212,7 @@ export default function PPDTSimulatorPage() {
       breakdown: evalData.breakdown,
       strengths: evalData.strengths,
       improvements: evalData.improvements,
+      olq: evalData.olq,
       wpm: evalData.wpm,
       wordCount: evalData.wordCount,
       longestPause: evalData.longestPause,
@@ -591,6 +593,8 @@ export default function PPDTSimulatorPage() {
                   </div>
                 ) : (
                   <>
+                    {report.olq && <OlqAnalysis olq={report.olq} />}
+
                     <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <h2 className="text-xl font-black text-white">
