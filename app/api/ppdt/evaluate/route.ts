@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { EvaluationResult, RecommendationLevel, TranscriptToken } from '@/lib/types';
 import { OLQS } from '@/lib/olq';
+import { generateOlqReport } from '@/lib/olq-ai';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -211,7 +212,7 @@ Differentiate: do NOT give the same score to more than 3 qualities. Strongest an
 Give a one-line remark (max 20 words) per OLQ in "olqRemarks", citing what the candidate actually said or did.
 Also estimate "recommendation": the realistic probability (0-100) that a candidate with this performance would be screened in at Stage 1. Be strict: weak or average narrations are about 10-35, good ones 45-65, only excellent ones above 75. Give a one-line "reason" (max 25 words).
 Return ONLY valid JSON in exactly this shape (use the OLQ names exactly as written above as keys):
-`;
+{"heroClarity":0,"pastPresentFuture":0,"practicalAction":0,"structurePacing":0,"strengths":["..."],"improvements":["..."],"olq":{"<OLQ name>":0},"olqRemarks":{"<OLQ name>":"..."},"recommendation":{"probability":0,"reason":"..."}}`;
 
   const user = JSON.stringify({
     scenarioTitle: input.scenarioTitle,
@@ -252,19 +253,37 @@ Return ONLY valid JSON in exactly this shape (use the OLQ names exactly as writt
   const list = (v: unknown) =>
     Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s.trim()).slice(0, 3).map(String) : [];
 
-  // 15 OLQs, 0-100 each. Only returned if the AI actually produced them.
+  // 15 OLQs, 0-100 each. Tolerant of small format differences in the AI's reply.
+  const squash = (x: string) => x.toLowerCase().replace(/[^a-z]/g, '');
+  const pickMap = (...cands: any[]) => {
+    for (const c of cands) if (c && typeof c === 'object' && !Array.isArray(c)) return c as Record<string, any>;
+    return null;
+  };
+  const scoreMap = pickMap(parsed.olq, parsed.olqs, parsed.OLQ, parsed.olqScores, parsed.OLQs);
+  const remarkMap = pickMap(parsed.olqRemarks, parsed.olq_remarks, parsed.remarks) || {};
+  const byKey = (m: Record<string, any> | null) => {
+    const out: Record<string, any> = {};
+    if (m) for (const k of Object.keys(m)) out[squash(k)] = m[k];
+    return out;
+  };
   let olq: { scores: Record<string, number>; remarks: Record<string, string> } | undefined;
-  if (parsed.olq && typeof parsed.olq === 'object') {
+  if (scoreMap) {
+    const sm = byKey(scoreMap);
+    const rm = byKey(remarkMap);
     const scores: Record<string, number> = {};
     const remarks: Record<string, string> = {};
     let found = 0;
     for (const name of OLQS) {
-      const n = Number((parsed.olq as any)[name]);
+      const raw = sm[squash(name)];
+      const n = Number(raw && typeof raw === 'object' ? raw.score : raw);
       if (Number.isFinite(n)) found++;
       scores[name] = clamp(Math.round(Number.isFinite(n) ? n : 0), 0, 100);
-      remarks[name] = String(parsed.olqRemarks?.[name] ?? '').slice(0, 200);
+      const r = rm[squash(name)] ?? (raw && typeof raw === 'object' ? raw.remark ?? raw.reason : '');
+      remarks[name] = String(r ?? '').slice(0, 200);
     }
     if (found >= 10) olq = { scores, remarks };
+  } else {
+    console.error('OLQ missing from AI reply. Keys received:', Object.keys(parsed || {}));
   }
 
   const rawProb = Number(parsed?.recommendation?.probability);
@@ -384,11 +403,25 @@ export async function POST(req: Request) {
     });
     const storyScore = ai.heroClarity + ai.pastPresentFuture + ai.practicalAction + ai.structurePacing;
 
+    // Safety net: if the combined reply had no OLQ scores, ask again with a focused OLQ-only prompt.
+    let olqData = ai.olq;
+    if (!olqData) {
+      try {
+        const r = await generateOlqReport({
+          scenarioTitle: String(ctx.scenarioTitle || 'PPDT'),
+          transcript,
+        });
+        olqData = { scores: r.scores, remarks: r.remarks };
+      } catch (e) {
+        console.error('OLQ fallback failed', e);
+      }
+    }
+
     // ---- Recommendation chance: the AI's estimate, capped by what the real score supports ----
     const totalScore = storyScore + narrationScore;
     const totalPct = Math.round((totalScore / 60) * 100);
-    const olqAvg = ai.olq
-      ? Math.round(OLQS.reduce((sum, q) => sum + (ai.olq!.scores[q] ?? 0), 0) / OLQS.length)
+    const olqAvg = olqData
+      ? Math.round(OLQS.reduce((sum, q) => sum + (olqData!.scores[q] ?? 0), 0) / OLQS.length)
       : totalPct;
     const fallbackProb = Math.round(totalPct * 0.6 + olqAvg * 0.4);
     const draftProb = ai.recommendationDraft.probability ?? fallbackProb;
@@ -436,7 +469,7 @@ export async function POST(req: Request) {
       },
       strengths: strengths.slice(0, 5),
       improvements: improvements.slice(0, 6),
-      olq: ai.olq,
+      olq: olqData,
       recommendation: { level, probability, reason: ai.recommendationDraft.reason },
     };
     return NextResponse.json(result);
