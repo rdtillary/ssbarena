@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS } from '@/lib/seed-data';
 import { PPDTScenario, UserAttempt } from '@/lib/types';
 import { OlqAnalysis } from '@/components/OlqAnalysis';
+import { RecommendationMeter } from '@/components/RecommendationMeter';
 
 const BREAKDOWN_LABELS: Record<string, [string, number]> = {
   heroClarity: ['Hero clarity', 10],
@@ -98,6 +99,14 @@ export default function PPDTResultsPage() {
           <RotateCcw className="w-3.5 h-3.5" /> Retry
         </Link>
       </div>
+
+      {att.payload?.recommendation && (
+        <RecommendationMeter
+          totalScore={att.total_score}
+          maxScore={att.max_score}
+          recommendation={att.payload.recommendation}
+        />
+      )}
 
       {att.payload?.olq ? (
         <OlqAnalysis olq={att.payload.olq} />

@@ -48,6 +48,14 @@ export interface TranscriptToken {
   seconds?: number; // pause length
 }
 
+export type RecommendationLevel = 'Very Low' | 'Low' | 'Moderate' | 'High' | 'Very High';
+
+export interface Recommendation {
+  level: RecommendationLevel;
+  probability: number; // 0-100, estimated chance of being recommended
+  reason: string;
+}
+
 export interface EvaluationResult {
   valid: boolean; // false when no usable speech was detected
   message?: string; // shown when valid is false
@@ -77,6 +85,7 @@ export interface EvaluationResult {
     scores: Record<string, number>;
     remarks: Record<string, string>;
   };
+  recommendation?: Recommendation;
 }
 
 export interface UserAttempt {
