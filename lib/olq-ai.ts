@@ -84,6 +84,28 @@ async function callOpenAI(system: string, user: string): Promise<string> {
   return data?.choices?.[0]?.message?.content || '';
 }
 
+async function callGroq(system: string, user: string): Promise<string> {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: process.env.GROQ_LLM_MODEL || process.env.AI_MODEL || 'llama-3.3-70b-versatile',
+      temperature: 0.3,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`AI request failed (${res.status}): ${await res.text()}`);
+  const data = await res.json();
+  return data?.choices?.[0]?.message?.content || '';
+}
+
 function extractJson(text: string): any {
   const cleaned = text.replace(/```json|```/g, '').trim();
   const start = cleaned.indexOf('{');
@@ -99,7 +121,8 @@ export async function generateOlqReport(input: {
   const user = `PPDT scenario: ${input.scenarioTitle}\n\nCandidate's narration (transcript):\n"""\n${input.transcript.slice(0, 6000)}\n"""`;
 
   let raw: string;
-  if (process.env.ANTHROPIC_API_KEY) raw = await callAnthropic(SYSTEM_PROMPT, user);
+  if (process.env.GROQ_API_KEY) raw = await callGroq(SYSTEM_PROMPT, user);
+  else if (process.env.ANTHROPIC_API_KEY) raw = await callAnthropic(SYSTEM_PROMPT, user);
   else if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) raw = await callGemini(SYSTEM_PROMPT, user);
   else if (process.env.OPENAI_API_KEY) raw = await callOpenAI(SYSTEM_PROMPT, user);
   else throw new Error('No AI key configured on the server.');
