@@ -9,6 +9,7 @@ import { SSB_CENTRES } from '@/lib/ssb-centres';
 import { BulkAddPanel } from '@/components/BulkAddPanel';
 import { BulkPhotoPanel } from '@/components/BulkPhotoPanel';
 import { AdminInbox } from '@/components/AdminInbox';
+import { AdminUsers } from '@/components/AdminUsers';
 
 interface OirRow {
   id: number;
@@ -22,6 +23,7 @@ export default function AdminDashboardPage() {
   const [scenarios, setScenarios] = useState<PPDTScenario[]>([]);
   const [oirSets, setOirSets] = useState<OirRow[]>([]);
   const [statusMsg, setStatusMsg] = useState('');
+  const [view, setView] = useState<'manage' | 'users'>('manage');
 
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<'Standard' | 'Ambiguous' | 'High-Pressure'>('Standard');
@@ -298,6 +300,27 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      <div className="flex gap-2">
+        {([
+          ['manage', 'Manage'],
+          ['users', 'Users'],
+        ] as const).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setView(id)}
+            className={`px-4 py-2 rounded-lg text-xs font-black uppercase ${
+              view === id ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 border border-slate-800 text-slate-300'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'users' && <AdminUsers />}
+
+      <div className={view === 'users' ? 'hidden' : 'space-y-6'}>
       <AdminInbox />
 
       <BulkAddPanel onDone={loadAdminData} />
@@ -634,6 +657,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );
