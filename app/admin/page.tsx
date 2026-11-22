@@ -9,7 +9,6 @@ import { SSB_CENTRES } from '@/lib/ssb-centres';
 import { BulkAddPanel } from '@/components/BulkAddPanel';
 import { BulkPhotoPanel } from '@/components/BulkPhotoPanel';
 import { AdminInbox } from '@/components/AdminInbox';
-import { AdminUpiPanel } from '@/components/AdminUpiPanel';
 
 interface OirRow {
   id: number;
@@ -298,8 +297,6 @@ export default function AdminDashboardPage() {
           {statusMsg}
         </div>
       )}
-
-      <AdminUpiPanel />
 
       <AdminInbox />
 

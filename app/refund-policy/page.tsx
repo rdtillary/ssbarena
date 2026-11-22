@@ -1,11 +1,11 @@
-import { PRO_PRICE_INR } from '@/lib/config';
+import { PRO_PRICE_INR, PRO_PERIOD_DAYS } from '@/lib/pricing';
 
 export default function RefundPolicyPage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-12 space-y-4 text-sm text-slate-300">
       <h1 className="text-2xl font-black text-white">Cancellation &amp; Refund Policy</h1>
       <p>
-        Because the ₹{PRO_PRICE_INR} Lifetime Pro Pass unlocks instant digital access to practice
+        Because the ₹{PRO_PRICE_INR} Pro Pass ({PRO_PERIOD_DAYS} days of access) unlocks instant digital access to practice
         scenarios and AI assessments, purchases are generally non-refundable once activated.
       </p>
       <p>

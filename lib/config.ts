@@ -1,2 +1,3 @@
-// Single source of truth for pricing. The Pro Pass is a one-time, lifetime purchase.
-export const PRO_PRICE_INR = 199;
+// Single source of truth for pricing lives in lib/pricing.ts.
+// Pro Pass: PRO_PRICE_INR per month (PRO_PERIOD_DAYS days of access per payment).
+export { PRO_PRICE_INR, PRO_PERIOD_DAYS } from './pricing';

@@ -22,7 +22,7 @@ import { getCentre } from '@/lib/ssb-centres';
 import { PPDTScenario, RecommendedCandidate, UserAttempt } from '@/lib/types';
 import { Logo } from '@/components/Logo';
 import { AuthModal } from '@/components/AuthModal';
-import { UpiPayModal } from '@/components/UpiPayModal';
+import { ProCheckoutModal } from '@/components/ProCheckoutModal';
 import { Carousel } from '@/components/Carousel';
 import { RecommendedSlide } from '@/components/RecommendedSlide';
 import { ReportingTimer } from '@/components/ReportingTimer';
@@ -534,10 +534,11 @@ export default function HomePage() {
       </nav>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onAuthenticated={loadData} />
-      <UpiPayModal
+      <ProCheckoutModal
         open={proOpen}
         onClose={() => setProOpen(false)}
-        signedIn={Boolean(user)}
+        userEmail={user?.email}
+        onSuccess={loadData}
         onRequireAuth={() => setAuthOpen(true)}
       />
       <ContactCadetModal

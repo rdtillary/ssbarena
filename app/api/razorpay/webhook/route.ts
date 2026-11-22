@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createAdminSupabase } from '@/lib/supabase/admin';
+import { grantProPeriod } from '@/lib/pro';
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
@@ -21,18 +22,16 @@ export async function POST(req: Request) {
     const orderId = payment.order_id;
     const admin = createAdminSupabase();
 
-    const { data: orderRow } = await admin
+    // Mark paid and grant Pro only once per order (the checkout may already have done it).
+    const { data: claimed } = await admin
       .from('payment_orders')
       .update({ status: 'paid', razorpay_payment_id: payment.id })
       .eq('razorpay_order_id', orderId)
-      .select('user_id')
-      .single();
+      .or('status.is.null,status.neq.paid')
+      .select('user_id');
 
-    if (orderRow?.user_id) {
-      await admin
-        .from('profiles')
-        .update({ is_pro: true, pro_expires_at: null })
-        .eq('id', orderRow.user_id);
+    if (claimed && claimed.length > 0 && claimed[0].user_id) {
+      await grantProPeriod(admin, claimed[0].user_id);
     }
   }
 

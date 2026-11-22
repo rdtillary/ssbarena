@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
-import { PRO_PRICE_INR } from '@/lib/config';
+import { PRO_PRICE_INR, PRO_PERIOD_DAYS, ORIGINAL_PRICE_INR } from '@/lib/pricing';
 
 declare global {
   interface Window {
@@ -63,7 +63,7 @@ export function ProCheckoutModal({
         amount: data.amount,
         currency: 'INR',
         name: 'SSB Arena',
-        description: 'Lifetime Pro Pass (All PPDT + OIR + Audio Vault)',
+        description: `SSB Arena Pro - ${PRO_PERIOD_DAYS} days (All PPDT + OIR + Audio Vault)`,
         order_id: data.orderId,
         prefill: { email: userEmail },
         theme: { color: '#F59E0B' },
@@ -103,20 +103,23 @@ export function ProCheckoutModal({
         </button>
 
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-semibold mb-3">
-          <Sparkles className="w-3.5 h-3.5" /> LIFETIME PRO PASS
+          <Sparkles className="w-3.5 h-3.5" /> MONTHLY PRO PASS
         </div>
 
         <h2 className="text-2xl font-black text-white">
           Unlock All PPDT &amp; OIR Drills
         </h2>
         <p className="text-slate-400 text-sm mt-1">
-          One-time payment via UPI, QR, or Card. No auto-renewal.
+          Pay via UPI, QR, or Card. Valid for {PRO_PERIOD_DAYS} days. No auto-renewal.
         </p>
 
         <div className="my-5 p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-baseline justify-between">
           <div>
+            {ORIGINAL_PRICE_INR ? (
+              <span className="text-lg font-bold text-slate-500 line-through mr-2">₹{ORIGINAL_PRICE_INR}</span>
+            ) : null}
             <span className="text-3xl font-black text-amber-400">₹{priceInr}</span>
-            <span className="text-slate-400 text-xs ml-2">one-time • lifetime access</span>
+            <span className="text-slate-400 text-xs ml-2">per month • {PRO_PERIOD_DAYS} days access</span>
           </div>
           <span className="text-xs text-emerald-400 font-medium">Instant Activation</span>
         </div>
