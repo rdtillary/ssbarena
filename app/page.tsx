@@ -239,9 +239,14 @@ export default function HomePage() {
             )}
 
             {isPro ? (
-              <span className="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setProOpen(true)}
+                title="Manage subscription"
+                className="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-1 hover:bg-emerald-500/25"
+              >
                 <CheckCircle2 className="w-3.5 h-3.5" /> PRO ACTIVE
-              </span>
+              </button>
             ) : (
               <button
                 onClick={() => setProOpen(true)}

@@ -1,4 +1,4 @@
-import { PRO_PRICE_INR, PRO_PERIOD_DAYS } from '@/lib/pricing';
+import { PRO_PRICE_INR } from '@/lib/pricing';
 
 export default function TermsPage() {
   return (
@@ -9,8 +9,11 @@ export default function TermsPage() {
         and is not affiliated with UPSC, the Ministry of Defence, or the Indian Armed Forces.
       </p>
       <p>
-        The ₹{PRO_PRICE_INR} Pro Pass is a payment that grants personal, non-transferable digital
-        access for {PRO_PERIOD_DAYS} days from payment confirmation. It does not renew automatically. Sharing accounts or scraping test content is prohibited.
+        The Pro subscription costs ₹{PRO_PRICE_INR} per month. By subscribing you authorise
+        Razorpay to charge ₹{PRO_PRICE_INR} to your UPI AutoPay mandate or card every month until
+        you cancel. It grants personal, non-transferable digital access for each paid month. You
+        can cancel at any time from the Pro screen; access continues until the end of the paid
+        month. Sharing accounts or scraping test content is prohibited.
       </p>
     </main>
   );
