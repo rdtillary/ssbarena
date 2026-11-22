@@ -125,7 +125,7 @@ create policy "Users can insert own attempts"
   on public.user_attempts for insert
   with check (auth.uid() = user_id);
 
--- 5. PAYMENT ORDERS (RAZORPAY ₹199 LIFETIME PASS)
+-- 5. PAYMENT ORDERS (RAZORPAY PRO PAYMENTS)
 create table if not exists public.payment_orders (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.profiles(id) on delete cascade,
@@ -191,7 +191,7 @@ on conflict (id) do nothing;
 
 select setval('public.ppdt_scenarios_id_seq', (select coalesce(max(id), 10) from public.ppdt_scenarios));
 
--- Carousel (recommended candidates), SSB centre images, lifetime Pro Pass.
+-- Carousel (recommended candidates), SSB centre images.
 -- Safe to re-run. Paste into the Supabase SQL Editor for an existing project.
 
 -- 8. RECOMMENDED CANDIDATES (homepage slideshow, managed from /admin)
@@ -242,7 +242,7 @@ create policy "Public read access for ssb-centres"
 alter table public.profiles alter column target_board drop default;
 update public.profiles set target_board = null where target_board = '34 SSB Allahabad';
 
--- 11. LIFETIME PASS: ₹199 default amount
+-- 11. Default order amount
 alter table public.payment_orders alter column amount_paise set default 19900;
 
 -- 12. SECURITY: users may only edit their own name / SSB centre / reporting date.

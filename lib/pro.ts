@@ -11,12 +11,12 @@ async function readPro(admin: any, userId: string) {
     .eq('id', userId)
     .single();
   return {
-    lifetime: Boolean(data?.is_pro && !data?.pro_expires_at), // manually granted lifetime pass
+    lifetime: Boolean(data?.is_pro && !data?.pro_expires_at), // manually granted pass with no expiry
     end: data?.pro_expires_at ? new Date(data.pro_expires_at).getTime() : 0,
   };
 }
 
-/** Adds one paid period of Pro (one-time orders). Never shortens a lifetime pass. */
+/** Adds one paid period of Pro (one-time orders). Never shortens a no-expiry pass. */
 export async function grantProPeriod(admin: any, userId: string) {
   const cur = await readPro(admin, userId);
   if (cur.lifetime) return;

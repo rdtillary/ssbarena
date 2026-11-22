@@ -25,5 +25,5 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json({ message: `Lifetime Pro Pass activated for ${email}!` });
+  return NextResponse.json({ message: `Pro activated (no expiry) for ${email}!` });
 }

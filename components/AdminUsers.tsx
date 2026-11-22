@@ -11,7 +11,7 @@ interface UserRow {
   created_at: string;
   last_sign_in_at: string | null;
   email_confirmed: boolean;
-  plan: 'Free' | 'Pro' | 'Lifetime';
+  plan: 'Free' | 'Pro' | 'No expiry';
   pro_expires_at: string | null;
   subscription_status: string | null;
   subscription_end: string | null;
@@ -76,7 +76,7 @@ export function AdminUsers() {
     const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const rows = shown.map((u) =>
       [
-        u.email, u.name, u.plan, u.pro_expires_at ? fmt(u.pro_expires_at) : u.plan === 'Lifetime' ? 'Lifetime' : '',
+        u.email, u.name, u.plan, u.pro_expires_at ? fmt(u.pro_expires_at) : u.plan === 'No expiry' ? 'No expiry' : '',
         u.subscription_status || '', fmt(u.created_at), fmt(u.last_sign_in_at),
         u.ppdt_attempts, u.oir_attempts, fmt(u.last_attempt_at), u.target_board || '', u.reporting_date || '',
       ].map(esc).join(',')
@@ -188,7 +188,7 @@ export function AdminUsers() {
                         <p><span className="text-slate-500">Email confirmed:</span> {u.email_confirmed ? 'Yes' : 'No'}</p>
                         <p>
                           <span className="text-slate-500">Pro until:</span>{' '}
-                          {u.plan === 'Lifetime' ? 'Lifetime' : u.pro_expires_at ? fmtTime(u.pro_expires_at) : '—'}
+                          {u.plan === 'No expiry' ? 'No expiry' : u.pro_expires_at ? fmtTime(u.pro_expires_at) : '—'}
                         </p>
                         <p>
                           <span className="text-slate-500">Autopay:</span> {u.subscription_status || 'none'}

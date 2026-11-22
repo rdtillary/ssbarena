@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { X, CheckCircle2, ShieldCheck, Sparkles, Instagram } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import { PRO_PRICE_INR } from '@/lib/config';
 
 declare global {
@@ -14,6 +14,8 @@ interface Props {
   open: boolean;
   onClose: () => void;
   userEmail?: string | null;
+  isPro?: boolean;
+  proUntil?: string | null;
   onSuccess: () => void;
   onRequireAuth: () => void;
 }
@@ -27,6 +29,8 @@ export function ProCheckoutModal({
   open,
   onClose,
   userEmail,
+  isPro = false,
+  proUntil = null,
   onSuccess,
   onRequireAuth,
 }: Props) {
@@ -154,6 +158,9 @@ export function ProCheckoutModal({
 
   const hasSub = Boolean(sub);
   const isCancelling = sub?.status === 'cancelling';
+  // Pro without a subscription row (manual grant or an earlier one-time payment): info only.
+  const proInfoOnly = isPro && !hasSub;
+  const showManage = hasSub || isPro;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -171,10 +178,14 @@ export function ProCheckoutModal({
         </div>
 
         <h2 className="text-2xl font-black text-white">
-          {hasSub ? 'Your Pro Subscription' : 'Unlock All PPDT & OIR Drills'}
+          {showManage ? 'Your Pro Subscription' : 'Unlock All PPDT & OIR Drills'}
         </h2>
         <p className="text-slate-400 text-sm mt-1">
-          {hasSub
+          {proInfoOnly
+            ? proUntil
+              ? `Pro is active until ${fmtDate(proUntil)}.`
+              : 'Pro is active on your account.'
+            : hasSub
             ? isCancelling
               ? `Autopay is cancelled. Pro stays active until ${fmtDate(sub!.current_end) || 'the end of your paid month'}.`
               : `Autopay is on: ₹${priceInr} is charged every month.${
@@ -183,7 +194,7 @@ export function ProCheckoutModal({
             : `₹${priceInr} per month via UPI AutoPay or card. Cancel any time.`}
         </p>
 
-        {!hasSub && (
+        {!showManage && (
           <div className="my-5 p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-baseline justify-between">
             <div>
               <span className="text-3xl font-black text-amber-400">₹{priceInr}</span>
@@ -219,7 +230,7 @@ export function ProCheckoutModal({
           </p>
         )}
 
-        {hasSub ? (
+        {proInfoOnly ? null : hasSub ? (
           !isCancelling && (
             <button
               onClick={handleCancel}
@@ -241,24 +252,6 @@ export function ProCheckoutModal({
             <p className="text-[11px] text-slate-500 text-center mt-2">
               By subscribing you authorise a recurring monthly charge of ₹{priceInr} until you cancel.
             </p>
-          </>
-        )}
-
-        {!hasSub && (
-          <>
-            <div className="my-4 flex items-center gap-2 text-xs text-slate-500">
-              <div className="h-px bg-slate-800 flex-1" /> OR <div className="h-px bg-slate-800 flex-1" />
-            </div>
-
-            <a
-              href="https://www.instagram.com/ssb.arena"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-sm transition flex items-center justify-center gap-2"
-            >
-              <Instagram className="w-4 h-4 text-pink-400" />
-              Contact @ssb.arena on Instagram DMs (pay there)
-            </a>
           </>
         )}
 

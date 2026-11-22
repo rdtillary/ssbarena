@@ -63,7 +63,7 @@ export async function GET() {
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at || null,
       email_confirmed: Boolean(u.email_confirmed_at),
-      plan: proActive ? (expires === null ? 'Lifetime' : 'Pro') : 'Free',
+      plan: proActive ? (expires === null ? 'No expiry' : 'Pro') : 'Free',
       pro_expires_at: p.pro_expires_at || null,
       subscription_status: sub?.status || null,
       subscription_end: sub?.current_end || null,

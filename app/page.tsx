@@ -35,6 +35,7 @@ export default function HomePage() {
   const [attempts, setAttempts] = useState<UserAttempt[]>([]);
   const [user, setUser] = useState<any>(null);
   const [isPro, setIsPro] = useState(false);
+  const [proUntil, setProUntil] = useState<string | null>(null);
   const [centre, setCentre] = useState('');
   const [reportingDate, setReportingDate] = useState('');
   const [centreImages, setCentreImages] = useState<Record<string, string>>({});
@@ -95,6 +96,7 @@ export default function HomePage() {
           profile.is_pro &&
           (!profile.pro_expires_at || new Date(profile.pro_expires_at) > new Date());
         setIsPro(Boolean(activePro));
+        setProUntil(profile.pro_expires_at || null);
         if (profile.target_board && getCentre(profile.target_board)) {
           setCentre(profile.target_board);
           if (profile.reporting_date) setReportingDate(profile.reporting_date);
@@ -551,6 +553,8 @@ export default function HomePage() {
         open={proOpen}
         onClose={() => setProOpen(false)}
         userEmail={user?.email}
+        isPro={isPro}
+        proUntil={proUntil}
         onSuccess={loadData}
         onRequireAuth={() => setAuthOpen(true)}
       />
