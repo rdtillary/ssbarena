@@ -16,10 +16,11 @@ import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS } from '@/lib/seed-data';
 import { CharacterPin, EvaluationResult, PPDTScenario } from '@/lib/types';
 import { HazyProjectorCanvas } from '@/components/HazyProjectorCanvas';
-import { OlqAnalysis } from '@/components/OlqAnalysis';
-import { RecommendationMeter } from '@/components/RecommendationMeter';
 
 type Phase = 'INTRO' | 'OBSERVE_30S' | 'CHARACTER_60S' | 'PAPER_WRITE_240S' | 'NARRATE_60S' | 'REPORT';
+
+const EVAL_TIMEOUT_MS = 50000; // give up waiting for the grader after 50s so Retry always appears
+const STOP_TIMEOUT_MS = 3000; // give up waiting for the recorder to stop after 3s
 
 const pickMimeType = () => {
   if (typeof MediaRecorder === 'undefined') return '';
@@ -58,7 +59,6 @@ export default function PPDTSimulatorPage() {
   const finishingRef = useRef(false);
   const blobRef = useRef<Blob | null>(null);
   const durationRef = useRef(0);
-  const savedRef = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -142,19 +142,33 @@ export default function PPDTSimulatorPage() {
     }
   };
 
+  // Always resolves: if the recorder never fires "stop", we continue with whatever was captured.
   const stopRecording = (): Promise<Blob | null> =>
     new Promise((resolve) => {
       const rec = mediaRecorderRef.current;
       const type = mimeRef.current || 'audio/webm';
+      const build = () => (chunksRef.current.length ? new Blob(chunksRef.current, { type }) : null);
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        try {
+          rec?.stream.getTracks().forEach((t) => t.stop());
+        } catch {}
+        resolve(build());
+      };
+
       if (!rec || rec.state === 'inactive') {
-        resolve(chunksRef.current.length ? new Blob(chunksRef.current, { type }) : null);
+        finish();
         return;
       }
-      rec.onstop = () => {
-        rec.stream.getTracks().forEach((t) => t.stop());
-        resolve(chunksRef.current.length ? new Blob(chunksRef.current, { type }) : null);
-      };
-      rec.stop();
+      rec.onstop = finish;
+      setTimeout(finish, STOP_TIMEOUT_MS);
+      try {
+        rec.stop();
+      } catch {
+        finish();
+      }
     });
 
   const runEvaluation = async () => {
@@ -162,6 +176,9 @@ export default function PPDTSimulatorPage() {
     setEvaluating(true);
     setEvalError('');
     setReport(null);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), EVAL_TIMEOUT_MS);
 
     try {
       const ext = (mimeRef.current || 'audio/webm').includes('mp4')
@@ -183,20 +200,32 @@ export default function PPDTSimulatorPage() {
         })
       );
 
-      const res = await fetch('/api/ppdt/evaluate', { method: 'POST', body: fd });
+      const res = await fetch('/api/ppdt/evaluate', {
+        method: 'POST',
+        body: fd,
+        signal: controller.signal,
+      });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Evaluation failed. Please retry.');
 
       const evalData = data as EvaluationResult;
       setReport(evalData);
-      // Save each graded attempt exactly once (a Retry of the grading must not duplicate it).
-      if (evalData.valid && !savedRef.current) {
-        savedRef.current = true;
-        await saveAttempt(evalData, blob);
+      setEvaluating(false); // show the results right away, never wait for saving
+
+      if (evalData.valid) {
+        // Saving runs in the background; a slow or failed save must not hide the report.
+        saveAttempt(evalData, blob).catch(() => {
+          setSavedNotice('Could not save this attempt to your Vault.');
+        });
       }
     } catch (err: any) {
-      setEvalError(err?.message || 'Evaluation failed. Please retry.');
+      setEvalError(
+        err?.name === 'AbortError'
+          ? 'The AI took too long to respond. Press Retry.'
+          : err?.message || 'Evaluation failed. Please retry.'
+      );
     } finally {
+      clearTimeout(timeout);
       setEvaluating(false);
     }
   };
@@ -205,23 +234,6 @@ export default function PPDTSimulatorPage() {
     const { data: authData } = await supabase.auth.getUser();
     const user = authData?.user;
     let uploadedAudioUrl: string | null = null;
-
-    // Everything needed to show the full result later.
-    const payload = {
-      pins,
-      mainAction,
-      breakdown: evalData.breakdown,
-      strengths: evalData.strengths,
-      improvements: evalData.improvements,
-      olq: evalData.olq,
-      recommendation: evalData.recommendation,
-      wpm: evalData.wpm,
-      wordCount: evalData.wordCount,
-      longestPause: evalData.longestPause,
-      stammerCount: evalData.stammerCount,
-      pauseCount: evalData.pauseCount,
-      fillerCount: evalData.fillerCount,
-    };
 
     if (user && blob) {
       const ext = (mimeRef.current || '').includes('mp4') ? 'mp4' : 'webm';
@@ -237,7 +249,7 @@ export default function PPDTSimulatorPage() {
     }
 
     if (user) {
-      const { error } = await supabase.from('user_attempts').insert({
+      const { error: insertErr } = await supabase.from('user_attempts').insert({
         user_id: user.id,
         attempt_type: 'PPDT',
         scenario_id: scenario.id,
@@ -248,9 +260,16 @@ export default function PPDTSimulatorPage() {
         max_score: 60,
         transcript: evalData.transcript,
         audio_url: uploadedAudioUrl,
-        payload,
+        payload: {
+          pins,
+          mainAction,
+          breakdown: evalData.breakdown,
+          stammerCount: evalData.stammerCount,
+          pauseCount: evalData.pauseCount,
+          fillerCount: evalData.fillerCount,
+        },
       });
-      setSavedNotice(error ? 'Could not save this result. Please check your connection.' : 'Result saved to your account.');
+      setSavedNotice(insertErr ? 'Could not save this attempt to your Vault.' : 'Saved to your Vault.');
     } else {
       try {
         const existing = JSON.parse(localStorage.getItem('ssb_arena_guest_vault') || '[]');
@@ -264,12 +283,11 @@ export default function PPDTSimulatorPage() {
           total_score: evalData.totalScore,
           max_score: 60,
           transcript: evalData.transcript,
-          payload,
           created_at: new Date().toISOString(),
         });
-        localStorage.setItem('ssb_arena_guest_vault', JSON.stringify(existing.slice(0, 60)));
+        localStorage.setItem('ssb_arena_guest_vault', JSON.stringify(existing.slice(0, 15)));
       } catch {}
-      setSavedNotice('Saved on this device. Sign in to keep results and audio permanently.');
+      setSavedNotice('Saved on this device. Sign in to keep audio permanently.');
     }
   };
 
@@ -571,6 +589,162 @@ export default function PPDTSimulatorPage() {
               <p className="text-sm font-bold text-red-400 flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4" /> {evalError}
               </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={runEvaluation}
+                  className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 text-xs font-black flex items-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Retry
+                </button>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold"
+                >
+                  Restart this PPDT
+                </button>
+              </div>
+            </div>
+          ) : report ? (
+            <>
+              {!report.valid ? (
+                <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+                  <h2 className="text-xl font-black text-white">Score: 0 / 60</h2>
+                  <p className="text-sm text-red-400 font-bold">{report.message}</p>
+                  {audioUrl && <audio controls src={audioUrl} className="w-full h-9" />}
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 text-xs font-black flex items-center gap-1.5"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" /> Try Again
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h2 className="text-xl font-black text-white">
+                        Total Score: {report.totalScore} / 60
+                      </h2>
+                      <div className="flex gap-2 text-xs font-bold">
+                        <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-amber-400">
+                          Story: {report.storyScore}/40
+                        </span>
+                        <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-sky-400">
+                          Narration: {report.narrationScore}/20
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 text-[11px] font-bold">
+                      <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-slate-300">
+                        {report.wordCount} words
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-slate-300">
+                        {report.wpm} WPM
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-red-950/40 border border-red-900/60 text-red-400">
+                        {report.pauseCount} pauses
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-red-950/40 border border-red-900/60 text-red-400">
+                        {report.stammerCount} stammers
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-red-950/40 border border-red-900/60 text-red-400">
+                        {report.fillerCount} fillers
+                      </span>
+                    </div>
+
+                    {savedNotice && (
+                      <p className="text-xs text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" /> {savedNotice}
+                      </p>
+                    )}
+
+                    {audioUrl && <audio controls src={audioUrl} className="w-full h-9" />}
+
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                      <p className="text-xs font-bold text-slate-400">
+                        Transcript <span className="text-red-400 font-normal">(red = stammer / filler / pause)</span>
+                      </p>
+                      <p className="text-sm text-slate-200 leading-loose">
+                        {report.tokens.map((t, i) =>
+                          t.type === 'pause' ? (
+                            <span
+                              key={i}
+                              className="mx-1 px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 text-[11px] font-bold"
+                            >
+                              ⏸ {t.text}
+                            </span>
+                          ) : t.type === 'word' ? (
+                            <span key={i}>{t.text} </span>
+                          ) : (
+                            <span key={i}>
+                              <span className="px-0.5 rounded bg-red-500/20 text-red-400 font-bold underline decoration-red-500">
+                                {t.text}
+                              </span>{' '}
+                            </span>
+                          )
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                      <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-800/50 space-y-1">
+                        <p className="font-bold text-emerald-400">Strengths</p>
+                        {report.strengths.length === 0 && <p className="text-slate-400">—</p>}
+                        {report.strengths.map((s, i) => (
+                          <p key={i} className="text-slate-300">• {s}</p>
+                        ))}
+                      </div>
+                      <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-800/50 space-y-1">
+                        <p className="font-bold text-amber-400">Improvements</p>
+                        {report.improvements.map((imp, i) => (
+                          <p key={i} className="text-slate-300">• {imp}</p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-base font-black text-amber-400">
+                        Recommended Candidate Response
+                      </h3>
+                      <div className="flex flex-wrap gap-1.5">
+                        {scenario.olq_highlights?.map((olq, i) => (
+                          <span
+                            key={i}
+                            className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300"
+                          >
+                            {olq}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-200 leading-relaxed">
+                      {scenario.recommended_story}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 text-xs font-black flex items-center gap-1.5"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Retry this PPDT
+                    </button>
+                    <Link
+                      href="/"
+                      className="px-4 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold"
+                    >
+                      Back to Home
+                    </Link>
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <p className="text-sm font-bold text-white">No result was received.</p>
               <button
                 onClick={runEvaluation}
                 className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 text-xs font-black flex items-center gap-1.5"
@@ -578,176 +752,6 @@ export default function PPDTSimulatorPage() {
                 <RotateCcw className="w-3.5 h-3.5" /> Retry
               </button>
             </div>
-          ) : (
-            report && (
-              <>
-                {!report.valid ? (
-                  <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                    <h2 className="text-xl font-black text-white">Score: 0 / 60</h2>
-                    <p className="text-sm text-red-400 font-bold">{report.message}</p>
-                    {audioUrl && <audio controls src={audioUrl} className="w-full h-9" />}
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 text-xs font-black flex items-center gap-1.5"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" /> Try Again
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    {report.recommendation && (
-                      <RecommendationMeter
-                        totalScore={report.totalScore}
-                        recommendation={report.recommendation}
-                      />
-                    )}
-
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={() => window.location.reload()}
-                        className="px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" /> Retry this picture
-                      </button>
-                      <Link
-                        href={`/ppdt/${scenario.id}/results`}
-                        className="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold"
-                      >
-                        View saved results
-                      </Link>
-                      <Link
-                        href="/"
-                        className="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold"
-                      >
-                        Back to Home
-                      </Link>
-                    </div>
-
-                    {report.olq && <OlqAnalysis olq={report.olq} />}
-
-                    <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h2 className="text-xl font-black text-white">
-                          Total Score: {report.totalScore} / 60
-                        </h2>
-                        <div className="flex gap-2 text-xs font-bold">
-                          <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-amber-400">
-                            Story: {report.storyScore}/40
-                          </span>
-                          <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-sky-400">
-                            Narration: {report.narrationScore}/20
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 text-[11px] font-bold">
-                        <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-slate-300">
-                          {report.wordCount} words
-                        </span>
-                        <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-slate-300">
-                          {report.wpm} WPM
-                        </span>
-                        <span className="px-2.5 py-1 rounded bg-red-950/40 border border-red-900/60 text-red-400">
-                          {report.pauseCount} pauses
-                        </span>
-                        <span className="px-2.5 py-1 rounded bg-red-950/40 border border-red-900/60 text-red-400">
-                          {report.stammerCount} stammers
-                        </span>
-                        <span className="px-2.5 py-1 rounded bg-red-950/40 border border-red-900/60 text-red-400">
-                          {report.fillerCount} fillers
-                        </span>
-                      </div>
-
-                      {savedNotice && (
-                        <p className="text-xs text-emerald-400 flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4" /> {savedNotice}
-                        </p>
-                      )}
-
-                      {audioUrl && <audio controls src={audioUrl} className="w-full h-9" />}
-
-                      <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                        <p className="text-xs font-bold text-slate-400">
-                          Transcript <span className="text-red-400 font-normal">(red = stammer / filler / pause)</span>
-                        </p>
-                        <p className="text-sm text-slate-200 leading-loose">
-                          {report.tokens.map((t, i) =>
-                            t.type === 'pause' ? (
-                              <span
-                                key={i}
-                                className="mx-1 px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 text-[11px] font-bold"
-                              >
-                                ⏸ {t.text}
-                              </span>
-                            ) : t.type === 'word' ? (
-                              <span key={i}>{t.text} </span>
-                            ) : (
-                              <span key={i}>
-                                <span className="px-0.5 rounded bg-red-500/20 text-red-400 font-bold underline decoration-red-500">
-                                  {t.text}
-                                </span>{' '}
-                              </span>
-                            )
-                          )}
-                        </p>
-                      </div>
-
-                      <div className="grid sm:grid-cols-2 gap-3 text-xs">
-                        <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-800/50 space-y-1">
-                          <p className="font-bold text-emerald-400">Strengths</p>
-                          {report.strengths.length === 0 && <p className="text-slate-400">—</p>}
-                          {report.strengths.map((s, i) => (
-                            <p key={i} className="text-slate-300">• {s}</p>
-                          ))}
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-800/50 space-y-1">
-                          <p className="font-bold text-amber-400">Improvements</p>
-                          {report.improvements.map((imp, i) => (
-                            <p key={i} className="text-slate-300">• {imp}</p>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        <button
-                          onClick={() => window.location.reload()}
-                          className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" /> Retry this picture
-                        </button>
-                        <Link
-                          href="/"
-                          className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold"
-                        >
-                          Back to Home
-                        </Link>
-                      </div>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-base font-black text-amber-400">
-                          Recommended Candidate Response
-                        </h3>
-                        <div className="flex flex-wrap gap-1.5">
-                          {scenario.olq_highlights?.map((olq, i) => (
-                            <span
-                              key={i}
-                              className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300"
-                            >
-                              {olq}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-sm text-slate-200 leading-relaxed">
-                        {scenario.recommended_story}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </>
-            )
           )}
         </div>
       )}

@@ -155,7 +155,7 @@ export function ProCheckoutModal({
         </div>
 
         <a
-          href="https://ig.me/m/ssb.arena"
+          href="https://www.instagram.com/ssb.arena"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-sm transition flex items-center justify-center gap-2"
