@@ -67,22 +67,37 @@ export function ProCheckoutModal({
         order_id: data.orderId,
         prefill: { email: userEmail },
         theme: { color: '#F59E0B' },
+        modal: {
+          ondismiss: () => setError('Payment cancelled. You can try again any time.'),
+        },
         handler: async function (response: any) {
-          const verifyRes = await fetch('/api/razorpay/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(response),
-          });
-          if (verifyRes.ok) {
-            onSuccess();
-            onClose();
-          } else {
+          setError('');
+          try {
+            const verifyRes = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            if (verifyRes.ok) {
+              onSuccess();
+              onClose();
+            } else {
+              setError('Payment captured, verification pending. Refresh in 10 seconds.');
+            }
+          } catch {
             setError('Payment captured, verification pending. Refresh in 10 seconds.');
           }
         },
       };
 
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (resp: any) => {
+        setError(resp?.error?.description || 'Payment failed. Please try again.');
+      });
       rzp.open();
     } catch (err: any) {
       setError(err.message || 'Payment initialization failed');

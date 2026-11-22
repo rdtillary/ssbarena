@@ -5,18 +5,38 @@ import { createAdminSupabase } from '@/lib/supabase/admin';
 import { grantProPeriod } from '@/lib/pro';
 
 export async function POST(req: Request) {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  }
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body || {};
 
-  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+  if (
+    typeof razorpay_order_id !== 'string' ||
+    typeof razorpay_payment_id !== 'string' ||
+    typeof razorpay_signature !== 'string' ||
+    !razorpay_order_id ||
+    !razorpay_payment_id ||
+    !razorpay_signature
+  ) {
     return NextResponse.json({ error: 'Missing payment details' }, { status: 400 });
   }
 
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keySecret) {
+    return NextResponse.json({ error: 'Payments are not configured on the server.' }, { status: 500 });
+  }
+
   const expectedSignature = crypto
-    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+    .createHmac('sha256', keySecret)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest('hex');
 
-  if (expectedSignature !== razorpay_signature) {
+  const a = Buffer.from(expectedSignature);
+  const b = Buffer.from(razorpay_signature);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
     return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 });
   }
 
