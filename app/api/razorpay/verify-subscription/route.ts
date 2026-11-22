@@ -4,6 +4,8 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { getRazorpay } from '@/lib/razorpay-sub';
 import { paidUntil, setProUntil } from '@/lib/pro';
+import { PRO_PRICE_INR } from '@/lib/pricing';
+import { recordCommission } from '@/lib/referral';
 
 export const runtime = 'nodejs';
 
@@ -63,5 +65,6 @@ export async function POST(req: Request) {
   }
 
   await setProUntil(admin, auth.user.id, paidUntil(currentEnd));
+  await recordCommission(admin, auth.user.id, razorpay_payment_id, PRO_PRICE_INR * 100);
   return NextResponse.json({ success: true });
 }

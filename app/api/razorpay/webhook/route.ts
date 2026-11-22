@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { grantProPeriod, paidUntil, setProUntil } from '@/lib/pro';
+import { recordCommission } from '@/lib/referral';
 
 export const runtime = 'nodejs';
 
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
       .select('user_id');
     if (claimed && claimed.length > 0 && claimed[0].user_id) {
       await grantProPeriod(admin, claimed[0].user_id);
+      await recordCommission(admin, claimed[0].user_id, payment.id, payment.amount);
     }
   }
 
@@ -73,7 +75,8 @@ export async function POST(req: Request) {
 
       // Every successful monthly charge extends Pro (once per payment).
       if (event.event === 'subscription.charged') {
-        const paymentId: string | undefined = event.payload?.payment?.entity?.id;
+        const paymentEntity = event.payload?.payment?.entity;
+        const paymentId: string | undefined = paymentEntity?.id;
         if (paymentId) {
           const { error: claimErr } = await admin.from('subscription_payments').insert({
             razorpay_payment_id: paymentId,
@@ -82,6 +85,7 @@ export async function POST(req: Request) {
           });
           if (!claimErr) {
             await setProUntil(admin, userId, paidUntil(subEntity.current_end));
+            await recordCommission(admin, userId, paymentId, paymentEntity?.amount);
           }
         }
       }
