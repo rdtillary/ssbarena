@@ -155,7 +155,7 @@ export function AdminCreators() {
         <input placeholder="Notes (deal terms, DM date...)" value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} className={`w-full ${inp}`} />
         <p className="text-[11px] text-slate-500">
           Link: {origin || 'https://yoursite'}/r/{f.code || 'code'}. You can pay per click, per paying subscriber, or both (set either to 0 to turn it off).
-          Repeat visits from the same browser count as one unique click; bots are ignored.
+          Repeat visits from the same browser count as one unique click; bots are ignored. Payments are always made by you manually.
         </p>
         <button disabled={busy} className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs disabled:opacity-50">
           {busy ? 'Saving...' : 'Create Partner Link'}

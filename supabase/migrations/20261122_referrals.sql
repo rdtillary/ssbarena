@@ -9,7 +9,6 @@ create table if not exists public.creators (
   created_at timestamptz not null default now()
 );
 
--- One creator per user (first referral wins).
 create table if not exists public.referrals (
   user_id uuid primary key references public.profiles(id) on delete cascade,
   creator_id bigint not null references public.creators(id) on delete cascade,
@@ -17,7 +16,6 @@ create table if not exists public.referrals (
 );
 create index if not exists referrals_creator_idx on public.referrals (creator_id);
 
--- One row per paid subscription payment of a referred user.
 create table if not exists public.referral_earnings (
   id bigserial primary key,
   creator_id bigint not null references public.creators(id) on delete cascade,
@@ -32,7 +30,6 @@ create table if not exists public.referral_earnings (
 );
 create index if not exists referral_earnings_creator_idx on public.referral_earnings (creator_id, status);
 
--- No policies: only the server (service role) can read or write these.
 alter table public.creators enable row level security;
 alter table public.referrals enable row level security;
 alter table public.referral_earnings enable row level security;

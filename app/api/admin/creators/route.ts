@@ -56,7 +56,7 @@ export async function GET() {
   return NextResponse.json({ creators: rows });
 }
 
-// action: "create" | "payout"
+// action: "create" | "payout"  (payout only marks things as paid in the database; it never sends money)
 export async function POST(req: Request) {
   if (!(await verifyAdmin())) return deny();
   const body = await req.json().catch(() => ({}));

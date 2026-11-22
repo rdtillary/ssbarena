@@ -6,7 +6,6 @@ export const runtime = 'nodejs';
 
 const BOT = /bot|crawl|spider|preview|facebookexternalhit|whatsapp|telegram|slurp|curl|wget|headless/i;
 
-// https://yoursite/r/<creator-code>: counts the click, remembers the creator for 30 days, opens the home page.
 export async function GET(req: Request, { params }: { params: { code: string } }) {
   const code = String(params.code || '').toLowerCase();
   const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || new URL(req.url).host;
