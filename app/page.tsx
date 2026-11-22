@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   Sparkles,
   MessageCircle,
-  Download,
+  RotateCcw,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS, DEFAULT_OIR_SETS } from '@/lib/seed-data';
@@ -124,6 +124,11 @@ export default function HomePage() {
     loadData();
   }, []);
 
+  // PPDT pictures the user has already attempted (drives the Results / Retry buttons).
+  const attemptedPpdtIds = new Set(
+    attempts.filter((a) => a.attempt_type === 'PPDT').map((a) => Number(a.scenario_id))
+  );
+
   const handleSaveTarget = async (code: string, date: string) => {
     setCentre(code);
     setReportingDate(date);
@@ -220,12 +225,7 @@ export default function HomePage() {
                 {tab}
               </button>
             ))}
-            <Link
-              href="/download"
-              className="px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300 flex items-center gap-1"
-            >
-              <Download className="w-3.5 h-3.5" /> Download APK
-            </Link>
+            {/* Download APK link hidden for now (the /download page still exists). */}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -381,6 +381,21 @@ export default function HomePage() {
                       >
                         <Lock className="w-3.5 h-3.5" /> Unlock
                       </button>
+                    ) : attemptedPpdtIds.has(sc.id) ? (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Link
+                          href={`/ppdt/${sc.id}/results`}
+                          className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold"
+                        >
+                          Results
+                        </Link>
+                        <Link
+                          href={`/ppdt/${sc.id}`}
+                          className="px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" /> Retry
+                        </Link>
+                      </div>
                     ) : (
                       <Link
                         href={`/ppdt/${sc.id}`}
@@ -529,13 +544,6 @@ export default function HomePage() {
             </button>
           );
         })}
-        <Link
-          href="/download"
-          className="flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold text-amber-400"
-        >
-          <Download className="w-4 h-4" />
-          APK
-        </Link>
       </nav>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onAuthenticated={loadData} />

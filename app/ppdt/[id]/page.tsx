@@ -733,6 +733,12 @@ export default function PPDTSimulatorPage() {
                       <RotateCcw className="w-3.5 h-3.5" /> Retry this PPDT
                     </button>
                     <Link
+                      href={`/ppdt/${scenario.id}/results`}
+                      className="px-4 py-2 rounded-lg bg-slate-800 text-amber-400 text-xs font-bold"
+                    >
+                      View Results
+                    </Link>
+                    <Link
                       href="/"
                       className="px-4 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-bold"
                     >
