@@ -207,7 +207,7 @@ export function ProCheckoutModal({
         <ul className="space-y-2.5 text-sm text-slate-300 my-5">
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            All 10+ Real Hazy PPDT Scenes &amp; Recommended Stories
+            All 50+ Real Hazy PPDT Scenes &amp; Recommended Stories
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
