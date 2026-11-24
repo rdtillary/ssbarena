@@ -3,19 +3,21 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 
-interface Attempt {
+interface Item {
   id: string;
-  user_id: string;
+  visitor_id: string;
   email: string;
   name: string;
   scenario_title: string;
-  story_score: number;
-  narration_score: number;
-  total_score: number;
-  max_score: number;
-  transcript: string | null;
   audio_url: string | null;
+  transcript: string | null;
   main_action: string;
+  valid: boolean | null;
+  story_score: number | null;
+  narration_score: number | null;
+  total_score: number | null;
+  max_score: number;
+  duration_seconds: number;
   created_at: string;
 }
 interface Stats {
@@ -23,15 +25,96 @@ interface Stats {
   uniqueVisitors: number;
   visitsToday: number;
   visits7d: number;
-  uniqueVisitors7d: number;
-  ppdtAttempts: number;
-  practisingUsers: number;
+  recordings: number;
+  recordingUsers: number;
   days: { date: string; visits: number }[];
+}
+interface Group {
+  key: string;
+  title: string;
+  sub: string;
+  list: Item[];
+}
+
+const shortId = (v: string) => `U-${v.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase()}`;
+
+function AttemptCard({ a }: { a: Item }) {
+  return (
+    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-bold text-white">{a.scenario_title || 'PPDT'}</p>
+        {a.total_score !== null ? (
+          <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-xs font-black">
+            {a.total_score}/{a.max_score}
+          </span>
+        ) : (
+          <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-xs font-bold">Not graded</span>
+        )}
+      </div>
+      <p className="text-[11px] text-slate-500">
+        {new Date(a.created_at).toLocaleString()}
+        {a.duration_seconds ? ` • ${a.duration_seconds}s` : ''}
+        {a.story_score !== null && a.narration_score !== null
+          ? ` • Story ${a.story_score}/40 • Narration ${a.narration_score}/20`
+          : ''}
+      </p>
+      {a.main_action && (
+        <p className="text-[11px] text-slate-400">
+          <span className="text-slate-500">Main action:</span> {a.main_action}
+        </p>
+      )}
+      {a.audio_url ? (
+        <audio controls preload="none" src={a.audio_url} className="w-full h-9" />
+      ) : (
+        <p className="text-[11px] text-slate-500">No audio saved.</p>
+      )}
+      <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+        <p className="text-[10px] font-bold uppercase text-slate-500 mb-1">Transcript</p>
+        <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
+          {a.transcript || (a.valid === false ? 'No speech detected.' : 'No transcript.')}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function GroupList({ groups, open, setOpen }: { groups: Group[]; open: string | null; setOpen: (k: string | null) => void }) {
+  return (
+    <div className="space-y-2.5">
+      {groups.map((g) => {
+        const isOpen = open === g.key;
+        return (
+          <div key={g.key} className="rounded-xl bg-slate-900 border border-slate-800">
+            <button onClick={() => setOpen(isOpen ? null : g.key)} className="w-full p-3.5 flex items-center justify-between gap-3 text-left">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white truncate">{g.title}</p>
+                {g.sub && <p className="text-[11px] text-slate-400 truncate">{g.sub}</p>}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 text-xs font-black">
+                  {g.list.length} recording{g.list.length === 1 ? '' : 's'}
+                </span>
+                {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+              </div>
+            </button>
+            {isOpen && (
+              <div className="px-3.5 pb-3.5 space-y-3">
+                {g.list.map((a) => (
+                  <AttemptCard key={a.id} a={a} />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export function AdminUserData() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [attempts, setAttempts] = useState<Attempt[]>([]);
+  const [recs, setRecs] = useState<Item[]>([]);
+  const [legacy, setLegacy] = useState<Item[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [more, setMore] = useState(false);
@@ -47,7 +130,8 @@ export function AdminUserData() {
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.error || 'Could not load data');
       setStats(d.stats);
-      setAttempts(d.attempts || []);
+      setRecs(d.recordings || []);
+      setLegacy(d.legacy || []);
       setTotal(d.total || 0);
     } catch (e: any) {
       setError(e.message || 'Could not load data');
@@ -63,26 +147,43 @@ export function AdminUserData() {
   const loadMore = async () => {
     setMore(true);
     try {
-      const res = await fetch(`/api/admin/user-data?offset=${attempts.length}`, { cache: 'no-store' });
+      const res = await fetch(`/api/admin/user-data?offset=${recs.length}`, { cache: 'no-store' });
       const d = await res.json().catch(() => ({}));
-      if (res.ok) setAttempts((a) => [...a, ...(d.attempts || [])]);
+      if (res.ok) setRecs((a) => [...a, ...(d.recordings || [])]);
     } finally {
       setMore(false);
     }
   };
 
-  const users = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    const map = new Map<string, { id: string; email: string; name: string; list: Attempt[] }>();
-    for (const a of attempts) {
-      const u = map.get(a.user_id) || { id: a.user_id, email: a.email, name: a.name, list: [] };
-      u.list.push(a);
-      map.set(a.user_id, u);
+  const needle = q.trim().toLowerCase();
+
+  const groups = useMemo<Group[]>(() => {
+    const map = new Map<string, Group>();
+    for (const r of recs) {
+      const g = map.get(r.visitor_id) || {
+        key: r.visitor_id,
+        title: `${shortId(r.visitor_id)}${r.email ? ' • ' + r.email : ' • Guest'}`,
+        sub: `Full ID: ${r.visitor_id}${r.name ? ' • ' + r.name : ''}`,
+        list: [],
+      };
+      if (r.email && !g.title.includes('@')) g.title = `${shortId(r.visitor_id)} • ${r.email}`;
+      g.list.push(r);
+      map.set(r.visitor_id, g);
     }
     return Array.from(map.values()).filter(
-      (u) => !needle || u.email.toLowerCase().includes(needle) || u.name.toLowerCase().includes(needle)
+      (g) => !needle || g.title.toLowerCase().includes(needle) || g.sub.toLowerCase().includes(needle)
     );
-  }, [attempts, q]);
+  }, [recs, needle]);
+
+  const legacyGroups = useMemo<Group[]>(() => {
+    const map = new Map<string, Group>();
+    for (const r of legacy) {
+      const g = map.get(r.email) || { key: `old-${r.email}`, title: r.email, sub: r.name, list: [] };
+      g.list.push(r);
+      map.set(r.email, g);
+    }
+    return Array.from(map.values()).filter((g) => !needle || g.title.toLowerCase().includes(needle));
+  }, [legacy, needle]);
 
   const maxDay = Math.max(1, ...(stats?.days.map((d) => d.visits) || [1]));
   const cards: [string, number, string][] = stats
@@ -91,8 +192,8 @@ export function AdminUserData() {
         ['Unique visitors', stats.uniqueVisitors, 'text-sky-400'],
         ['Visits today', stats.visitsToday, 'text-amber-400'],
         ['Visits (7 days)', stats.visits7d, 'text-white'],
-        ['PPDT attempts', stats.ppdtAttempts, 'text-emerald-400'],
-        ['Users who practised', stats.practisingUsers, 'text-amber-400'],
+        ['PPDT recordings', stats.recordings, 'text-emerald-400'],
+        ['Users who recorded', stats.recordingUsers, 'text-amber-400'],
       ]
     : [];
 
@@ -119,7 +220,8 @@ export function AdminUserData() {
             ))}
           </div>
           <p className="text-[11px] text-slate-500">
-            A visit = one browser session on the site (admin pages and bots are not counted). Tracking started when this update went live.
+            A visit = one browser session (admin pages and bots are not counted). Each browser gets an anonymous ID the first time it
+            starts a PPDT; the same ID is used for all its recordings, signed in or not.
           </p>
 
           <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
@@ -142,83 +244,33 @@ export function AdminUserData() {
       )}
 
       <div className="flex items-center gap-2">
-        <h3 className="text-sm font-black text-white shrink-0">PPDT attempts by user</h3>
+        <h3 className="text-sm font-black text-white shrink-0">Recordings by user ID</h3>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search email or name..."
+          placeholder="Search ID or email..."
           className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white"
         />
       </div>
 
-      <div className="space-y-2.5">
-        {users.length === 0 && !loading && <p className="text-xs text-slate-400">No attempts found.</p>}
-        {users.map((u) => {
-          const isOpen = open === u.id;
-          return (
-            <div key={u.id} className="rounded-xl bg-slate-900 border border-slate-800">
-              <button
-                onClick={() => setOpen(isOpen ? null : u.id)}
-                className="w-full p-3.5 flex items-center justify-between gap-3 text-left"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-white truncate">{u.email}</p>
-                  {u.name && <p className="text-[11px] text-slate-400 truncate">{u.name}</p>}
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 text-xs font-black">
-                    {u.list.length} attempt{u.list.length === 1 ? '' : 's'}
-                  </span>
-                  {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-                </div>
-              </button>
+      {groups.length === 0 && !loading && <p className="text-xs text-slate-400">No recordings yet.</p>}
+      <GroupList groups={groups} open={open} setOpen={setOpen} />
 
-              {isOpen && (
-                <div className="px-3.5 pb-3.5 space-y-3">
-                  {u.list.map((a) => (
-                    <div key={a.id} className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-xs font-bold text-white">{a.scenario_title}</p>
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-xs font-black">
-                          {a.total_score}/{a.max_score}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-500">
-                        {new Date(a.created_at).toLocaleString()} • Story {a.story_score}/40 • Narration {a.narration_score}/20
-                      </p>
-                      {a.main_action && (
-                        <p className="text-[11px] text-slate-400">
-                          <span className="text-slate-500">Main action:</span> {a.main_action}
-                        </p>
-                      )}
-                      {a.audio_url ? (
-                        <audio controls preload="none" src={a.audio_url} className="w-full h-9" />
-                      ) : (
-                        <p className="text-[11px] text-slate-500">No audio saved.</p>
-                      )}
-                      <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                        <p className="text-[10px] font-bold uppercase text-slate-500 mb-1">Transcript</p>
-                        <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
-                          {a.transcript || 'No transcript.'}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {attempts.length < total && (
+      {recs.length < total && (
         <button
           onClick={loadMore}
           disabled={more}
           className="w-full py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-amber-400 disabled:opacity-50"
         >
-          {more ? 'Loading...' : `Load more (${attempts.length} of ${total})`}
+          {more ? 'Loading...' : `Load more (${recs.length} of ${total})`}
         </button>
+      )}
+
+      {legacyGroups.length > 0 && (
+        <div className="space-y-2.5 pt-2">
+          <h3 className="text-sm font-black text-white">Earlier attempts (signed-in users, before anonymous IDs)</h3>
+          <GroupList groups={legacyGroups} open={open} setOpen={setOpen} />
+        </div>
       )}
     </section>
   );

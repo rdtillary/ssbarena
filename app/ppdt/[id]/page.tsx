@@ -16,16 +16,47 @@ import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS } from '@/lib/seed-data';
 import { CharacterPin, EvaluationResult, PPDTScenario } from '@/lib/types';
 import { HazyProjectorCanvas } from '@/components/HazyProjectorCanvas';
+import { VoiceWave } from '@/components/VoiceWave';
 
-type Phase = 'INTRO' | 'OBSERVE_30S' | 'CHARACTER_60S' | 'PAPER_WRITE_240S' | 'NARRATE_60S' | 'REPORT';
+type Phase =
+  | 'INTRO'
+  | 'OBSERVE_30S'
+  | 'CHARACTER_60S'
+  | 'PAPER_WRITE_240S'
+  | 'NARRATE_READY'
+  | 'NARRATE_60S'
+  | 'REPORT';
 
 const EVAL_TIMEOUT_MS = 50000; // give up waiting for the grader after 50s so Retry always appears
 const STOP_TIMEOUT_MS = 3000; // give up waiting for the recorder to stop after 3s
+
+// Live text while speaking uses the browser's speech recognition (free). The final graded
+// transcript always comes from the recorded audio. Set to false if a phone's mic conflicts with it.
+const LIVE_TRANSCRIPTION = true;
 
 const pickMimeType = () => {
   if (typeof MediaRecorder === 'undefined') return '';
   const options = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
   return options.find((m) => MediaRecorder.isTypeSupported(m)) || '';
+};
+
+const newId = () =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `v${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
+
+// Anonymous ID for this browser (never shown to the user). Shared with the visit tracker.
+const getVisitorId = () => {
+  try {
+    let id = localStorage.getItem('ssb_visitor_id');
+    if (!id) {
+      id = newId();
+      localStorage.setItem('ssb_visitor_id', id);
+    }
+    return id;
+  } catch {
+    return newId();
+  }
 };
 
 export default function PPDTSimulatorPage() {
@@ -46,6 +77,11 @@ export default function PPDTSimulatorPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [micError, setMicError] = useState('');
+  const [stream, setStream] = useState<MediaStream | null>(null);
+
+  const [liveFinal, setLiveFinal] = useState('');
+  const [liveInterim, setLiveInterim] = useState('');
+  const [liveNote, setLiveNote] = useState('');
 
   const [evaluating, setEvaluating] = useState(false);
   const [report, setReport] = useState<EvaluationResult | null>(null);
@@ -60,6 +96,15 @@ export default function PPDTSimulatorPage() {
   const blobRef = useRef<Blob | null>(null);
   const durationRef = useRef(0);
 
+  const visitorIdRef = useRef('');
+  const recPromiseRef = useRef<Promise<string | null> | null>(null);
+
+  const recogRef = useRef<any>(null);
+  const recogOnRef = useRef(false);
+  const liveBaseRef = useRef('');
+  const liveSessionRef = useRef('');
+  const liveBoxRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     (async () => {
       const { data } = await supabase
@@ -70,6 +115,24 @@ export default function PPDTSimulatorPage() {
       if (data) setScenario(data);
     })();
   }, [scenarioId]);
+
+  // Release the mic and speech recognition if the user leaves the page.
+  useEffect(() => {
+    return () => {
+      recogOnRef.current = false;
+      try {
+        recogRef.current?.abort();
+      } catch {}
+      try {
+        mediaRecorderRef.current?.stream.getTracks().forEach((t) => t.stop());
+      } catch {}
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = liveBoxRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [liveFinal, liveInterim]);
 
   const playBeep = (freq = 720, duration = 0.08) => {
     try {
@@ -88,26 +151,37 @@ export default function PPDTSimulatorPage() {
 
   const goToPhase = (next: Phase) => {
     playBeep(880, 0.14);
-    if (next === 'OBSERVE_30S') setSecondsLeft(30);
+    if (next === 'OBSERVE_30S') {
+      visitorIdRef.current = getVisitorId(); // anonymous ID is created the first time Start is pressed
+      setSecondsLeft(30);
+    }
     if (next === 'CHARACTER_60S') setSecondsLeft(60);
     if (next === 'PAPER_WRITE_240S') setSecondsLeft(240);
-    if (next === 'NARRATE_60S') {
-      setSecondsLeft(60);
-      startRecording();
-    }
     setPhase(next);
   };
 
-  // Countdown
+  // Narration only begins when the user presses Start on the narration screen.
+  const beginNarration = () => {
+    playBeep(880, 0.14);
+    setSecondsLeft(60);
+    setLiveFinal('');
+    setLiveInterim('');
+    setLiveNote('');
+    setPhase('NARRATE_60S');
+    startRecording();
+    if (LIVE_TRANSCRIPTION) startLiveTranscription();
+  };
+
+  // Countdown (the narration-ready screen has no timer)
   useEffect(() => {
-    if (phase === 'INTRO' || phase === 'REPORT') return;
+    if (phase === 'INTRO' || phase === 'REPORT' || phase === 'NARRATE_READY') return;
     const timer = setInterval(() => setSecondsLeft((p) => (p > 0 ? p - 1 : 0)), 1000);
     return () => clearInterval(timer);
   }, [phase]);
 
   // Last-5-seconds beeps
   useEffect(() => {
-    if (phase === 'INTRO' || phase === 'REPORT') return;
+    if (phase === 'INTRO' || phase === 'REPORT' || phase === 'NARRATE_READY') return;
     if (secondsLeft > 0 && secondsLeft <= 5) playBeep(600, 0.05);
   }, [secondsLeft, phase]);
 
@@ -116,19 +190,19 @@ export default function PPDTSimulatorPage() {
     if (secondsLeft > 0) return;
     if (phase === 'OBSERVE_30S') goToPhase('CHARACTER_60S');
     else if (phase === 'CHARACTER_60S') goToPhase('PAPER_WRITE_240S');
-    else if (phase === 'PAPER_WRITE_240S') goToPhase('NARRATE_60S');
+    else if (phase === 'PAPER_WRITE_240S') goToPhase('NARRATE_READY');
     else if (phase === 'NARRATE_60S') finishNarration();
   }, [secondsLeft, phase]);
 
   const startRecording = async () => {
     setMicError('');
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const media = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true },
       });
       const mime = pickMimeType();
       mimeRef.current = mime || 'audio/webm';
-      const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      const recorder = mime ? new MediaRecorder(media, { mimeType: mime }) : new MediaRecorder(media);
       chunksRef.current = [];
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
@@ -136,10 +210,66 @@ export default function PPDTSimulatorPage() {
       recorder.start(1000);
       mediaRecorderRef.current = recorder;
       narrationStartRef.current = Date.now();
+      setStream(media);
       setIsRecording(true);
     } catch {
       setMicError('Microphone is blocked. Allow mic access in your browser and start again.');
     }
+  };
+
+  // ---------- live transcription (browser speech recognition) ----------
+  const startLiveTranscription = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      setLiveNote('Live text is not supported on this browser. Your full transcript will appear after you finish.');
+      return;
+    }
+    liveBaseRef.current = '';
+    liveSessionRef.current = '';
+    recogOnRef.current = true;
+
+    const boot = () => {
+      if (!recogOnRef.current) return;
+      const rec = new SR();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = 'en-IN';
+      rec.onresult = (e: any) => {
+        let fin = '';
+        let interim = '';
+        for (let i = 0; i < e.results.length; i++) {
+          const r = e.results[i];
+          if (r.isFinal) fin += r[0].transcript + ' ';
+          else interim += r[0].transcript;
+        }
+        liveSessionRef.current = fin;
+        setLiveFinal((liveBaseRef.current + fin).trim());
+        setLiveInterim(interim);
+      };
+      rec.onerror = (e: any) => {
+        if (e?.error === 'not-allowed' || e?.error === 'service-not-allowed') {
+          recogOnRef.current = false;
+          setLiveNote('Live text is blocked on this browser. Your full transcript will appear after you finish.');
+        }
+      };
+      rec.onend = () => {
+        liveBaseRef.current += liveSessionRef.current;
+        liveSessionRef.current = '';
+        if (recogOnRef.current) setTimeout(boot, 250);
+      };
+      recogRef.current = rec;
+      try {
+        rec.start();
+      } catch {}
+    };
+    boot();
+  };
+
+  const stopLiveTranscription = () => {
+    recogOnRef.current = false;
+    try {
+      recogRef.current?.stop();
+    } catch {}
   };
 
   // Always resolves: if the recorder never fires "stop", we continue with whatever was captured.
@@ -171,6 +301,50 @@ export default function PPDTSimulatorPage() {
       }
     });
 
+  const extOf = () => {
+    const m = mimeRef.current || 'audio/webm';
+    return m.includes('mp4') ? 'mp4' : m.includes('ogg') ? 'ogg' : 'webm';
+  };
+
+  // Saves every recording on the server under the anonymous visitor ID (guest or signed in).
+  const uploadRecording = async (blob: Blob): Promise<string | null> => {
+    try {
+      const fd = new FormData();
+      fd.append('audio', blob, `narration.${extOf()}`);
+      fd.append('visitor_id', visitorIdRef.current || getVisitorId());
+      fd.append('scenario_id', String(scenario.id));
+      fd.append('scenario_title', scenario.title);
+      fd.append('duration_seconds', String(durationRef.current));
+      fd.append('main_action', mainAction);
+      const res = await fetch('/api/ppdt/recording', { method: 'POST', body: fd });
+      const d = await res.json().catch(() => ({}));
+      return res.ok ? (d.id as string) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const attachResult = (ev: EvaluationResult) => {
+    const p = recPromiseRef.current;
+    if (!p) return;
+    p.then((id) => {
+      if (!id) return;
+      fetch('/api/ppdt/recording', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          visitor_id: visitorIdRef.current,
+          valid: ev.valid,
+          transcript: ev.transcript,
+          story_score: ev.storyScore,
+          narration_score: ev.narrationScore,
+          total_score: ev.totalScore,
+        }),
+      }).catch(() => {});
+    });
+  };
+
   const runEvaluation = async () => {
     const blob = blobRef.current;
     setEvaluating(true);
@@ -181,14 +355,8 @@ export default function PPDTSimulatorPage() {
     const timeout = setTimeout(() => controller.abort(), EVAL_TIMEOUT_MS);
 
     try {
-      const ext = (mimeRef.current || 'audio/webm').includes('mp4')
-        ? 'mp4'
-        : (mimeRef.current || '').includes('ogg')
-        ? 'ogg'
-        : 'webm';
-
       const fd = new FormData();
-      if (blob) fd.append('audio', blob, `narration.${ext}`);
+      if (blob) fd.append('audio', blob, `narration.${extOf()}`);
       fd.append('durationSeconds', String(durationRef.current));
       fd.append(
         'context',
@@ -211,6 +379,7 @@ export default function PPDTSimulatorPage() {
       const evalData = data as EvaluationResult;
       setReport(evalData);
       setEvaluating(false); // show the results right away, never wait for saving
+      attachResult(evalData);
 
       if (evalData.valid) {
         // Saving runs in the background; a slow or failed save must not hide the report.
@@ -298,13 +467,18 @@ export default function PPDTSimulatorPage() {
     const started = narrationStartRef.current;
     durationRef.current = started ? Math.round((Date.now() - started) / 1000) : 0;
 
+    stopLiveTranscription();
     setPhase('REPORT');
     setEvaluating(true);
     setIsRecording(false);
 
     const blob = await stopRecording();
+    setStream(null);
     blobRef.current = blob;
     if (blob) setAudioUrl(URL.createObjectURL(blob));
+
+    // Save the recording for the admin right away, in parallel with grading.
+    recPromiseRef.current = blob ? uploadRecording(blob) : Promise.resolve(null);
     await runEvaluation();
   };
 
@@ -325,6 +499,9 @@ export default function PPDTSimulatorPage() {
 
   const removePin = (id: number) => setPins(pins.filter((p) => p.id !== id));
 
+  const timed = phase !== 'INTRO' && phase !== 'REPORT' && phase !== 'NARRATE_READY';
+  const narrating = phase === 'NARRATE_READY' || phase === 'NARRATE_60S';
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
       <div className="flex items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
@@ -332,7 +509,7 @@ export default function PPDTSimulatorPage() {
           <ArrowLeft className="w-4 h-4" /> Exit
         </Link>
         <span className="text-xs font-bold text-slate-200 truncate">{scenario.title}</span>
-        {phase !== 'INTRO' && phase !== 'REPORT' ? (
+        {timed ? (
           <span
             className={`px-3 py-1 rounded-lg font-mono font-black text-sm ${
               secondsLeft <= 10
@@ -342,6 +519,8 @@ export default function PPDTSimulatorPage() {
           >
             {formatTime(secondsLeft)}
           </span>
+        ) : phase === 'NARRATE_READY' ? (
+          <span className="text-xs font-bold text-amber-400">READY</span>
         ) : (
           <span className="text-xs font-bold text-emerald-400">STAGE 1</span>
         )}
@@ -357,7 +536,7 @@ export default function PPDTSimulatorPage() {
             <p>1. <strong>00:30</strong> — Observe the picture</p>
             <p>2. <strong>01:00</strong> — Mark characters &amp; main action</p>
             <p>3. <strong>04:00</strong> — Write your story on paper</p>
-            <p>4. <strong>01:00</strong> — Narrate aloud</p>
+            <p>4. <strong>01:00</strong> — Press Start and narrate aloud</p>
           </div>
           <button
             onClick={() => goToPhase('OBSERVE_30S')}
@@ -508,10 +687,10 @@ export default function PPDTSimulatorPage() {
               Write on Paper
             </span>
             <button
-              onClick={() => goToPhase('NARRATE_60S')}
+              onClick={() => goToPhase('NARRATE_READY')}
               className="text-xs text-amber-400 underline"
             >
-              Done → Start Narration
+              Done → Go to Narration
             </button>
           </div>
 
@@ -555,11 +734,19 @@ export default function PPDTSimulatorPage() {
         </div>
       )}
 
-      {phase === 'NARRATE_60S' && (
-        <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-5">
-          <span className="inline-flex items-center gap-1.5 text-xs font-black text-red-400">
-            <Mic className="w-4 h-4 animate-pulse" />
-            {isRecording ? 'RECORDING — NARRATE YOUR STORY' : 'STARTING MICROPHONE...'}
+      {narrating && (
+        <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+          <span
+            className={`inline-flex items-center gap-1.5 text-xs font-black ${
+              phase === 'NARRATE_60S' ? 'text-red-400' : 'text-amber-400'
+            }`}
+          >
+            <Mic className={`w-4 h-4 ${phase === 'NARRATE_60S' ? 'animate-pulse' : ''}`} />
+            {phase === 'NARRATE_READY'
+              ? 'NARRATION — PRESS START WHEN YOU ARE READY'
+              : isRecording
+              ? 'RECORDING — NARRATE YOUR STORY'
+              : 'STARTING MICROPHONE...'}
           </span>
 
           {micError && (
@@ -568,12 +755,49 @@ export default function PPDTSimulatorPage() {
             </p>
           )}
 
-          <button
-            onClick={() => finishNarration()}
-            className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm"
+          <div className="rounded-xl bg-slate-950 border border-slate-800 px-3 py-2">
+            <VoiceWave stream={stream} />
+          </div>
+
+          <div
+            ref={liveBoxRef}
+            className="min-h-[96px] max-h-40 overflow-y-auto p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-sm leading-relaxed"
           >
-            Finish Narration
-          </button>
+            {liveFinal || liveInterim ? (
+              <p>
+                <span className="text-slate-100">{liveFinal} </span>
+                <span className="text-slate-500">{liveInterim}</span>
+              </p>
+            ) : (
+              <p className="text-slate-600">
+                {phase === 'NARRATE_READY'
+                  ? 'Your words will appear here as you speak.'
+                  : 'Listening... start speaking.'}
+              </p>
+            )}
+          </div>
+
+          {liveNote && <p className="text-[11px] text-amber-300">{liveNote}</p>}
+
+          {phase === 'NARRATE_READY' ? (
+            <button
+              onClick={beginNarration}
+              className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2"
+            >
+              <Mic className="w-4 h-4" /> Start Narration (1 min)
+            </button>
+          ) : (
+            <button
+              onClick={() => finishNarration()}
+              className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm"
+            >
+              Finish Narration
+            </button>
+          )}
+
+          <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Transcribing live with AI
+          </p>
         </div>
       )}
 
