@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Users, Download, RefreshCw } from 'lucide-react';
+import { Users, Download, RefreshCw, Trash2 } from 'lucide-react';
 
 interface UserRow {
   id: string;
@@ -29,9 +29,11 @@ export function AdminUsers({ onViewActivity }: { onViewActivity?: (email: string
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<'all' | 'pro' | 'free'>('all');
   const [open, setOpen] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -51,6 +53,33 @@ export function AdminUsers({ onViewActivity }: { onViewActivity?: (email: string
   useEffect(() => {
     load();
   }, [load]);
+
+  const deleteUser = async (u: UserRow) => {
+    const label = u.email || u.id;
+    const typed = window.prompt(
+      `PERMANENTLY delete ${label}?\n\nThis removes their account, Pro/autopay (cancelled on Razorpay), recordings and audio, results, OLQ reports, lecturettes, messages and referrals. It cannot be undone.\n\nType DELETE to confirm.`
+    );
+    if (typed !== 'DELETE') return;
+    setDeleting(u.id);
+    setError('');
+    setNotice('');
+    try {
+      const res = await fetch('/api/admin/users/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: u.id }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || 'Could not delete user');
+      setUsers((list) => list.filter((x) => x.id !== u.id));
+      setOpen(null);
+      setNotice(`Deleted ${label}.${d.notes?.length ? ' Notes: ' + d.notes.join(' ') : ''}`);
+    } catch (e: any) {
+      setError(e.message || 'Could not delete user');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   const proCount = users.filter((u) => u.plan !== 'Free').length;
 
@@ -136,6 +165,7 @@ export function AdminUsers({ onViewActivity }: { onViewActivity?: (email: string
       </div>
 
       {error && <p className="text-xs text-red-400">{error}</p>}
+      {notice && <p className="text-xs text-emerald-400">{notice}</p>}
       {loading && <p className="text-xs text-slate-400">Loading users...</p>}
 
       <div className="rounded-2xl bg-slate-900 border border-slate-800 overflow-x-auto">
@@ -149,6 +179,7 @@ export function AdminUsers({ onViewActivity }: { onViewActivity?: (email: string
               <th className="p-3">PPDT</th>
               <th className="p-3">OIR</th>
               <th className="p-3">Centre</th>
+              <th className="p-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -176,10 +207,23 @@ export function AdminUsers({ onViewActivity }: { onViewActivity?: (email: string
                   <td className="p-3 text-white font-bold">{u.ppdt_attempts}</td>
                   <td className="p-3 text-white font-bold">{u.oir_attempts}</td>
                   <td className="p-3 text-slate-300">{u.target_board || '—'}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteUser(u);
+                      }}
+                      disabled={deleting === u.id}
+                      title="Delete user and all their data"
+                      className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950 disabled:opacity-40"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
                 </tr>
                 {open === u.id && (
                   <tr className="bg-slate-950/70 border-b border-slate-800/60">
-                    <td colSpan={7} className="p-4">
+                    <td colSpan={8} className="p-4">
                       <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-slate-300">
                         <p><span className="text-slate-500">User ID:</span> {u.id}</p>
                         <p><span className="text-slate-500">Sign-in method:</span> {u.provider || '—'}</p>
@@ -198,14 +242,23 @@ export function AdminUsers({ onViewActivity }: { onViewActivity?: (email: string
                         <p><span className="text-slate-500">Target centre:</span> {u.target_board || '—'}</p>
                         <p><span className="text-slate-500">Reporting date:</span> {u.reporting_date || '—'}</p>
                       </div>
-                      {onViewActivity && u.email && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {onViewActivity && u.email && (
+                          <button
+                            onClick={() => onViewActivity(u.email)}
+                            className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-black"
+                          >
+                            View all recordings, results &amp; OLQ reports →
+                          </button>
+                        )}
                         <button
-                          onClick={() => onViewActivity(u.email)}
-                          className="mt-3 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-black"
+                          onClick={() => deleteUser(u)}
+                          disabled={deleting === u.id}
+                          className="px-3 py-1.5 rounded-lg bg-red-600/20 border border-red-500/40 text-red-300 text-xs font-black flex items-center gap-1.5 disabled:opacity-40"
                         >
-                          View all recordings, results &amp; OLQ reports →
+                          <Trash2 className="w-3.5 h-3.5" /> {deleting === u.id ? 'Deleting...' : 'Delete user & all data'}
                         </button>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 )}
