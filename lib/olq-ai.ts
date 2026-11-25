@@ -14,7 +14,7 @@ const SYSTEM_PROMPT = `You are a senior SSB (Services Selection Board) psycholog
 Rules:
 - Score EACH of the 15 OLQs from 0 to 100 (integers). Be realistic and strict: 50-60 is average, 70+ is good, 85+ is exceptional and needs clear evidence.
 - Base every score only on evidence in the narration. If a quality is not visible in the text, score it modestly (40-55) and say there was little evidence.
-- Judge what the story shows: positive, practical, action-oriented hero; sensible Past-Present-Future flow; cooperation with others; decisiveness; calm courage.
+- Judge what the story shows: positive, practical, action-oriented hero; sensible Past-Present-Future flow; decisiveness, responsibility, cooperation and calm courage as the situation calls for. There is no correct story or preferred theme.
 - remarks: one short, specific sentence per OLQ (max 22 words).
 - summary: 2-3 sentences of overall feedback.
 - strengths: 2-4 short bullet strings. improvements: 2-4 short, actionable strings.
@@ -115,10 +115,10 @@ function extractJson(text: string): any {
 }
 
 export async function generateOlqReport(input: {
-  scenarioTitle: string;
+  scenarioTitle?: string; // not sent to the AI: titles suggest an expected theme
   transcript: string;
 }): Promise<OlqReport> {
-  const user = `PPDT scenario: ${input.scenarioTitle}\n\nCandidate's narration (transcript):\n"""\n${input.transcript.slice(0, 6000)}\n"""`;
+  const user = `Candidate's narration (transcript):\n"""\n${input.transcript.slice(0, 6000)}\n"""`;
 
   let raw: string;
   if (process.env.GROQ_API_KEY) raw = await callGroq(SYSTEM_PROMPT, user);

@@ -25,7 +25,7 @@ interface UserRow {
 const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString() : '—');
 const fmtTime = (d: string | null) => (d ? new Date(d).toLocaleString() : '—');
 
-export function AdminUsers() {
+export function AdminUsers({ onViewActivity }: { onViewActivity?: (email: string) => void }) {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -198,6 +198,14 @@ export function AdminUsers() {
                         <p><span className="text-slate-500">Target centre:</span> {u.target_board || '—'}</p>
                         <p><span className="text-slate-500">Reporting date:</span> {u.reporting_date || '—'}</p>
                       </div>
+                      {onViewActivity && u.email && (
+                        <button
+                          onClick={() => onViewActivity(u.email)}
+                          className="mt-3 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-black"
+                        >
+                          View all recordings, results &amp; OLQ reports →
+                        </button>
+                      )}
                     </td>
                   </tr>
                 )}

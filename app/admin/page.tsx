@@ -9,7 +9,6 @@ import { SSB_CENTRES } from '@/lib/ssb-centres';
 import { BulkAddPanel } from '@/components/BulkAddPanel';
 import { BulkPhotoPanel } from '@/components/BulkPhotoPanel';
 import { AdminInbox } from '@/components/AdminInbox';
-import { AdminUsers } from '@/components/AdminUsers';
 
 interface OirRow {
   id: number;
@@ -23,7 +22,6 @@ export default function AdminDashboardPage() {
   const [scenarios, setScenarios] = useState<PPDTScenario[]>([]);
   const [oirSets, setOirSets] = useState<OirRow[]>([]);
   const [statusMsg, setStatusMsg] = useState('');
-  const [view, setView] = useState<'manage' | 'users'>('manage');
 
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<'Standard' | 'Ambiguous' | 'High-Pressure'>('Standard');
@@ -300,364 +298,344 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      <div className="flex gap-2">
-        {([
-          ['manage', 'Manage'],
-          ['users', 'Users'],
-        ] as const).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setView(id)}
-            className={`px-4 py-2 rounded-lg text-xs font-black uppercase ${
-              view === id ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 border border-slate-800 text-slate-300'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <div className="space-y-6">
+        <AdminInbox />
 
-      {view === 'users' && <AdminUsers />}
+        <BulkAddPanel onDone={loadAdminData} />
 
-      <div className={view === 'users' ? 'hidden' : 'space-y-6'}>
-      <AdminInbox />
+        <BulkPhotoPanel onDone={loadAdminData} />
 
-      <BulkAddPanel onDone={loadAdminData} />
+        <form
+          onSubmit={handleCreateScenario}
+          className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3.5"
+        >
+          <h2 className="text-base font-black text-white flex items-center gap-2">
+            <PlusCircle className="w-4 h-4 text-amber-400" /> Add New PPDT Picture &amp; Model Story
+          </h2>
 
-      <BulkPhotoPanel onDone={loadAdminData} />
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input
+              required
+              placeholder="Title (e.g., PPDT #11 — Dam Gate Inspection)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+            />
+            <div className="flex gap-2">
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value as any)}
+                className="flex-1 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+              >
+                <option value="Standard">Standard</option>
+                <option value="Ambiguous">Ambiguous</option>
+                <option value="High-Pressure">High-Pressure</option>
+              </select>
+              <label className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={isFree}
+                  onChange={(e) => setIsFree(e.target.checked)}
+                />
+                Free Tier
+              </label>
+            </div>
+          </div>
 
-      <form
-        onSubmit={handleCreateScenario}
-        className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3.5"
-      >
-        <h2 className="text-base font-black text-white flex items-center gap-2">
-          <PlusCircle className="w-4 h-4 text-amber-400" /> Add New PPDT Picture &amp; Model Story
-        </h2>
-
-        <div className="grid sm:grid-cols-2 gap-3">
-          <input
-            required
-            placeholder="Title (e.g., PPDT #11 — Dam Gate Inspection)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
-          />
-          <div className="flex gap-2">
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as any)}
-              className="flex-1 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
-            >
-              <option value="Standard">Standard</option>
-              <option value="Ambiguous">Ambiguous</option>
-              <option value="High-Pressure">High-Pressure</option>
-            </select>
-            <label className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300">
+          <div className="p-3 rounded-xl bg-slate-950 border border-dashed border-slate-700">
+            <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer">
+              <Upload className="w-4 h-4 text-amber-400" />
+              <span>
+                {imageFile
+                  ? `Selected: ${imageFile.name}`
+                  : 'Choose PPDT Image (.jpg/.png — auto-converted to hazy B&W projector view)'}
+              </span>
               <input
-                type="checkbox"
-                checked={isFree}
-                onChange={(e) => setIsFree(e.target.checked)}
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                className="hidden"
               />
-              Free Tier
             </label>
           </div>
-        </div>
 
-        <div className="p-3 rounded-xl bg-slate-950 border border-dashed border-slate-700">
-          <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer">
-            <Upload className="w-4 h-4 text-amber-400" />
-            <span>
-              {imageFile
-                ? `Selected: ${imageFile.name}`
-                : 'Choose PPDT Image (.jpg/.png — auto-converted to hazy B&W projector view)'}
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-              className="hidden"
-            />
-          </label>
-        </div>
-
-        <input
-          placeholder="Key Visual Cues (comma-separated, e.g., 3 men near bridge, rising water)"
-          value={cues}
-          onChange={(e) => setCues(e.target.value)}
-          className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white"
-        />
-
-        <textarea
-          required
-          rows={4}
-          placeholder="Recommended Candidate Story (~100 words, Past-Present-Future with practical hero actions)"
-          value={recommendedStory}
-          onChange={(e) => setRecommendedStory(e.target.value)}
-          className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
-        />
-
-        <input
-          placeholder="OLQ Highlights (comma-separated)"
-          value={olqs}
-          onChange={(e) => setOlqs(e.target.value)}
-          className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white"
-        />
-
-        <button
-          type="submit"
-          disabled={uploading}
-          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs"
-        >
-          {uploading ? 'Publishing...' : 'Publish PPDT Scenario Live'}
-        </button>
-      </form>
-
-      <form
-        onSubmit={handleAddCandidate}
-        className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3.5"
-      >
-        <h2 className="text-base font-black text-white flex items-center gap-2">
-          <Award className="w-4 h-4 text-amber-400" /> Add Recommended Candidate (Homepage Slideshow)
-        </h2>
-
-        <div className="grid sm:grid-cols-2 gap-3">
           <input
-            required
-            placeholder="Candidate name"
-            value={candName}
-            onChange={(e) => setCandName(e.target.value)}
-            className="px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+            placeholder="Key Visual Cues (comma-separated, e.g., 3 men near bridge, rising water)"
+            value={cues}
+            onChange={(e) => setCues(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white"
           />
+
+          <textarea
+            required
+            rows={4}
+            placeholder="Recommended Candidate Story (~100 words, Past-Present-Future with practical hero actions)"
+            value={recommendedStory}
+            onChange={(e) => setRecommendedStory(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+          />
+
           <input
-            required
-            list="ssb-centre-options"
-            placeholder="SSB they were recommended at"
-            value={candSsb}
-            onChange={(e) => setCandSsb(e.target.value)}
-            className="px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+            placeholder="OLQ Highlights (comma-separated)"
+            value={olqs}
+            onChange={(e) => setOlqs(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white"
           />
-          <datalist id="ssb-centre-options">
-            {SSB_CENTRES.map((c) => (
-              <option key={c.code} value={c.label} />
-            ))}
-          </datalist>
-        </div>
 
-        <div className="p-3 rounded-xl bg-slate-950 border border-dashed border-slate-700">
-          <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer">
-            <Upload className="w-4 h-4 text-amber-400" />
-            <span>
-              {candPhoto ? `Selected: ${candPhoto.name}` : "Choose candidate's photo (JPG/PNG/WebP, max 5 MB)"}
-            </span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/avif"
-              onChange={(e) => setCandPhoto(e.target.files?.[0] || null)}
-              className="hidden"
-            />
-          </label>
-        </div>
-
-        <button
-          type="submit"
-          disabled={candUploading}
-          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs disabled:opacity-50"
-        >
-          {candUploading ? 'Publishing...' : 'Add to Slideshow'}
-        </button>
-      </form>
-
-      <div className="space-y-2.5">
-        <h2 className="text-base font-black text-white">
-          Recommended Candidates in Slideshow ({candidates.length})
-        </h2>
-        {candidates.length === 0 && (
-          <p className="text-xs text-slate-400">No candidates yet. Add the first one above.</p>
-        )}
-        {candidates.map((c) => (
-          <div
-            key={c.id}
-            className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
+          <button
+            type="submit"
+            disabled={uploading}
+            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <img src={c.photo_url} alt={c.name} className="w-10 h-12 rounded object-cover" />
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-white truncate">{c.name}</p>
-                <p className="text-[11px] text-amber-400 truncate">{c.ssb_name}</p>
-              </div>
-            </div>
-            <button
-              onClick={() => deleteCandidate(c.id)}
-              className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950 shrink-0"
-              title="Remove candidate"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        ))}
-      </div>
+            {uploading ? 'Publishing...' : 'Publish PPDT Scenario Live'}
+          </button>
+        </form>
 
-      <div className="space-y-2.5">
-        <h2 className="text-base font-black text-white">
-          SSB Centre Gate Images ({SSB_CENTRES.length})
-        </h2>
-        <div className="grid sm:grid-cols-2 gap-2.5">
-          {SSB_CENTRES.map((c) => (
+        <form
+          onSubmit={handleAddCandidate}
+          className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3.5"
+        >
+          <h2 className="text-base font-black text-white flex items-center gap-2">
+            <Award className="w-4 h-4 text-amber-400" /> Add Recommended Candidate (Homepage Slideshow)
+          </h2>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input
+              required
+              placeholder="Candidate name"
+              value={candName}
+              onChange={(e) => setCandName(e.target.value)}
+              className="px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+            />
+            <input
+              required
+              list="ssb-centre-options"
+              placeholder="SSB they were recommended at"
+              value={candSsb}
+              onChange={(e) => setCandSsb(e.target.value)}
+              className="px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+            />
+            <datalist id="ssb-centre-options">
+              {SSB_CENTRES.map((c) => (
+                <option key={c.code} value={c.label} />
+              ))}
+            </datalist>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950 border border-dashed border-slate-700">
+            <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer">
+              <Upload className="w-4 h-4 text-amber-400" />
+              <span>
+                {candPhoto ? `Selected: ${candPhoto.name}` : "Choose candidate's photo (JPG/PNG/WebP, max 5 MB)"}
+              </span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/avif"
+                onChange={(e) => setCandPhoto(e.target.files?.[0] || null)}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            disabled={candUploading}
+            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs disabled:opacity-50"
+          >
+            {candUploading ? 'Publishing...' : 'Add to Slideshow'}
+          </button>
+        </form>
+
+        <div className="space-y-2.5">
+          <h2 className="text-base font-black text-white">
+            Recommended Candidates in Slideshow ({candidates.length})
+          </h2>
+          {candidates.length === 0 && (
+            <p className="text-xs text-slate-400">No candidates yet. Add the first one above.</p>
+          )}
+          {candidates.map((c) => (
             <div
-              key={c.code}
+              key={c.id}
               className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 min-w-0">
-                {centreImages[c.code] ? (
-                  <img
-                    src={centreImages[c.code]}
-                    alt={c.short}
-                    className="w-14 h-10 rounded object-cover"
-                  />
-                ) : (
-                  <div className="w-14 h-10 rounded bg-slate-800 flex items-center justify-center text-[10px] text-slate-400">
-                    No image
-                  </div>
-                )}
-                <p className="text-xs font-bold text-white truncate">{c.label}</p>
+                <img src={c.photo_url} alt={c.name} className="w-10 h-12 rounded object-cover" />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">{c.name}</p>
+                  <p className="text-[11px] text-amber-400 truncate">{c.ssb_name}</p>
+                </div>
               </div>
-              <label className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-400 cursor-pointer shrink-0">
-                {centreImages[c.code] ? 'Replace' : 'Upload'}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/avif"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleCentreImage(c.code, f);
-                  }}
-                />
-              </label>
+              <button
+                onClick={() => deleteCandidate(c.id)}
+                className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950 shrink-0"
+                title="Remove candidate"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           ))}
         </div>
-      </div>
 
-      <form
-        onSubmit={handleGrantPro}
-        className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center"
-      >
-        <div className="flex-1">
-          <p className="text-xs font-black text-white flex items-center gap-1.5">
-            <UserCheck className="w-4 h-4 text-emerald-400" /> Manually Unlock Pro Pass
-          </p>
-        </div>
-        <input
-          type="email"
-          required
-          placeholder="Aspirant email..."
-          value={proEmail}
-          onChange={(e) => setProEmail(e.target.value)}
-          className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white"
-        />
-        <button
-          type="submit"
-          className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs"
-        >
-          Activate Pro
-        </button>
-      </form>
-
-      <div className="space-y-2.5">
-        <h2 className="text-base font-black text-white">Manage Live PPDT Pictures ({scenarios.length})</h2>
-        {scenarios.map((sc) => (
-          <div
-            key={sc.id}
-            className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3"
-          >
-            <div className="flex items-center gap-3">
-              {sc.image_url ? (
-                <img
-                  src={sc.image_url}
-                  alt={sc.title}
-                  className="w-14 h-10 rounded object-cover grayscale"
-                />
-              ) : (
-                <div className="w-14 h-10 rounded bg-slate-800 flex items-center justify-center text-[10px] text-slate-400">
-                  Preset
+        <div className="space-y-2.5">
+          <h2 className="text-base font-black text-white">
+            SSB Centre Gate Images ({SSB_CENTRES.length})
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-2.5">
+            {SSB_CENTRES.map((c) => (
+              <div
+                key={c.code}
+                className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  {centreImages[c.code] ? (
+                    <img
+                      src={centreImages[c.code]}
+                      alt={c.short}
+                      className="w-14 h-10 rounded object-cover"
+                    />
+                  ) : (
+                    <div className="w-14 h-10 rounded bg-slate-800 flex items-center justify-center text-[10px] text-slate-400">
+                      No image
+                    </div>
+                  )}
+                  <p className="text-xs font-bold text-white truncate">{c.label}</p>
                 </div>
-              )}
-              <div>
-                <p className="text-xs font-bold text-white">{sc.title}</p>
-                <p className="text-[11px] text-slate-400">
-                  {sc.is_free ? 'Free Scenario' : 'Pro Locked'}
-                </p>
+                <label className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-400 cursor-pointer shrink-0">
+                  {centreImages[c.code] ? 'Replace' : 'Upload'}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/avif"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleCentreImage(c.code, f);
+                    }}
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <form
+          onSubmit={handleGrantPro}
+          className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center"
+        >
+          <div className="flex-1">
+            <p className="text-xs font-black text-white flex items-center gap-1.5">
+              <UserCheck className="w-4 h-4 text-emerald-400" /> Manually Unlock Pro Pass
+            </p>
+          </div>
+          <input
+            type="email"
+            required
+            placeholder="Aspirant email..."
+            value={proEmail}
+            onChange={(e) => setProEmail(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs"
+          >
+            Activate Pro
+          </button>
+        </form>
+
+        <div className="space-y-2.5">
+          <h2 className="text-base font-black text-white">Manage Live PPDT Pictures ({scenarios.length})</h2>
+          {scenarios.map((sc) => (
+            <div
+              key={sc.id}
+              className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-3">
+                {sc.image_url ? (
+                  <img
+                    src={sc.image_url}
+                    alt={sc.title}
+                    className="w-14 h-10 rounded object-cover grayscale"
+                  />
+                ) : (
+                  <div className="w-14 h-10 rounded bg-slate-800 flex items-center justify-center text-[10px] text-slate-400">
+                    Preset
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs font-bold text-white">{sc.title}</p>
+                  <p className="text-[11px] text-slate-400">
+                    {sc.is_free ? 'Free Scenario' : 'Pro Locked'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-400 cursor-pointer">
+                  Swap Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleSwapPicture(sc.id, f);
+                    }}
+                  />
+                </label>
+
+                <button
+                  onClick={() => toggleFreeLock(sc)}
+                  className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+                  title="Toggle Free / Pro"
+                >
+                  {sc.is_free ? <Unlock className="w-4 h-4 text-emerald-400" /> : <Lock className="w-4 h-4 text-amber-400" />}
+                </button>
+
+                <button
+                  onClick={() => deleteScenario(sc.id)}
+                  className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950"
+                  title="Delete Scenario"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
+          ))}
+        </div>
 
-            <div className="flex items-center gap-2">
-              <label className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-400 cursor-pointer">
-                Swap Photo
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleSwapPicture(sc.id, f);
-                  }}
-                />
-              </label>
-
-              <button
-                onClick={() => toggleFreeLock(sc)}
-                className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
-                title="Toggle Free / Pro"
-              >
-                {sc.is_free ? <Unlock className="w-4 h-4 text-emerald-400" /> : <Lock className="w-4 h-4 text-amber-400" />}
-              </button>
-
-              <button
-                onClick={() => deleteScenario(sc.id)}
-                className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950"
-                title="Delete Scenario"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+        <div className="space-y-2.5">
+          <h2 className="text-base font-black text-white">Imported OIR Sets ({oirSets.length})</h2>
+          {oirSets.length === 0 && (
+            <p className="text-xs text-slate-400">No imported sets yet. Use Bulk Add above.</p>
+          )}
+          {oirSets.map((set) => (
+            <div
+              key={set.id}
+              className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
+            >
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-white truncate">{set.title}</p>
+                <p className="text-[11px] text-slate-400">{set.is_free ? 'Free' : 'Pro Locked'}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => toggleOirFree(set)}
+                  className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+                  title="Toggle Free / Pro"
+                >
+                  {set.is_free ? <Unlock className="w-4 h-4 text-emerald-400" /> : <Lock className="w-4 h-4 text-amber-400" />}
+                </button>
+                <button
+                  onClick={() => deleteOirSet(set.id)}
+                  className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950"
+                  title="Delete set"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="space-y-2.5">
-        <h2 className="text-base font-black text-white">Imported OIR Sets ({oirSets.length})</h2>
-        {oirSets.length === 0 && (
-          <p className="text-xs text-slate-400">No imported sets yet. Use Bulk Add above.</p>
-        )}
-        {oirSets.map((set) => (
-          <div
-            key={set.id}
-            className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3"
-          >
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-white truncate">{set.title}</p>
-              <p className="text-[11px] text-slate-400">{set.is_free ? 'Free' : 'Pro Locked'}</p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => toggleOirFree(set)}
-                className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
-                title="Toggle Free / Pro"
-              >
-                {set.is_free ? <Unlock className="w-4 h-4 text-emerald-400" /> : <Lock className="w-4 h-4 text-amber-400" />}
-              </button>
-              <button
-                onClick={() => deleteOirSet(set.id)}
-                className="p-1.5 rounded-lg bg-slate-800 text-red-400 hover:bg-red-950"
-                title="Delete set"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       </div>
     </div>
   );

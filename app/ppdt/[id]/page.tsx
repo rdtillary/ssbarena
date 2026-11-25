@@ -324,6 +324,7 @@ export default function PPDTSimulatorPage() {
     }
   };
 
+  // Attaches the transcript, scores and the FULL AI result (OLQ, recommendation...) to the saved recording.
   const attachResult = (ev: EvaluationResult) => {
     const p = recPromiseRef.current;
     if (!p) return;
@@ -340,6 +341,7 @@ export default function PPDTSimulatorPage() {
           story_score: ev.storyScore,
           narration_score: ev.narrationScore,
           total_score: ev.totalScore,
+          result: { ...ev, pins, mainAction },
         }),
       }).catch(() => {});
     });
@@ -436,6 +438,14 @@ export default function PPDTSimulatorPage() {
           stammerCount: evalData.stammerCount,
           pauseCount: evalData.pauseCount,
           fillerCount: evalData.fillerCount,
+          longestPause: evalData.longestPause,
+          wordCount: evalData.wordCount,
+          wpm: evalData.wpm,
+          olq: evalData.olq,
+          recommendation: evalData.recommendation,
+          strengths: evalData.strengths,
+          improvements: evalData.improvements,
+          tokens: evalData.tokens,
         },
       });
       setSavedNotice(insertErr ? 'Could not save this attempt to your Vault.' : 'Saved to your Vault.');

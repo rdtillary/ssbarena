@@ -14,7 +14,7 @@ const num = (v: unknown, lo: number, hi: number): number | null => {
 };
 
 // multipart  -> saves the audio right after the narration ends (guest or signed in)
-// JSON       -> attaches the transcript and scores once the AI has graded it
+// JSON       -> attaches the transcript, scores and the full AI result once graded
 export async function POST(req: Request) {
   const admin = createAdminSupabase();
   const ct = req.headers.get('content-type') || '';
@@ -86,6 +86,9 @@ export async function POST(req: Request) {
   const visitor = String(b?.visitor_id || '');
   if (!id || !VID.test(visitor)) return NextResponse.json({ error: 'Bad request.' }, { status: 400 });
 
+  const result =
+    b.result && typeof b.result === 'object' && JSON.stringify(b.result).length < 200000 ? b.result : null;
+
   const { error } = await admin
     .from('ppdt_recordings')
     .update({
@@ -94,6 +97,7 @@ export async function POST(req: Request) {
       story_score: num(b.story_score, 0, 40),
       narration_score: num(b.narration_score, 0, 20),
       total_score: num(b.total_score, 0, 60),
+      result,
     })
     .eq('id', id)
     .eq('visitor_id', visitor);

@@ -16,12 +16,15 @@ async function people(admin: any, ids: string[]) {
   return out;
 }
 
-// GET            -> visit stats, recording totals, first page of recordings, earlier signed-in attempts
+// GET            -> visit stats, recording totals, first page of recordings (with full AI results), earlier signed-in attempts
 // GET ?offset=N  -> next page of recordings only
 export async function GET(req: Request) {
   if (!(await verifyAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   const admin = createAdminSupabase();
   const offset = Math.max(0, Number(new URL(req.url).searchParams.get('offset')) || 0);
+
+  const { data: sc } = await admin.from('ppdt_scenarios').select('id, recommended_story, olq_highlights');
+  const stories = new Map<number, any>((sc || []).map((s: any) => [s.id, s]));
 
   const { data: rows, error, count } = await admin
     .from('ppdt_recordings')
@@ -33,10 +36,13 @@ export async function GET(req: Request) {
   const who = await people(admin, Array.from(new Set((rows || []).map((r: any) => r.user_id).filter(Boolean))) as string[]);
   const recordings = (rows || []).map((r: any) => ({
     id: r.id,
+    source: 'recording',
     visitor_id: r.visitor_id,
     email: who[r.user_id]?.email || '',
     name: who[r.user_id]?.name || '',
     scenario_title: r.scenario_title || '',
+    recommended_story: stories.get(r.scenario_id)?.recommended_story || '',
+    story_olqs: stories.get(r.scenario_id)?.olq_highlights || [],
     audio_url: r.audio_url,
     transcript: r.transcript,
     main_action: r.main_action || '',
@@ -46,6 +52,7 @@ export async function GET(req: Request) {
     total_score: r.total_score,
     max_score: 60,
     duration_seconds: r.duration_seconds || 0,
+    result: r.result || null,
     created_at: r.created_at,
   }));
 
@@ -93,30 +100,44 @@ export async function GET(req: Request) {
   const cutoff = first?.[0]?.created_at || new Date(now + DAY).toISOString();
   const { data: old } = await admin
     .from('user_attempts')
-    .select('id, user_id, scenario_title, story_score, narration_score, total_score, max_score, transcript, audio_url, payload, created_at')
+    .select('id, user_id, scenario_id, scenario_title, story_score, narration_score, total_score, max_score, transcript, audio_url, payload, olq_report, created_at')
     .eq('attempt_type', 'PPDT')
     .lt('created_at', cutoff)
     .order('created_at', { ascending: false })
     .limit(300);
   const oldWho = await people(admin, Array.from(new Set((old || []).map((r: any) => r.user_id).filter(Boolean))) as string[]);
-  const legacy = (old || []).map((r: any) => ({
-    id: r.id,
-    visitor_id: '',
-    user_id: r.user_id,
-    email: oldWho[r.user_id]?.email || 'unknown',
-    name: oldWho[r.user_id]?.name || '',
-    scenario_title: r.scenario_title,
-    audio_url: r.audio_url,
-    transcript: r.transcript,
-    main_action: r.payload?.mainAction || '',
-    valid: true,
-    story_score: r.story_score,
-    narration_score: r.narration_score,
-    total_score: r.total_score,
-    max_score: r.max_score,
-    duration_seconds: 0,
-    created_at: r.created_at,
-  }));
+  const legacy = (old || []).map((r: any) => {
+    const p = r.payload || {};
+    const rep = r.olq_report;
+    return {
+      id: r.id,
+      source: 'attempt',
+      visitor_id: '',
+      user_id: r.user_id,
+      email: oldWho[r.user_id]?.email || 'unknown',
+      name: oldWho[r.user_id]?.name || '',
+      scenario_title: r.scenario_title,
+      recommended_story: stories.get(r.scenario_id)?.recommended_story || '',
+      story_olqs: stories.get(r.scenario_id)?.olq_highlights || [],
+      audio_url: r.audio_url,
+      transcript: r.transcript,
+      main_action: p.mainAction || '',
+      valid: true,
+      story_score: r.story_score,
+      narration_score: r.narration_score,
+      total_score: r.total_score,
+      max_score: r.max_score,
+      duration_seconds: 0,
+      result: {
+        ...p,
+        olq: p.olq || (rep?.scores ? { scores: rep.scores, remarks: rep.remarks } : undefined),
+        strengths: p.strengths ?? rep?.strengths,
+        improvements: p.improvements ?? rep?.improvements,
+        summary: rep?.summary,
+      },
+      created_at: r.created_at,
+    };
+  });
 
   return NextResponse.json({
     stats: {
