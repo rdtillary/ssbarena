@@ -1,5 +1,6 @@
 'use client';
 
+import { compressImage } from '@/lib/compress-image';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ImagePlus, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -62,7 +63,7 @@ export function BulkPhotoPanel({ onDone }: { onDone?: () => void }) {
       try {
         const fd = new FormData();
         fd.append('bucket', 'ppdt-scenes');
-        fd.append('file', m.file);
+        fd.append('file', await compressImage(m.file, 'ppdt-scenes', m.file.name));
         const up = await fetch('/api/admin/upload', { method: 'POST', body: fd });
         const upData = await up.json().catch(() => ({}));
         if (!up.ok) throw new Error(upData.error || 'Upload failed');

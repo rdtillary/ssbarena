@@ -19,7 +19,7 @@ export function RecommendedSlide({ candidates }: { candidates: RecommendedCandid
               className="rounded-xl overflow-hidden bg-slate-950 border border-slate-800"
             >
               <div className="aspect-square sm:aspect-[4/5] bg-slate-800">
-                <img src={c.photo_url} alt={c.name} className="w-full h-full object-cover" />
+                <img src={c.photo_url} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
               </div>
               <div className="p-2.5">
                 <p className="text-sm font-bold text-white truncate">{c.name}</p>

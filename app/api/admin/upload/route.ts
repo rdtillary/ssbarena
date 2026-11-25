@@ -36,6 +36,7 @@ export async function POST(req: Request) {
     .from(bucket)
     .upload(path, Buffer.from(await file.arrayBuffer()), {
       contentType: file.type,
+      cacheControl: '31536000', // 1 year; every upload gets a new file name
       upsert: false,
     });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });

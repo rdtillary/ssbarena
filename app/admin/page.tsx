@@ -1,5 +1,6 @@
 'use client';
 
+import { compressImage } from '@/lib/compress-image';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Upload, Trash2, Lock, Unlock, UserCheck, PlusCircle, Award } from 'lucide-react';
@@ -192,7 +193,7 @@ export default function AdminDashboardPage() {
   const uploadViaApi = async (bucket: string, file: File): Promise<string> => {
     const fd = new FormData();
     fd.append('bucket', bucket);
-    fd.append('file', file);
+    fd.append('file', await compressImage(file, bucket, file.name));
     const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Upload failed');
