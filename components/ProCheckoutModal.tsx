@@ -1,5 +1,6 @@
 'use client';
 
+import { isPhoneLogin } from '@/lib/login-id';
 import React, { useEffect, useState } from 'react';
 import { X, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import { PRO_PRICE_INR } from '@/lib/config';
@@ -97,7 +98,7 @@ export function ProCheckoutModal({
         subscription_id: data.subscriptionId,
         name: 'SSB Arena',
         description: `Pro Subscription: ₹${priceInr}/month (autopay, cancel any time)`,
-        prefill: { email: userEmail },
+        prefill: isPhoneLogin(userEmail) ? { contact: userEmail!.split('@')[0] } : { email: userEmail },
         theme: { color: '#F59E0B' },
         modal: {
           ondismiss: () => setError('Payment cancelled. You can try again any time.'),

@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+.ob { --gold:#e9c46a; --gold-2:#f6dc9a; --line:rgba(255,255,255,.09); --muted:#8e9ab3;
+  min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px 18px; position:relative; isolation:isolate; font-family:Manrope,ui-sans-serif,system-ui,sans-serif; color:#f4f1ea; }
+.ob *, .ob *::before, .ob *::after { box-sizing:border-box; }
+.ob::before { content:''; position:absolute; inset:0; z-index:-1;
+  background:radial-gradient(640px 420px at 50% 0%, rgba(233,196,106,.16), transparent 70%),
+             radial-gradient(520px 420px at 90% 100%, rgba(80,120,200,.13), transparent 70%); }
+.ob-card { width:100%; max-width:460px; padding:34px 28px; border-radius:28px; border:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(25,33,52,.92), rgba(11,16,28,.94));
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.06); }
+.ob-brand { display:flex; justify-content:center; margin-bottom:26px; }
+.ob-eyebrow { margin:0 0 10px; text-align:center; font-size:11px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); }
+.ob-title { margin:0; text-align:center; font-family:Fraunces,Georgia,serif; font-weight:600; font-size:clamp(26px,7vw,33px); line-height:1.15; letter-spacing:-.01em; }
+.ob-sub { margin:10px 0 0; text-align:center; font-size:13.5px; line-height:1.6; color:var(--muted); }
+.ob-in { animation:ob-in .45s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes ob-in { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+
+.ob-progress { display:flex; gap:6px; margin-bottom:28px; }
+.ob-progress i { flex:1; height:3px; border-radius:9px; background:var(--line); transition:background .35s; }
+.ob-progress i.on { background:linear-gradient(90deg,var(--gold),var(--gold-2)); }
+
+.ob-options { display:grid; gap:10px; margin-top:26px; }
+.ob-options.two { grid-template-columns:1fr 1fr; }
+.ob-option { display:flex; align-items:center; gap:13px; width:100%; min-height:58px; padding:12px 14px; text-align:left;
+  border-radius:16px; border:1px solid var(--line); background:rgba(255,255,255,.025); color:inherit;
+  font:600 14.5px/1.35 Manrope,ui-sans-serif,system-ui,sans-serif; cursor:pointer; transition:border-color .18s, background .18s, transform .18s; }
+.ob-option:hover:not(:disabled) { border-color:rgba(233,196,106,.6); background:rgba(233,196,106,.07); transform:translateY(-2px); }
+.ob-option.picked { border-color:var(--gold); background:rgba(233,196,106,.15); }
+.ob-key { flex:none; display:grid; place-items:center; width:30px; height:30px; border-radius:10px; border:1px solid var(--line);
+  font-size:12px; font-weight:800; color:var(--gold); }
+.ob-option.picked .ob-key { background:var(--gold); border-color:var(--gold); color:#141005; }
+
+.ob-field { display:block; margin-top:14px; }
+.ob-label { display:block; margin-bottom:7px; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.ob-input, .ob-select { width:100%; height:52px; padding:0 16px; border-radius:14px; border:1px solid var(--line);
+  background:rgba(4,8,17,.7); color:#f4f1ea; font:500 15px Manrope,ui-sans-serif,system-ui,sans-serif; outline:none; transition:border-color .18s, box-shadow .18s; }
+.ob-input:focus, .ob-select:hover, .ob-select:focus-visible, .ob-select[aria-expanded="true"] { border-color:var(--gold); box-shadow:0 0 0 4px rgba(233,196,106,.12); }
+.ob-button { width:100%; height:52px; margin-top:18px; border:0; border-radius:14px; cursor:pointer;
+  background:linear-gradient(135deg,var(--gold-2),var(--gold)); color:#171204; font:800 14.5px Manrope,ui-sans-serif,system-ui,sans-serif; }
+.ob-button.plain { background:#fff; color:#0b101c; margin-top:12px; }
+.ob-button:disabled { opacity:.55; cursor:default; }
+.ob-or { display:flex; align-items:center; gap:10px; margin-top:18px; font-size:11px; color:var(--muted); }
+.ob-or::before, .ob-or::after { content:''; flex:1; height:1px; background:var(--line); }
+.ob-link { display:block; margin:18px auto 0; background:none; border:0; color:var(--muted); font:600 13px Manrope,ui-sans-serif,system-ui,sans-serif; cursor:pointer; }
+.ob-link:hover { color:var(--gold); }
+.ob-error { margin:12px 0 0; text-align:center; font-size:13px; color:#ffb4a2; }
+
+.ob-select { display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; text-align:left; }
+.ob-select.empty { color:var(--muted); }
+.ob-select b { color:var(--gold); font-size:11px; }
+.ob-panel { margin-top:8px; padding:6px; border-radius:16px; border:1px solid var(--line); background:#0a0f1c; }
+.ob-list { max-height:244px; overflow-y:auto; }
+.ob-item { display:block; width:100%; padding:11px 12px; border:0; border-radius:10px; background:none; color:inherit; text-align:left; cursor:pointer;
+  font:600 13.5px Manrope,ui-sans-serif,system-ui,sans-serif; }
+.ob-item:hover { background:rgba(233,196,106,.12); }
+.ob-cal-head { display:flex; align-items:center; justify-content:space-between; padding:4px 4px 10px; font-weight:800; font-size:14px; }
+.ob-nav { width:34px; height:34px; border-radius:10px; border:1px solid var(--line); background:none; color:var(--gold); cursor:pointer; }
+.ob-nav:disabled { opacity:.25; cursor:default; }
+.ob-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; text-align:center; }
+.ob-grid span { padding:4px 0; font-size:10.5px; font-weight:800; color:var(--muted); }
+.ob-day { height:36px; border:0; border-radius:10px; background:none; color:inherit; cursor:pointer; font:600 13px Manrope,ui-sans-serif,system-ui,sans-serif; }
+.ob-day:hover:not(:disabled) { background:rgba(233,196,106,.16); }
+.ob-day.picked { background:var(--gold); color:#171204; }
+.ob-day:disabled { opacity:.22; cursor:default; }
+.ob button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+@media (max-width:420px) { .ob-card { padding:28px 18px; border-radius:22px; } .ob-options.two .ob-option { padding:10px; gap:9px; font-size:13px; } }
+@media (prefers-reduced-motion:reduce) { .ob-in { animation:none; } .ob-option { transition:none; } }
