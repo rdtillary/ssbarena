@@ -6,6 +6,7 @@ import {
   Play,
   Lock,
   Mic,
+  Mic2,
   Timer,
   Archive,
   Shield,
@@ -27,6 +28,7 @@ import { Carousel } from '@/components/Carousel';
 import { RecommendedSlide } from '@/components/RecommendedSlide';
 import { ReportingTimer } from '@/components/ReportingTimer';
 import { ContactCadetModal } from '@/components/ContactCadetModal';
+import { LecturetteEntry } from '@/components/LecturetteEntry';
 
 export default function HomePage() {
   const supabase = createClient();
@@ -227,6 +229,12 @@ export default function HomePage() {
                 {tab}
               </button>
             ))}
+            <Link
+              href="/lecturette"
+              className="px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white"
+            >
+              Lecturette
+            </Link>
             {/* Download APK link hidden for now (the /download page still exists). */}
           </nav>
 
@@ -319,6 +327,8 @@ export default function HomePage() {
             </div>
           </div>
         )}
+
+        {activeTab === 'home' && <LecturetteEntry />}
 
         {(activeTab === 'home' || activeTab === 'ppdt') && (
           <section className="space-y-3">
@@ -546,6 +556,13 @@ export default function HomePage() {
             </button>
           );
         })}
+        <Link
+          href="/lecturette"
+          className="flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold text-slate-400"
+        >
+          <Mic2 className="w-4 h-4" />
+          Lecturette
+        </Link>
       </nav>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onAuthenticated={loadData} />
