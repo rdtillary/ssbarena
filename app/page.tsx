@@ -6,14 +6,15 @@ import {
   Play,
   Lock,
   Mic,
-  Mic2,
   Timer,
   Archive,
   Shield,
   LogOut,
   CheckCircle2,
   Sparkles,
+  MessageCircle,
   RotateCcw,
+  PenTool,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS, DEFAULT_OIR_SETS } from '@/lib/seed-data';
@@ -26,12 +27,14 @@ import { ProCheckoutModal } from '@/components/ProCheckoutModal';
 import { Carousel } from '@/components/Carousel';
 import { RecommendedSlide } from '@/components/RecommendedSlide';
 import { ReportingTimer } from '@/components/ReportingTimer';
-import { FeatureGrid } from '@/components/FeatureGrid';
-import { Testimonials } from '@/components/Testimonials';
+import { ContactCadetModal } from '@/components/ContactCadetModal';
+import { WatSection } from '@/components/WatSection';
+
+type Tab = 'home' | 'ppdt' | 'wat' | 'oir' | 'vault';
 
 export default function HomePage() {
   const supabase = createClient();
-  const [activeTab, setActiveTab] = useState<'home' | 'ppdt' | 'oir' | 'vault'>('home');
+  const [activeTab, setActiveTab] = useState<Tab>('home');
   const [scenarios, setScenarios] = useState<PPDTScenario[]>(DEFAULT_PPDT_SCENARIOS);
   const [attempts, setAttempts] = useState<UserAttempt[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -44,6 +47,7 @@ export default function HomePage() {
   const [dbOirSets, setDbOirSets] = useState<{ id: number; title: string; is_free: boolean }[]>([]);
   const [authOpen, setAuthOpen] = useState(false);
   const [proOpen, setProOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const isAdmin =
     user?.email &&
@@ -160,7 +164,7 @@ export default function HomePage() {
         NO TYPING • REAL PAPER &amp; VOICE NARRATION FLOW
       </span>
       <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-        Practice the Real SSB Under Exact Exam Timers.
+        Practice Real Day-1 SSB Screening Under Exact Exam Timers.
       </h1>
 
       <div className="mt-6 flex flex-wrap gap-3">
@@ -175,6 +179,12 @@ export default function HomePage() {
           className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center gap-2 transition"
         >
           <Timer className="w-4 h-4 text-amber-400" /> Take 10-Min OIR Drill
+        </Link>
+        <Link
+          href="/wat/1"
+          className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center gap-2 transition"
+        >
+          <PenTool className="w-4 h-4 text-amber-400" /> Try WAT
         </Link>
       </div>
     </section>
@@ -214,7 +224,7 @@ export default function HomePage() {
           <Logo />
 
           <nav className="hidden md:flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
-            {(['home', 'ppdt', 'oir', 'vault'] as const).map((tab) => (
+            {(['home', 'ppdt', 'wat', 'oir', 'vault'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -227,12 +237,6 @@ export default function HomePage() {
                 {tab}
               </button>
             ))}
-            <Link
-              href="/lecturette"
-              className="px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white"
-            >
-              Lecturette
-            </Link>
             {/* Download APK link hidden for now (the /download page still exists). */}
           </nav>
 
@@ -286,20 +290,17 @@ export default function HomePage() {
 
       <main className="max-w-5xl mx-auto px-4 pt-6 space-y-6">
         <div className="space-y-3">
-          {activeTab === 'home' && <Carousel slides={slides} />}
-
           {activeTab === 'home' && (
-            <FeatureGrid
-              onPpdt={() => {
-                setActiveTab('ppdt');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              onOir={() => {
-                setActiveTab('oir');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-            />
+            <button
+              type="button"
+              onClick={() => setContactOpen(true)}
+              className="w-full py-3 rounded-xl bg-slate-900 border border-amber-500/40 hover:border-amber-500 text-amber-400 font-black text-sm flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" /> Contact Recommended Candidates
+            </button>
           )}
+
+          {activeTab === 'home' && <Carousel slides={slides} />}
 
           <ReportingTimer
             centreCode={centre}
@@ -312,8 +313,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {activeTab === 'home' && <Testimonials />}
-
         {activeTab === 'home' && (
           <div className="grid sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
@@ -325,13 +324,13 @@ export default function HomePage() {
               <p className="text-sm font-bold text-white mt-1">1-Min Voice Narration</p>
             </div>
             <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-              <p className="text-xs font-bold text-sky-400 uppercase">Step 3 • OLQ Analysis</p>
+              <p className="text-xs font-bold text-sky-400 uppercase">Step 3 • AI OLQ Report</p>
               <p className="text-sm font-bold text-white mt-1">Compare with Recommended Story</p>
             </div>
           </div>
         )}
 
-        {activeTab === 'ppdt' && (
+        {(activeTab === 'home' || activeTab === 'ppdt') && (
           <section className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-black text-white">
@@ -424,7 +423,11 @@ export default function HomePage() {
           </section>
         )}
 
-        {activeTab === 'oir' && (
+        {(activeTab === 'home' || activeTab === 'wat') && (
+          <WatSection isPro={isPro} onUnlock={() => setProOpen(true)} />
+        )}
+
+        {(activeTab === 'home' || activeTab === 'oir') && (
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white">OIR Speed Drills (10-Min Timer)</h2>
             <div className="grid sm:grid-cols-2 gap-3.5">
@@ -473,7 +476,7 @@ export default function HomePage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-black text-white">
-                Saved Narration Audio &amp; Reports ({attempts.length})
+                Saved Narration Audio &amp; AI Reports ({attempts.length})
               </h2>
               {!user && (
                 <button
@@ -505,7 +508,9 @@ export default function HomePage() {
                         <h3 className="text-sm font-bold text-white">{att.scenario_title}</h3>
                       </div>
                       <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-black">
-                        {att.total_score} / {att.max_score}
+                        {(att.attempt_type as string) === 'WAT'
+                          ? `${att.total_score} / ${att.max_score} words`
+                          : `${att.total_score} / ${att.max_score}`}
                       </span>
                     </div>
 
@@ -539,6 +544,7 @@ export default function HomePage() {
         {[
           { id: 'home', label: 'Home', icon: Shield },
           { id: 'ppdt', label: 'PPDT', icon: Play },
+          { id: 'wat', label: 'WAT', icon: PenTool },
           { id: 'oir', label: 'OIR', icon: Timer },
           { id: 'vault', label: 'Vault', icon: Archive },
         ].map((item) => {
@@ -547,7 +553,7 @@ export default function HomePage() {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => setActiveTab(item.id as Tab)}
               className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold ${
                 active ? 'text-amber-400' : 'text-slate-400'
               }`}
@@ -557,13 +563,6 @@ export default function HomePage() {
             </button>
           );
         })}
-        <Link
-          href="/lecturette"
-          className="flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold text-slate-400"
-        >
-          <Mic2 className="w-4 h-4" />
-          Lecturette
-        </Link>
       </nav>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onAuthenticated={loadData} />
@@ -574,6 +573,12 @@ export default function HomePage() {
         isPro={isPro}
         proUntil={proUntil}
         onSuccess={loadData}
+        onRequireAuth={() => setAuthOpen(true)}
+      />
+      <ContactCadetModal
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+        signedIn={Boolean(user)}
         onRequireAuth={() => setAuthOpen(true)}
       />
     </div>

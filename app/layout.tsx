@@ -3,13 +3,12 @@ import './globals.css';
 import { Footer } from '@/components/Footer';
 import { ReferralClaim } from '@/components/ReferralClaim';
 import { VisitTracker } from '@/components/VisitTracker';
-import { AuthGate } from '@/components/onboarding/AuthGate';
-import { FloatingContact } from '@/components/FloatingContact';
+import { AuthGate } from '@/components/AuthGate';
 
 export const metadata: Metadata = {
-  title: 'SSB Arena — SSB Simulator for PPDT, OIR & Lecturette',
+  title: 'SSB Arena — Stage-1 PPDT & OIR Screening Simulator',
   description:
-    'The SSB simulator: real 30-second PPDT perception, paper story writing, 1-minute voice narration with live transcription, timed OIR speed drills, Lecturette assessment and OLQ analysis.',
+    'Practice real 30-second PPDT perception, paper story writing, 1-minute voice narration with AI transcription, and timed OIR speed drills.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -19,10 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ReferralClaim />
         <VisitTracker />
         <div className="flex-1">
-          <AuthGate>
-            {children}
-            <FloatingContact />
-          </AuthGate>
+          <AuthGate>{children}</AuthGate>
         </div>
         <Footer />
       </body>
