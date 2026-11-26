@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { ReferralClaim } from '@/components/ReferralClaim';
 import { VisitTracker } from '@/components/VisitTracker';
 import { AuthGate } from '@/components/onboarding/AuthGate';
+import { FloatingContact } from '@/components/FloatingContact';
 
 export const metadata: Metadata = {
   title: 'SSB Arena — Stage-1 PPDT & OIR Screening Simulator',
@@ -18,7 +19,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ReferralClaim />
         <VisitTracker />
         <div className="flex-1">
-          <AuthGate>{children}</AuthGate>
+          <AuthGate>
+            {children}
+            <FloatingContact />
+          </AuthGate>
         </div>
         <Footer />
       </body>
