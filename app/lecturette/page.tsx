@@ -8,7 +8,8 @@ import { SpinWheel } from '@/components/SpinWheel';
 import { VoiceWave } from '@/components/VoiceWave';
 import { ProCheckoutModal } from '@/components/ProCheckoutModal';
 import { LecturetteTranscript, type LecturetteAttempt } from '@/components/LecturetteTranscript';
-import { CATEGORY_COLORS, LECTURETTE_CATEGORIES, LECTURETTE_SECONDS, type LecturetteTopic } from '@/lib/lecturette-topics';
+import { CATEGORY_COLORS, LECTURETTE_CATEGORIES, LECTURETTE_SECONDS, LECTURETTE_TOPICS, type LecturetteTopic } from '@/lib/lecturette-topics';
+import { LECTURETTE_BELL_SECONDS, type VoiceStats } from '@/lib/lecturette-assessment';
 
 type Phase = 'HOME' | 'READY' | 'RECORD' | 'WORKING' | 'RESULT';
 
@@ -43,12 +44,40 @@ const getVisitorId = () => {
   }
 };
 
+const SILENT = 0.02;
+const voiceStats = (levels: number[]): VoiceStats => {
+  const n = levels.length;
+  if (!n) return { avgLevel: 0, levelVariation: 0, quietRatio: 1, samples: 0 };
+  const speaking = levels.filter((l) => l > SILENT);
+  const avg = speaking.length ? speaking.reduce((a, b) => a + b, 0) / speaking.length : 0;
+  const variance = speaking.length ? speaking.reduce((a, b) => a + (b - avg) ** 2, 0) / speaking.length : 0;
+  return {
+    avgLevel: Number(avg.toFixed(3)),
+    levelVariation: avg > 0 ? Number((Math.sqrt(variance) / avg).toFixed(3)) : 0,
+    quietRatio: Number(((n - speaking.length) / n).toFixed(3)),
+    samples: n,
+  };
+};
+
+// The spun topic plus three others from different categories: the candidate picks one, like a real card.
+const buildCard = (spun: LecturetteTopic): LecturetteTopic[] => {
+  const others = LECTURETTE_TOPICS.filter((t) => t.category !== spun.category).sort(() => Math.random() - 0.5);
+  const picked: LecturetteTopic[] = [];
+  for (const t of others) {
+    if (picked.length === 3) break;
+    if (!picked.some((p) => p.category === t.category)) picked.push(t);
+  }
+  return [spun, ...picked].sort(() => Math.random() - 0.5);
+};
+
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
 export default function LecturettePage() {
   const supabase = createClient();
   const [phase, setPhase] = useState<Phase>('HOME');
   const [topic, setTopic] = useState<LecturetteTopic | null>(null);
+  const [options, setOptions] = useState<LecturetteTopic[]>([]);
+  const [bellRung, setBellRung] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(LECTURETTE_SECONDS);
 
   const [user, setUser] = useState<any>(null);
@@ -81,6 +110,8 @@ export default function LecturettePage() {
   const liveBaseRef = useRef('');
   const liveSessionRef = useRef('');
   const liveBoxRef = useRef<HTMLDivElement | null>(null);
+  const levelsRef = useRef<number[]>([]);
+  const onLevel = useCallback((l: number) => { levelsRef.current.push(l); }, []);
 
   const load = useCallback(async () => {
     const { data: auth } = await supabase.auth.getUser();
@@ -142,6 +173,11 @@ export default function LecturettePage() {
   }, [phase]);
   useEffect(() => {
     if (phase !== 'RECORD') return;
+    if (secondsLeft === LECTURETTE_SECONDS - LECTURETTE_BELL_SECONDS) {
+      beep(1000, 0.25);
+      setTimeout(() => beep(1000, 0.25), 350);
+      setBellRung(true);
+    }
     if (secondsLeft > 0 && secondsLeft <= 5) beep(600, 0.05);
     if (secondsLeft === 0) finish();
   }, [secondsLeft, phase]);
@@ -253,6 +289,8 @@ export default function LecturettePage() {
       fd.append('topic_id', String(topic.id));
       fd.append('duration_seconds', String(durationRef.current));
       fd.append('visitor_id', getVisitorId());
+      fd.append('voice', JSON.stringify(voiceStats(levelsRef.current)));
+      fd.append('option_ids', JSON.stringify(options.map((o) => o.id)));
       const res = await fetch('/api/lecturette/transcribe', { method: 'POST', body: fd, signal: controller.signal });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Could not process your lecturette. Please retry.');
@@ -272,6 +310,8 @@ export default function LecturettePage() {
   const begin = () => {
     beep();
     setSecondsLeft(LECTURETTE_SECONDS);
+    setBellRung(false);
+    levelsRef.current = [];
     setLiveFinal('');
     setLiveInterim('');
     setLiveNote('');
@@ -296,13 +336,15 @@ export default function LecturettePage() {
   const backHome = () => {
     setPhase('HOME');
     setTopic(null);
+    setOptions([]);
     setResult(null);
     setError('');
   };
 
   const onSpun = (t: LecturetteTopic) => {
     beep(660, 0.18);
-    setTopic(t);
+    setTopic(null);
+    setOptions(buildCard(t));
     setPhase('READY');
   };
 
@@ -383,6 +425,32 @@ export default function LecturettePage() {
         </>
       )}
 
+      {phase === 'READY' && !topic && options.length > 0 && (
+        <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+          <div className="text-center space-y-1">
+            <p className="text-[11px] font-bold text-amber-400 tracking-widest">YOUR TOPIC CARD</p>
+            <h1 className="text-xl font-black text-white">Choose the one topic you can speak on best</h1>
+            <p className="text-xs text-slate-400">Pick what you genuinely understand, not what sounds impressive.</p>
+          </div>
+          <div className="grid gap-2.5">
+            {options.map((o) => {
+              const col = CATEGORY_COLORS[LECTURETTE_CATEGORIES.indexOf(o.category)] || '#f59e0b';
+              return (
+                <button
+                  key={o.id}
+                  onClick={() => setTopic(o)}
+                  className="text-left p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-amber-500 transition"
+                  style={{ borderLeft: `3px solid ${col}` }}
+                >
+                  <p className="text-[10px] font-bold uppercase" style={{ color: col }}>{o.category}</p>
+                  <p className="text-sm font-bold text-white">{o.title}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {(phase === 'READY' || phase === 'RECORD') && topic && (
         <div className="space-y-4">
           <div className="p-6 rounded-2xl border text-center space-y-2 bg-slate-900" style={{ borderColor: `${catColor}88`, boxShadow: `0 0 60px -25px ${catColor}` }}>
@@ -405,8 +473,14 @@ export default function LecturettePage() {
               </p>
             )}
 
+            {phase === 'RECORD' && bellRung && (
+              <p className="text-xs font-black text-amber-300 bg-amber-950/50 border border-amber-700 p-2.5 rounded-lg text-center animate-pulse">
+                🔔 2.5 minutes. Wrap up with your conclusion now.
+              </p>
+            )}
+
             <div className="rounded-xl bg-slate-950 border border-slate-800 px-3 py-2">
-              <VoiceWave stream={stream} />
+              <VoiceWave stream={stream} onLevel={onLevel} />
             </div>
 
             <div ref={liveBoxRef} className="min-h-[110px] max-h-44 overflow-y-auto p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-sm leading-relaxed">
@@ -431,7 +505,7 @@ export default function LecturettePage() {
               </button>
             )}
             <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Transcribing live with AI
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Transcribing live
             </p>
           </div>
         </div>
@@ -440,7 +514,7 @@ export default function LecturettePage() {
       {phase === 'WORKING' && (
         <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 text-center">
           <Sparkles className="w-8 h-8 text-amber-400 animate-spin mx-auto mb-2" />
-          <p className="text-sm font-bold text-white">Transcribing your lecturette...</p>
+          <p className="text-sm font-bold text-white">Assessing your lecturette...</p>
         </div>
       )}
 

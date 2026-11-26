@@ -6,7 +6,7 @@ export default function RefundPolicyPage() {
       <h1 className="text-2xl font-black text-white">Cancellation &amp; Refund Policy</h1>
       <p>
         The ₹{PRO_PRICE_INR} monthly Pro subscription unlocks instant digital access to practice
-        scenarios and AI assessments, so payments are generally non-refundable once activated.
+        scenarios and assessments, so payments are generally non-refundable once activated.
       </p>
       <p>
         You can cancel autopay at any time from the Pro screen on the website. Cancelling stops

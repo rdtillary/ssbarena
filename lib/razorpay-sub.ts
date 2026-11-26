@@ -28,7 +28,7 @@ export async function ensurePlanId(admin: any, rz: any): Promise<string> {
       name: 'SSB Arena Pro (monthly)',
       amount,
       currency: 'INR',
-      description: 'Full access to all PPDT, OIR and AI OLQ reports',
+      description: 'Full access to all PPDT, OIR, Lecturette and OLQ analysis',
     },
   });
   await admin.from('razorpay_plans').insert({ mode, amount_paise: amount, plan_id: plan.id });

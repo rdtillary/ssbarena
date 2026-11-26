@@ -80,7 +80,7 @@ export function RecommendationMeter({ totalScore, maxScore = 60, recommendation 
       {recommendation.reason && <p className="text-xs text-slate-300">{recommendation.reason}</p>}
 
       <p className="text-[11px] text-slate-500">
-        An AI estimate for practice only. It is not a prediction of your real SSB result.
+        An estimate for practice only. It is not a prediction of your real SSB result.
       </p>
     </div>
   );

@@ -37,7 +37,7 @@ async function callAnthropic(system: string, user: string): Promise<string> {
       messages: [{ role: 'user', content: user }],
     }),
   });
-  if (!res.ok) throw new Error(`AI request failed (${res.status}): ${await res.text()}`);
+  if (!res.ok) throw new Error(`Assessment request failed (${res.status}): ${await res.text()}`);
   const data = await res.json();
   return (data.content || []).map((c: any) => c.text || '').join('');
 }
@@ -57,7 +57,7 @@ async function callGemini(system: string, user: string): Promise<string> {
       }),
     }
   );
-  if (!res.ok) throw new Error(`AI request failed (${res.status}): ${await res.text()}`);
+  if (!res.ok) throw new Error(`Assessment request failed (${res.status}): ${await res.text()}`);
   const data = await res.json();
   return data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || '').join('') || '';
 }
@@ -79,7 +79,7 @@ async function callOpenAI(system: string, user: string): Promise<string> {
       ],
     }),
   });
-  if (!res.ok) throw new Error(`AI request failed (${res.status}): ${await res.text()}`);
+  if (!res.ok) throw new Error(`Assessment request failed (${res.status}): ${await res.text()}`);
   const data = await res.json();
   return data?.choices?.[0]?.message?.content || '';
 }
@@ -101,7 +101,7 @@ async function callGroq(system: string, user: string): Promise<string> {
       ],
     }),
   });
-  if (!res.ok) throw new Error(`AI request failed (${res.status}): ${await res.text()}`);
+  if (!res.ok) throw new Error(`Assessment request failed (${res.status}): ${await res.text()}`);
   const data = await res.json();
   return data?.choices?.[0]?.message?.content || '';
 }
@@ -110,7 +110,7 @@ function extractJson(text: string): any {
   const cleaned = text.replace(/```json|```/g, '').trim();
   const start = cleaned.indexOf('{');
   const end = cleaned.lastIndexOf('}');
-  if (start === -1 || end === -1) throw new Error('AI did not return JSON');
+  if (start === -1 || end === -1) throw new Error('No result returned');
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
@@ -125,7 +125,7 @@ export async function generateOlqReport(input: {
   else if (process.env.ANTHROPIC_API_KEY) raw = await callAnthropic(SYSTEM_PROMPT, user);
   else if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) raw = await callGemini(SYSTEM_PROMPT, user);
   else if (process.env.OPENAI_API_KEY) raw = await callOpenAI(SYSTEM_PROMPT, user);
-  else throw new Error('No AI key configured on the server.');
+  else throw new Error('No assessment key configured on the server.');
 
   const parsed = extractJson(raw);
 

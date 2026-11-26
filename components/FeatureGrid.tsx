@@ -131,7 +131,7 @@ export function FeatureGrid({ onPpdt, onOir }: Props) {
   const tiles: Tile[] = [
     { key: 'ppdt', label: 'PPDT', caption: 'Picture · Story · Voice', icon: <IconPpdt />, onClick: onPpdt },
     { key: 'oir', label: 'OIR', caption: '10-min speed drills', icon: <IconOir />, onClick: onOir },
-    { key: 'olq', label: 'OLQ Analysis', caption: 'AI report on 15 OLQs', icon: <IconOlq />, href: '/olq' },
+    { key: 'olq', label: 'OLQ Analysis', caption: 'Report on 15 OLQs', icon: <IconOlq />, href: '/olq' },
     { key: 'lect', label: 'Lecturette', caption: 'Spin a topic · 3 min', icon: <IconLecturette />, href: '/lecturette' },
   ];
 

@@ -9,7 +9,7 @@ import { Logo } from '@/components/Logo';
 const STEPS = [
   { icon: Eye, title: 'View the picture', text: '30 seconds on the hazy projector slide.' },
   { icon: Pencil, title: 'Write your story', text: '4 minutes on real paper, no typing.' },
-  { icon: Mic, title: 'Narrate it', text: '1-minute voice narration, transcribed by AI.' },
+  { icon: Mic, title: 'Narrate it', text: '1-minute voice narration, transcribed automatically.' },
   { icon: BarChart3, title: 'Get your OLQ report', text: 'Scored on all 15 Officer Like Qualities.' },
 ];
 
@@ -54,8 +54,8 @@ export default function OlqIntroPage() {
             Attempt a PPDT first.
           </h1>
           <p className="mt-3 text-slate-300 text-sm sm:text-base max-w-xl mx-auto">
-            Your OLQ analysis is built from your own PPDT story and voice narration. Complete your first PPDT and the AI
-            will score you on all 15 Officer Like Qualities.
+            Your OLQ analysis is built from your own PPDT story and voice narration. Complete your first PPDT and you
+            will be scored on all 15 Officer Like Qualities.
           </p>
 
           <Link

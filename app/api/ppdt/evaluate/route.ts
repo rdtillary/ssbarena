@@ -243,8 +243,8 @@ Return ONLY valid JSON in exactly this shape (use the OLQ names exactly as writt
     console.error('Groq LLM error', res.status, body);
     throw new Error(
       res.status === 429
-        ? 'The free AI service is busy. Wait a few seconds and press Retry.'
-        : `AI analysis failed (${res.status}).`
+        ? 'The assessment service is busy. Wait a few seconds and press Retry.'
+        : `Assessment failed (${res.status}).`
     );
   }
   const data = await res.json();
@@ -308,7 +308,7 @@ export async function POST(req: Request) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'AI grading is not set up yet. Add GROQ_API_KEY in the server environment.' },
+      { error: 'Assessment is not set up yet. Add GROQ_API_KEY in the server environment.' },
       { status: 503 }
     );
   }

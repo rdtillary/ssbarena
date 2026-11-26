@@ -24,7 +24,7 @@ export function OlqAnalysis({ olq }: Props) {
     <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-bold uppercase text-amber-400">AI OLQ Analysis</p>
+          <p className="text-[11px] font-bold uppercase text-amber-400">OLQ Analysis</p>
           <h2 className="text-base font-black text-white">15 Officer Like Qualities</h2>
         </div>
         <div className="text-right shrink-0">
@@ -58,7 +58,7 @@ export function OlqAnalysis({ olq }: Props) {
       </div>
 
       <p className="text-[11px] text-slate-500 text-center">
-        AI-generated practice feedback based on your narration. Not an official SSB assessment.
+        Practice feedback based on your narration. Not an official SSB assessment.
       </p>
     </div>
   );
