@@ -220,7 +220,7 @@ function UserPanel({ id }: { id: string }) {
   );
 }
 
-export function AdminUsers() {
+export function AdminUsers({ onViewActivity }: { onViewActivity?: (email: string) => void } = {}) {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -376,6 +376,17 @@ export function AdminUsers() {
                 {open === u.id && (
                   <tr className="bg-slate-950/70 border-b border-slate-800/60">
                     <td colSpan={9} className="p-0">
+                      {onViewActivity && (
+                        <div className="px-4 pt-4">
+                          <button
+                            type="button"
+                            onClick={() => onViewActivity(u.email || u.login)}
+                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-400"
+                          >
+                            View recordings
+                          </button>
+                        </div>
+                      )}
                       <UserPanel id={u.id} />
                     </td>
                   </tr>

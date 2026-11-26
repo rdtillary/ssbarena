@@ -5,11 +5,9 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { AdminUserData } from '@/components/AdminUserData';
-import { AdminUsers } from '@/components/AdminUsers';
 
 export default function UserDataAdminPage() {
   const [ok, setOk] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<'users' | 'visits'>('users');
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => {
       const e = data?.user?.email?.toLowerCase();
@@ -33,26 +31,7 @@ export default function UserDataAdminPage() {
         </Link>
         <span className="px-2.5 py-1 rounded bg-red-600/20 text-red-400 text-xs font-black">USER DATA</span>
       </div>
-
-      <div className="flex gap-2">
-        {([
-          ['users', 'All Users'],
-          ['visits', 'Visits & Recordings'],
-        ] as const).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setTab(id)}
-            className={`px-4 py-2 rounded-lg text-xs font-black uppercase ${
-              tab === id ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 border border-slate-800 text-slate-300'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {tab === 'users' ? <AdminUsers /> : <AdminUserData />}
+      <AdminUserData />
     </div>
   );
 }
