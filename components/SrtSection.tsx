@@ -10,7 +10,7 @@ export function SrtSection({ isPro, onUnlock }: { isPro: boolean; onUnlock: () =
     <section className="sr">
       <style>{SRT_CSS}</style>
       <p className="sr-eyebrow">Situation Reaction Test</p>
-      <h2 className="sr-h1 text-white" style={{ fontSize: 'clamp(2rem,6vw,3.2rem)' }}>
+      <h2 className="sr-h1">
         60 situations. <em>30 minutes.</em>
       </h2>
       <p className="sr-lead">Type your reactions, or write them on paper like the real test.</p>
@@ -19,7 +19,7 @@ export function SrtSection({ isPro, onUnlock }: { isPro: boolean; onUnlock: () =
           const locked = !set.is_free && !isPro;
           const inner = (
             <>
-              <span className="sr-eyebrow" style={{ color: 'var(--accent)' }}>{set.is_free ? 'Free' : 'Pro'}</span>
+              <span className="sr-eyebrow">{set.is_free ? 'Free' : 'Pro'}</span>
               <h3>{set.title}</h3>
               <p>{set.situations.length} situations · 30 minutes</p>
               <span className="go">{locked ? 'Unlock →' : 'Open booklet →'}</span>

@@ -157,13 +157,13 @@ export default function SrtPage() {
         </div>
         <div className="sr-modes">
           <button type="button" className="sr-mode" onClick={() => begin('type')}>
-            <span className="sr-eyebrow" style={{ color: 'var(--accent)' }}>Option A</span>
+            <span className="sr-eyebrow">Option A</span>
             <h3>Type</h3>
             <p>One situation at a time. Type your reaction, move back and forth freely.</p>
             <span className="go">Start the clock →</span>
           </button>
           <button type="button" className="sr-mode" onClick={() => begin('write')}>
-            <span className="sr-eyebrow" style={{ color: 'var(--accent)' }}>Option B</span>
+            <span className="sr-eyebrow">Option B</span>
             <h3>Write on paper</h3>
             <p>The full booklet of {total} situations on screen. Write your answers on your own sheet.</p>
             <span className="go">Start the clock →</span>
