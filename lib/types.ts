@@ -90,7 +90,7 @@ export interface EvaluationResult {
 
 export interface UserAttempt {
   id: string;
-  attempt_type: 'PPDT' | 'OIR';
+  attempt_type: 'PPDT' | 'OIR' | 'WAT';
   scenario_id: number;
   scenario_title: string;
   story_score: number;

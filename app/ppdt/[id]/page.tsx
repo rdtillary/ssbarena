@@ -324,6 +324,7 @@ export default function PPDTSimulatorPage() {
     }
   };
 
+  // Attaches the transcript, scores and the FULL AI result (OLQ, recommendation...) to the saved recording.
   const attachResult = (ev: EvaluationResult) => {
     const p = recPromiseRef.current;
     if (!p) return;
@@ -340,6 +341,7 @@ export default function PPDTSimulatorPage() {
           story_score: ev.storyScore,
           narration_score: ev.narrationScore,
           total_score: ev.totalScore,
+          result: { ...ev, pins, mainAction },
         }),
       }).catch(() => {});
     });
@@ -390,7 +392,7 @@ export default function PPDTSimulatorPage() {
     } catch (err: any) {
       setEvalError(
         err?.name === 'AbortError'
-          ? 'The AI took too long to respond. Press Retry.'
+          ? 'The assessment took too long. Press Retry.'
           : err?.message || 'Evaluation failed. Please retry.'
       );
     } finally {
@@ -429,7 +431,6 @@ export default function PPDTSimulatorPage() {
         max_score: 60,
         transcript: evalData.transcript,
         audio_url: uploadedAudioUrl,
-        // The full result is stored so the user's Results page and the admin can show everything.
         payload: {
           pins,
           mainAction,
@@ -438,12 +439,12 @@ export default function PPDTSimulatorPage() {
           pauseCount: evalData.pauseCount,
           fillerCount: evalData.fillerCount,
           longestPause: evalData.longestPause,
-          wpm: evalData.wpm,
           wordCount: evalData.wordCount,
-          strengths: evalData.strengths,
-          improvements: evalData.improvements,
+          wpm: evalData.wpm,
           olq: evalData.olq,
           recommendation: evalData.recommendation,
+          strengths: evalData.strengths,
+          improvements: evalData.improvements,
           tokens: evalData.tokens,
         },
       });
@@ -531,7 +532,7 @@ export default function PPDTSimulatorPage() {
         ) : phase === 'NARRATE_READY' ? (
           <span className="text-xs font-bold text-amber-400">READY</span>
         ) : (
-          <span className="text-xs font-bold text-emerald-400">STAGE 1</span>
+          <span className="text-xs font-bold text-emerald-400">SSB SIM</span>
         )}
       </div>
 
@@ -805,7 +806,7 @@ export default function PPDTSimulatorPage() {
           )}
 
           <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Transcribing live with AI
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Transcribing live
           </p>
         </div>
       )}

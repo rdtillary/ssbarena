@@ -122,21 +122,35 @@ const IconLecturette = () => (
   </svg>
 );
 
+const IconWat = () => (
+  <svg viewBox="0 0 96 96" className="w-full h-full" aria-hidden>
+    <Defs id="wa" />
+    <circle cx="48" cy="50" r="42" fill="url(#wa-glow)" />
+    <rect x="14" y="14" width="58" height="68" rx="10" fill="url(#wa-steel)" />
+    <rect x="20" y="20" width="46" height="56" rx="6" fill="#E2E8F0" />
+    <path d="M28 34h30M28 46h30M28 58h18" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
+    <path d="M74 26l10 10-30 30-14 4 4-14z" fill="url(#wa-gold)" />
+    <path d="M44 56l10 10-14 4z" fill="#0F172A" fillOpacity=".55" />
+  </svg>
+);
+
 interface Props {
+  onWat: () => void;
   onPpdt: () => void;
   onOir: () => void;
 }
 
-export function FeatureGrid({ onPpdt, onOir }: Props) {
+export function FeatureGrid({ onPpdt, onWat, onOir }: Props) {
   const tiles: Tile[] = [
     { key: 'ppdt', label: 'PPDT', caption: 'Picture · Story · Voice', icon: <IconPpdt />, onClick: onPpdt },
     { key: 'oir', label: 'OIR', caption: '10-min speed drills', icon: <IconOir />, onClick: onOir },
+    { key: 'wat', label: 'WAT', caption: '60 words · Type or write', icon: <IconWat />, onClick: onWat },
     { key: 'olq', label: 'OLQ Analysis', caption: 'Report on 15 OLQs', icon: <IconOlq />, href: '/olq' },
     { key: 'lect', label: 'Lecturette', caption: 'Spin a topic · 3 min', icon: <IconLecturette />, href: '/lecturette' },
   ];
 
   return (
-    <section aria-label="Features" className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+    <section aria-label="Features" className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
       {tiles.map((t) => {
         const inner = (
           <>
@@ -150,7 +164,10 @@ export function FeatureGrid({ onPpdt, onOir }: Props) {
             <span className="text-[10.5px] text-slate-400 font-medium mt-0.5">{t.caption}</span>
           </>
         );
-        const cls = 'feature-tile group relative flex flex-col items-center text-center pt-5 pb-4 px-2';
+        // Five tiles: the last one fills the empty half of the final row on phones.
+        const cls = `feature-tile group relative flex flex-col items-center text-center pt-5 pb-4 px-2${
+          t.key === 'lect' ? ' col-span-2 sm:col-span-1' : ''
+        }`;
         return t.href ? (
           <Link key={t.key} href={t.href} className={cls}>
             {inner}

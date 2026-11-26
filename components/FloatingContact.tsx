@@ -28,7 +28,8 @@ export function FloatingContact() {
     };
   }, [supabase]);
 
-  if (pathname?.startsWith('/admin')) return null;
+  // Hidden on WAT drills so it never covers the word or the Next button.
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/wat')) return null;
 
   return (
     <>
