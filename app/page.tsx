@@ -9,6 +9,7 @@ import {
   Mic2,
   Timer,
   PenTool,
+  Images,
   Archive,
   Shield,
   LogOut,
@@ -30,8 +31,9 @@ import { ReportingTimer } from '@/components/ReportingTimer';
 import { FeatureGrid } from '@/components/FeatureGrid';
 import { Testimonials } from '@/components/Testimonials';
 import { WatSection } from '@/components/WatSection';
+import { TatSection } from '@/components/TatSection';
 
-type Tab = 'home' | 'ppdt' | 'wat' | 'oir' | 'vault';
+type Tab = 'home' | 'ppdt' | 'tat' | 'wat' | 'oir' | 'vault';
 
 export default function HomePage() {
   const supabase = createClient();
@@ -218,7 +220,7 @@ export default function HomePage() {
           <Logo />
 
           <nav className="hidden md:flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
-            {(['home', 'ppdt', 'wat', 'oir', 'vault'] as const).map((tab) => (
+            {(['home', 'ppdt', 'tat', 'wat', 'oir', 'vault'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -296,6 +298,10 @@ export default function HomePage() {
             <FeatureGrid
               onPpdt={() => {
                 setActiveTab('ppdt');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onTat={() => {
+                setActiveTab('tat');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               onWat={() => {
@@ -432,6 +438,8 @@ export default function HomePage() {
           </section>
         )}
 
+        {activeTab === 'tat' && <TatSection isPro={isPro} onUnlock={() => setProOpen(true)} />}
+
         {activeTab === 'wat' && <WatSection isPro={isPro} onUnlock={() => setProOpen(true)} />}
 
         {activeTab === 'oir' && (
@@ -546,10 +554,11 @@ export default function HomePage() {
         )}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-slate-950/95 backdrop-blur border-t border-slate-800 grid grid-cols-6 h-14">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-slate-950/95 backdrop-blur border-t border-slate-800 grid grid-cols-7 h-14">
         {[
           { id: 'home', label: 'Home', icon: Shield },
           { id: 'ppdt', label: 'PPDT', icon: Play },
+          { id: 'tat', label: 'TAT', icon: Images },
           { id: 'wat', label: 'WAT', icon: PenTool },
           { id: 'oir', label: 'OIR', icon: Timer },
           { id: 'vault', label: 'Vault', icon: Archive },

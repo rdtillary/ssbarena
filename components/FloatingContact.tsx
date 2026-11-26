@@ -28,8 +28,8 @@ export function FloatingContact() {
     };
   }, [supabase]);
 
-  // Hidden on WAT drills so it never covers the word or the Next button.
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/wat')) return null;
+  // Hidden on WAT and TAT drills so it never covers the word or the Next button.
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/wat') || pathname?.startsWith('/tat')) return null;
 
   return (
     <>
