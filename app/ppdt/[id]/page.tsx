@@ -392,7 +392,7 @@ export default function PPDTSimulatorPage() {
     } catch (err: any) {
       setEvalError(
         err?.name === 'AbortError'
-          ? 'The AI took too long to respond. Press Retry.'
+          ? 'The assessment took too long. Press Retry.'
           : err?.message || 'Evaluation failed. Please retry.'
       );
     } finally {
@@ -806,7 +806,7 @@ export default function PPDTSimulatorPage() {
           )}
 
           <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Transcribing live with AI
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Transcribing live
           </p>
         </div>
       )}

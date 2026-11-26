@@ -6,7 +6,7 @@ import { Share2 } from 'lucide-react';
 export function ShareButton() {
   const share = async () => {
     const url = window.location.origin;
-    const text = 'Practice the real SSB with PPDT, OIR and Lecturette under exam timers, plus AI OLQ reports, on SSB Arena.';
+    const text = 'Practice the real SSB with PPDT, OIR and Lecturette under exam timers, plus OLQ analysis, on SSB Arena.';
     if (navigator.share) {
       try {
         await navigator.share({ title: 'SSB Arena', text, url });

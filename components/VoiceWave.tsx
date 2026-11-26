@@ -4,14 +4,17 @@ import React, { useEffect, useRef } from 'react';
 
 interface Props {
   stream: MediaStream | null;
+  onLevel?: (level: number) => void; // called about 18 times a second while a stream is live
 }
 
 const BAR = 4;
 const GAP = 3;
 
 /** Live loudness graph (scrolling bars, newest on the right). Flat line when there is no mic stream. */
-export function VoiceWave({ stream }: Props) {
+export function VoiceWave({ stream, onLevel }: Props) {
   const ref = useRef<HTMLCanvasElement | null>(null);
+  const onLevelRef = useRef(onLevel);
+  onLevelRef.current = onLevel;
 
   useEffect(() => {
     const canvas = ref.current;
@@ -75,6 +78,7 @@ export function VoiceWave({ stream }: Props) {
         }
         const level = Math.min(1, Math.sqrt(sum / data.length) * 4.5);
         hist.push(level);
+        onLevelRef.current?.(level);
         if (hist.length > maxBars) hist.shift();
         paint();
       };

@@ -212,7 +212,7 @@ export function ProCheckoutModal({
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            Unlimited 1-Min Narration Audio Storage &amp; AI Transcripts
+            Unlimited 1-Min Narration Audio Storage &amp; Transcripts
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />

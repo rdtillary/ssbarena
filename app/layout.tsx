@@ -9,7 +9,7 @@ import { FloatingContact } from '@/components/FloatingContact';
 export const metadata: Metadata = {
   title: 'SSB Arena — SSB Simulator for PPDT, OIR & Lecturette',
   description:
-    'The SSB simulator: real 30-second PPDT perception, paper story writing, 1-minute voice narration with AI transcription, timed OIR speed drills, Lecturette and AI OLQ reports.',
+    'The SSB simulator: real 30-second PPDT perception, paper story writing, 1-minute voice narration with live transcription, timed OIR speed drills, Lecturette assessment and OLQ analysis.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -79,7 +79,7 @@ export default function ReportPage() {
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-bold uppercase text-amber-400">AI OLQ Report</p>
+                <p className="text-[11px] font-bold uppercase text-amber-400">OLQ Analysis</p>
                 <h1 className="text-lg font-black text-white">{title || 'PPDT Narration'}</h1>
               </div>
               <div className="text-right shrink-0">
@@ -140,7 +140,7 @@ export default function ReportPage() {
           </div>
 
           <p className="text-[11px] text-slate-500 text-center">
-            AI-generated practice feedback based on your narration. It is not an official SSB assessment.
+            Practice feedback based on your narration. It is not an official SSB assessment.
           </p>
         </>
       )}

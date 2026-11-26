@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { getTopic } from '@/lib/lecturette-topics';
+import { assessLecturette, type LecturetteAssessment, type VoiceStats } from '@/lib/lecturette-assessment';
 import { analyseWords, flat, STT_PROMPT, transcribe, type RawWord } from '@/lib/speech-analysis';
 
 export const runtime = 'nodejs';
@@ -32,6 +33,15 @@ export async function POST(req: Request) {
   const duration = Math.min(600, Math.max(0, Math.round(Number(form.get('duration_seconds')) || 0)));
   const visitorRaw = String(form.get('visitor_id') || '');
   const visitor = VID.test(visitorRaw) ? visitorRaw : null;
+  let voice: VoiceStats | null = null;
+  try { voice = JSON.parse(String(form.get('voice') || 'null')); } catch {}
+  // The other topics that were on the card, so the assessment can judge the choice.
+  let optionIds: number[] = [];
+  try { optionIds = (JSON.parse(String(form.get('option_ids') || '[]')) as number[]).map(Number).slice(0, 6); } catch {}
+  const otherOptions = optionIds
+    .filter((id) => id !== topic?.id)
+    .map((id) => getTopic(id)?.title)
+    .filter((t): t is string => Boolean(t));
   if (!topic) return NextResponse.json({ error: 'Unknown topic.' }, { status: 400 });
   if (!(audio instanceof File) || audio.size < 3000) {
     return NextResponse.json({ error: 'No audio was recorded. Allow microphone access and try again.' }, { status: 400 });
@@ -75,6 +85,34 @@ export async function POST(req: Request) {
     const valid = a.wordCount >= 15;
     const wpm = a.lastEnd > 0 ? Math.round((a.wordCount / Math.max(10, a.lastEnd)) * 60) : 0;
 
+    // Assess on the five GTO criteria (needs enough speech to judge).
+    let assessment: LecturetteAssessment | null = null;
+    let assessmentNote = '';
+    if (a.wordCount >= 40) {
+      try {
+        assessment = await assessLecturette({
+          transcript,
+          topic: topic.title,
+          otherOptions,
+          wordCount: a.wordCount,
+          wpm,
+          lastEnd: a.lastEnd,
+          durationSeconds: duration,
+          fillerCount: a.fillerCount,
+          stammerCount: a.stammerCount,
+          pauseCount: a.pauseCount,
+          longPauses: a.longPauses,
+          longestPause: a.longestPause,
+          voice,
+        });
+      } catch (e: any) {
+        console.error('lecturette assessment failed', e);
+        assessmentNote = 'Your transcript is saved, but the assessment could not be completed. Please try again later.';
+      }
+    } else if (valid) {
+      assessmentNote = 'Too short to assess. Speak for at least 2 minutes to get a full assessment.';
+    }
+
     // Save the audio.
     const baseType = (audio.type || 'audio/webm').split(';')[0];
     const ext = baseType.includes('mp4') ? 'mp4' : baseType.includes('ogg') ? 'ogg' : 'webm';
@@ -104,13 +142,22 @@ export async function POST(req: Request) {
       longest_pause: a.longestPause,
       tokens: a.tokens,
     };
-    const { data: saved, error } = await admin.from('lecturette_attempts').insert(row).select('*').single();
-    if (error) console.error('lecturette save failed', error.message);
+    let { data: saved, error } = await admin
+      .from('lecturette_attempts')
+      .insert({ ...row, assessment, total_score: assessment?.total ?? null })
+      .select('*')
+      .single();
+    if (error) {
+      // Assessment columns missing (migration not run yet): save without them so nothing is lost.
+      console.error('lecturette save failed', error.message);
+      ({ data: saved, error } = await admin.from('lecturette_attempts').insert(row).select('*').single());
+      if (error) console.error('lecturette save retry failed', error.message);
+    }
 
     return NextResponse.json({
-      attempt: saved || { ...row, id: `tmp-${Date.now()}`, created_at: new Date().toISOString() },
+      attempt: { ...(saved || { ...row, id: `tmp-${Date.now()}`, created_at: new Date().toISOString() }), assessment, total_score: assessment?.total ?? null },
       message: valid
-        ? undefined
+        ? assessmentNote || undefined
         : a.wordCount === 0
         ? 'No speech was detected in your recording.'
         : 'Your lecturette was too short to count (under 15 words).',

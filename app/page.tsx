@@ -325,7 +325,7 @@ export default function HomePage() {
               <p className="text-sm font-bold text-white mt-1">1-Min Voice Narration</p>
             </div>
             <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-              <p className="text-xs font-bold text-sky-400 uppercase">Step 3 • AI OLQ Report</p>
+              <p className="text-xs font-bold text-sky-400 uppercase">Step 3 • OLQ Analysis</p>
               <p className="text-sm font-bold text-white mt-1">Compare with Recommended Story</p>
             </div>
           </div>
@@ -473,7 +473,7 @@ export default function HomePage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-black text-white">
-                Saved Narration Audio &amp; AI Reports ({attempts.length})
+                Saved Narration Audio &amp; Reports ({attempts.length})
               </h2>
               {!user && (
                 <button
