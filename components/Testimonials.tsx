@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { X, BadgeCheck, Quote } from 'lucide-react';
+import React from 'react';
+import { BadgeCheck, Quote } from 'lucide-react';
 
 const REVIEWS = [
   {
     name: 'Rahul Singh',
     tag: 'Best spend',
     quote: 'Sir this was my best spend recently, so much value I got. I am seeing improvement.',
-    proof: '/reviews/rahul.jpg',
     hue: 'from-amber-300 to-amber-600',
   },
   {
@@ -16,7 +15,6 @@ const REVIEWS = [
     tag: '23 PPDT stories done',
     quote:
       'I have already completed 23 PPDT stories and I see a clear difference in my writing and narration. I am a fresher and I feel confident that I would get screened in.',
-    proof: '/reviews/sumit.jpg',
     hue: 'from-sky-300 to-sky-600',
   },
   {
@@ -24,7 +22,6 @@ const REVIEWS = [
     tag: 'Fewer filler words',
     quote:
       'I am using SSB Arena for a week. It’s so good, especially the automatic speech recognition. I have reduced the filler words and gaps in my narration. It was worth it.',
-    proof: '/reviews/reena.jpg',
     hue: 'from-emerald-300 to-emerald-600',
   },
 ];
@@ -36,15 +33,6 @@ const initials = (n: string) =>
     .join('');
 
 export function Testimonials() {
-  const [open, setOpen] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(null);
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
-
   return (
     <section aria-label="What aspirants say" className="space-y-4">
       <div className="text-center">
@@ -61,22 +49,9 @@ export function Testimonials() {
             <span className="self-start px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] font-black tracking-wider uppercase">
               {r.tag}
             </span>
-            <p className="mt-4 text-[15px] leading-relaxed text-slate-100 font-medium flex-1">“{r.quote}”</p>
+            <p className="mt-4 mb-5 text-[15px] leading-relaxed text-slate-100 font-medium flex-1">“{r.quote}”</p>
 
-            <button
-              type="button"
-              onClick={() => setOpen(r.proof)}
-              className="mt-5 group relative overflow-hidden rounded-xl border border-slate-700/70 text-left"
-              aria-label={`View ${r.name}'s original message`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={r.proof} alt={`Message from ${r.name}`} loading="lazy" className="w-full h-24 object-cover object-top opacity-80 group-hover:opacity-100 transition" />
-              <span className="absolute inset-x-0 bottom-0 px-3 py-1.5 bg-gradient-to-t from-slate-950/95 to-transparent text-[10px] font-bold text-amber-300 tracking-wide">
-                TAP TO VIEW ORIGINAL MESSAGE
-              </span>
-            </button>
-
-            <div className="mt-4 pt-4 border-t border-slate-800 flex items-center gap-3">
+            <div className="pt-4 border-t border-slate-800 flex items-center gap-3">
               <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${r.hue} text-slate-950 font-black text-sm flex items-center justify-center ring-2 ring-white/10`}>
                 {initials(r.name)}
               </div>
@@ -91,15 +66,6 @@ export function Testimonials() {
         ))}
       </div>
 
-      {open && (
-        <div role="dialog" aria-modal="true" onClick={() => setOpen(null)} className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <button type="button" aria-label="Close" onClick={() => setOpen(null)} className="absolute top-4 right-4 p-2 rounded-full bg-slate-900 border border-slate-700 text-white">
-            <X className="w-5 h-5" />
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={open} alt="Original message" onClick={(e) => e.stopPropagation()} className="max-w-full max-h-[85vh] rounded-2xl border border-slate-700 shadow-2xl" />
-        </div>
-      )}
     </section>
   );
 }
