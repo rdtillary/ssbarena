@@ -334,23 +334,6 @@ export default function HomePage() {
 
         {activeTab === 'home' && <Testimonials />}
 
-        {activeTab === 'home' && (
-          <div className="grid sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-              <p className="text-xs font-bold text-amber-400 uppercase">Step 1 • Paper Story</p>
-              <p className="text-sm font-bold text-white mt-1">Write on Real Paper (4 Min)</p>
-            </div>
-            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-              <p className="text-xs font-bold text-emerald-400 uppercase">Step 2 • Auto Transcript</p>
-              <p className="text-sm font-bold text-white mt-1">1-Min Voice Narration</p>
-            </div>
-            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-              <p className="text-xs font-bold text-sky-400 uppercase">Step 3 • OLQ Analysis</p>
-              <p className="text-sm font-bold text-white mt-1">Compare with Recommended Story</p>
-            </div>
-          </div>
-        )}
-
         {activeTab === 'ppdt' && (
           <section className="space-y-3">
             <div className="flex items-center justify-between">
