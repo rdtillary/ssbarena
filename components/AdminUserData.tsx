@@ -36,6 +36,12 @@ interface Stats {
   recordingUsers: number;
   days: { date: string; visits: number }[];
 }
+interface Growth {
+  days: { date: string; signups: number; pro: number }[];
+  totalUsers: number;
+  activePro: number;
+  proReady: boolean;
+}
 interface Group {
   key: string;
   title: string;
@@ -310,7 +316,41 @@ function GroupList({
   );
 }
 
+function GrowthChart({ growth }: { growth: Growth }) {
+  const max = Math.max(1, ...growth.days.flatMap((d) => [d.signups, d.pro]));
+  const bar = (value: number, color: string) => (
+    <div className="flex-1 flex flex-col items-center justify-end h-full gap-1">
+      <span className="text-[9px] text-slate-400">{value || ''}</span>
+      <div className={`w-full rounded-t ${color}`} style={{ height: `${(value / max) * 80}%`, minHeight: value ? 3 : 1 }} />
+    </div>
+  );
+  return (
+    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+      <p className="text-xs font-bold text-white">Sign-ups and new Pro users, last 14 days</p>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 mb-3 text-[11px] text-slate-400">
+        <span><i className="inline-block w-2 h-2 rounded-sm bg-sky-400 mr-1" />Signed up ({growth.totalUsers} total)</span>
+        <span><i className="inline-block w-2 h-2 rounded-sm bg-emerald-400 mr-1" />Got Pro ({growth.activePro} active now)</span>
+      </div>
+      <div className="flex items-end gap-1.5 h-28">
+        {growth.days.map((d) => (
+          <div key={d.date} className="flex-1 flex items-end gap-px h-full" title={`${d.date}: ${d.signups} signed up, ${d.pro} got Pro`}>
+            {bar(d.signups, 'bg-sky-400')}
+            {bar(d.pro, 'bg-emerald-400')}
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-1.5 mt-1">
+        {growth.days.map((d) => (
+          <span key={d.date} className="flex-1 text-center text-[8px] text-slate-500">{d.date.slice(8)}</span>
+        ))}
+      </div>
+      {!growth.proReady && <p className="mt-2 text-xs text-amber-400">Run the pro_since SQL in Supabase to see Pro users.</p>}
+    </div>
+  );
+}
+
 export function AdminUserData() {
+  const [growth, setGrowth] = useState<Growth | null>(null);
   const [tab, setTab] = useState<'users' | 'recordings'>('users');
   const [stats, setStats] = useState<Stats | null>(null);
   const [recs, setRecs] = useState<Item[]>([]);
@@ -330,6 +370,7 @@ export function AdminUserData() {
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.error || 'Could not load data');
       setStats(d.stats);
+      setGrowth(d.growth || null);
       setRecs(d.recordings || []);
       setLegacy(d.legacy || []);
       setTotal(d.total || 0);
@@ -445,6 +486,8 @@ export function AdminUserData() {
               ))}
             </div>
           </div>
+
+          {growth && <GrowthChart growth={growth} />}
         </>
       )}
 

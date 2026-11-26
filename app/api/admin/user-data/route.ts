@@ -139,7 +139,35 @@ export async function GET(req: Request) {
     };
   });
 
+  // ---- new sign-ups and new Pro users per day (Indian time), last 14 days ----
+  const istDate = (t: number) => new Date(t).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+  const countOn = async (column: 'created_at' | 'pro_since', date: string) => {
+    const start = new Date(`${date}T00:00:00+05:30`).getTime();
+    const { count } = await admin
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .gte(column, new Date(start).toISOString())
+      .lt(column, new Date(start + DAY).toISOString());
+    return count || 0;
+  };
+  // Fails until the pro_since SQL has been run.
+  const { error: proError } = await admin.from('profiles').select('pro_since').limit(1);
+  const growthDays = await Promise.all(
+    Array.from({ length: 14 }, (_, i) => istDate(now - (13 - i) * DAY)).map(async (date) => ({
+      date,
+      signups: await countOn('created_at', date),
+      pro: proError ? 0 : await countOn('pro_since', date),
+    }))
+  );
+  const { count: totalUsers } = await admin.from('profiles').select('id', { count: 'exact', head: true });
+  const { count: activePro } = await admin
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('is_pro', true)
+    .or(`pro_expires_at.is.null,pro_expires_at.gt.${new Date(now).toISOString()}`);
+
   return NextResponse.json({
+    growth: { days: growthDays, totalUsers: totalUsers || 0, activePro: activePro || 0, proReady: !proError },
     stats: {
       totalVisits: totalVisits || 0,
       uniqueVisitors: uniqueAll,
