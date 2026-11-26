@@ -28,8 +28,8 @@ export function FloatingContact() {
     };
   }, [supabase]);
 
-  // Hidden on WAT and TAT drills so it never covers the word or the Next button.
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/wat') || pathname?.startsWith('/tat')) return null;
+  // Hidden on WAT, TAT and SRT drills so it never covers the word or the Next button.
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/wat') || pathname?.startsWith('/tat') || pathname?.startsWith('/srt')) return null;
 
   return (
     <>
@@ -38,7 +38,7 @@ export function FloatingContact() {
         onClick={() => setOpen(true)}
         aria-label="Contact Recommended Candidates"
         title="Contact Recommended Candidates"
-        className="fab-contact group fixed z-40 right-4 bottom-[72px] md:bottom-6 md:right-6 w-14 h-14 rounded-full flex items-center justify-center text-slate-950 hover:scale-105 active:scale-95"
+        className="fab-contact group fixed z-40 right-4 bottom-[72px] lg:bottom-6 md:right-6 w-14 h-14 rounded-full flex items-center justify-center text-slate-950 hover:scale-105 active:scale-95"
       >
         <MessageCircle className="w-6 h-6 relative" strokeWidth={2.4} />
         <span className="pointer-events-none absolute right-16 whitespace-nowrap px-3 py-1.5 rounded-lg bg-slate-900 border border-amber-500/40 text-amber-300 text-xs font-bold opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition hidden md:block">

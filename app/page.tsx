@@ -10,6 +10,7 @@ import {
   Timer,
   PenTool,
   Images,
+  ListChecks,
   Archive,
   Shield,
   LogOut,
@@ -32,8 +33,9 @@ import { FeatureGrid } from '@/components/FeatureGrid';
 import { Testimonials } from '@/components/Testimonials';
 import { WatSection } from '@/components/WatSection';
 import { TatSection } from '@/components/TatSection';
+import { SrtSection } from '@/components/SrtSection';
 
-type Tab = 'home' | 'ppdt' | 'tat' | 'wat' | 'oir' | 'vault';
+type Tab = 'home' | 'ppdt' | 'tat' | 'wat' | 'srt' | 'oir' | 'vault';
 
 export default function HomePage() {
   const supabase = createClient();
@@ -214,13 +216,13 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen pb-20 md:pb-10">
+    <div className="min-h-screen pb-20 lg:pb-10">
       <header className="sticky top-0 z-30 bg-[#090D16]/95 backdrop-blur border-b border-slate-800">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
           <Logo />
 
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
-            {(['home', 'ppdt', 'tat', 'wat', 'oir', 'vault'] as const).map((tab) => (
+          <nav className="hidden lg:flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+            {(['home', 'ppdt', 'tat', 'wat', 'srt', 'oir', 'vault'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -302,6 +304,10 @@ export default function HomePage() {
               }}
               onTat={() => {
                 setActiveTab('tat');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onSrt={() => {
+                setActiveTab('srt');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               onWat={() => {
@@ -442,6 +448,8 @@ export default function HomePage() {
 
         {activeTab === 'wat' && <WatSection isPro={isPro} onUnlock={() => setProOpen(true)} />}
 
+        {activeTab === 'srt' && <SrtSection isPro={isPro} onUnlock={() => setProOpen(true)} />}
+
         {activeTab === 'oir' && (
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white">OIR Speed Drills (10-Min Timer)</h2>
@@ -525,6 +533,7 @@ export default function HomePage() {
                       <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-black">
                         {att.total_score} / {att.max_score}
                         {att.attempt_type === 'WAT' && ' words'}
+                        {att.attempt_type === 'SRT' && ' answered'}
                       </span>
                     </div>
 
@@ -554,12 +563,13 @@ export default function HomePage() {
         )}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-slate-950/95 backdrop-blur border-t border-slate-800 grid grid-cols-7 h-14">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-slate-950/95 backdrop-blur border-t border-slate-800 grid grid-cols-8 h-14">
         {[
           { id: 'home', label: 'Home', icon: Shield },
           { id: 'ppdt', label: 'PPDT', icon: Play },
           { id: 'tat', label: 'TAT', icon: Images },
           { id: 'wat', label: 'WAT', icon: PenTool },
+          { id: 'srt', label: 'SRT', icon: ListChecks },
           { id: 'oir', label: 'OIR', icon: Timer },
           { id: 'vault', label: 'Vault', icon: Archive },
         ].map((item) => {
@@ -569,7 +579,7 @@ export default function HomePage() {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id as Tab)}
-              className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold ${
+              className={`flex flex-col items-center justify-center gap-0.5 text-[9px] font-bold ${
                 active ? 'text-amber-400' : 'text-slate-400'
               }`}
             >
@@ -580,7 +590,7 @@ export default function HomePage() {
         })}
         <Link
           href="/lecturette"
-          className="flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold text-slate-400"
+          className="flex flex-col items-center justify-center gap-0.5 text-[9px] font-bold text-slate-400"
         >
           <Mic2 className="w-4 h-4" />
           Lecturette

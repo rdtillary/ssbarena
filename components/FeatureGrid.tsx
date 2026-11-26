@@ -146,25 +146,39 @@ const IconTat = () => (
   </svg>
 );
 
+const IconSrt = () => (
+  <svg viewBox="0 0 96 96" className="w-full h-full" aria-hidden>
+    <Defs id="sr" />
+    <circle cx="48" cy="50" r="42" fill="url(#sr-glow)" />
+    <rect x="18" y="14" width="60" height="70" rx="10" fill="url(#sr-slate)" />
+    <rect x="24" y="22" width="48" height="56" rx="6" fill="#E2E8F0" />
+    <rect x="36" y="9" width="24" height="14" rx="6" fill="url(#sr-gold)" />
+    <path d="M31 38l4 4 7-8M31 54l4 4 7-8" stroke="#B45309" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M49 39h16M49 55h16M31 68h34" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
+  </svg>
+);
+
 interface Props {
+  onSrt: () => void;
   onTat: () => void;
   onWat: () => void;
   onPpdt: () => void;
   onOir: () => void;
 }
 
-export function FeatureGrid({ onPpdt, onTat, onWat, onOir }: Props) {
+export function FeatureGrid({ onPpdt, onTat, onWat, onSrt, onOir }: Props) {
   const tiles: Tile[] = [
     { key: 'ppdt', label: 'PPDT', caption: 'Picture · Story · Voice', icon: <IconPpdt />, onClick: onPpdt },
     { key: 'oir', label: 'OIR', caption: '10-min speed drills', icon: <IconOir />, onClick: onOir },
     { key: 'tat', label: 'TAT', caption: '12 slides · 5 mocks', icon: <IconTat />, onClick: onTat },
     { key: 'wat', label: 'WAT', caption: '60 words · Type or write', icon: <IconWat />, onClick: onWat },
+    { key: 'srt', label: 'SRT', caption: '60 situations · 30 min', icon: <IconSrt />, onClick: onSrt },
     { key: 'olq', label: 'OLQ Analysis', caption: 'Report on 15 OLQs', icon: <IconOlq />, href: '/olq' },
     { key: 'lect', label: 'Lecturette', caption: 'Spin a topic · 3 min', icon: <IconLecturette />, href: '/lecturette' },
   ];
 
   return (
-    <section aria-label="Features" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+    <section aria-label="Features" className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
       {tiles.map((t) => {
         const inner = (
           <>
@@ -178,7 +192,9 @@ export function FeatureGrid({ onPpdt, onTat, onWat, onOir }: Props) {
             <span className="text-[10.5px] text-slate-400 font-medium mt-0.5">{t.caption}</span>
           </>
         );
-        const cls = 'feature-tile group relative flex flex-col items-center text-center pt-5 pb-4 px-2';
+        const cls = `feature-tile group relative flex flex-col items-center text-center pt-5 pb-4 px-2${
+          t.key === 'lect' ? ' col-span-2 sm:col-span-1' : ''
+        }`;
         return t.href ? (
           <Link key={t.key} href={t.href} className={cls}>
             {inner}
