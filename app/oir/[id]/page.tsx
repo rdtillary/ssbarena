@@ -114,7 +114,7 @@ export default function OIRDrillPage() {
     const mins = Math.floor(timeUsed / 60);
     const secs = timeUsed % 60;
     const text = encodeURIComponent(
-      `🎯 SSB Arena OIR Drill Score: ${score}/${questions.length} in ${mins}m ${secs}s!\nCan you beat my Stage-1 OIR speed? Practice free: ${window.location.origin}`
+      `🎯 SSB Arena OIR Drill Score: ${score}/${questions.length} in ${mins}m ${secs}s!\nCan you beat my OIR speed? Practice free: ${window.location.origin}`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
@@ -208,7 +208,7 @@ export default function OIRDrillPage() {
         <div className="space-y-4">
           <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-bold text-emerald-400 uppercase">OIR Screening Result</p>
+              <p className="text-xs font-bold text-emerald-400 uppercase">OIR Result</p>
               <h2 className="text-2xl font-black text-white">
                 Score: {score} / {questions.length}
               </h2>

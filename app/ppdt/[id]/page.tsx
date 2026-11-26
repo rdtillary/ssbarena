@@ -532,7 +532,7 @@ export default function PPDTSimulatorPage() {
         ) : phase === 'NARRATE_READY' ? (
           <span className="text-xs font-bold text-amber-400">READY</span>
         ) : (
-          <span className="text-xs font-bold text-emerald-400">STAGE 1</span>
+          <span className="text-xs font-bold text-emerald-400">SSB SIM</span>
         )}
       </div>
 

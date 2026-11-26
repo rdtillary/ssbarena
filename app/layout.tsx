@@ -7,9 +7,9 @@ import { AuthGate } from '@/components/onboarding/AuthGate';
 import { FloatingContact } from '@/components/FloatingContact';
 
 export const metadata: Metadata = {
-  title: 'SSB Arena — Stage-1 PPDT & OIR Screening Simulator',
+  title: 'SSB Arena — SSB Simulator for PPDT, OIR & Lecturette',
   description:
-    'Practice real 30-second PPDT perception, paper story writing, 1-minute voice narration with AI transcription, and timed OIR speed drills.',
+    'The SSB simulator: real 30-second PPDT perception, paper story writing, 1-minute voice narration with AI transcription, timed OIR speed drills, Lecturette and AI OLQ reports.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -55,7 +55,7 @@ export function SignUpScreen() {
         <div className="ob-brand"><Logo /></div>
         <h1 className="ob-title">{isSignUp ? 'Create your account' : 'Welcome back'}</h1>
         <p className="ob-sub">
-          {isSignUp ? 'Sign up to start your SSB screening practice.' : 'Sign in to continue your practice.'}
+          {isSignUp ? 'Sign up to start your SSB practice.' : 'Sign in to continue your practice.'}
         </p>
 
         <form onSubmit={submit}>

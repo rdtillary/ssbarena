@@ -1,6 +1,6 @@
-# SSB Arena — Stage-1 Screening Simulator (PPDT & OIR)
+# SSB Arena — SSB Simulator
 
-Mobile-first SSB Stage-1 screening simulator built with **Next.js 14 (App Router), TypeScript, Tailwind CSS, Supabase, and Razorpay (₹99/month autopay Pro subscription)**.
+Mobile-first SSB simulator built with **Next.js 14 (App Router), TypeScript, Tailwind CSS, Supabase, and Razorpay (₹99/month autopay Pro subscription)**.
 
 ## Features
 - **Strict 4-Phase PPDT Simulator:**

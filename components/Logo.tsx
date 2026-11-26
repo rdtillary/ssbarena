@@ -40,7 +40,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
         </span>
         {!compact && (
           <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-0.5">
-            Stage-1 Screening Lab
+            SSB Simulator
           </p>
         )}
       </div>

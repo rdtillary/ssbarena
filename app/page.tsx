@@ -160,7 +160,7 @@ export default function HomePage() {
         NO TYPING • REAL PAPER &amp; VOICE NARRATION FLOW
       </span>
       <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-        Practice Real Day-1 SSB Screening Under Exact Exam Timers.
+        Practice the Real SSB Under Exact Exam Timers.
       </h1>
 
       <div className="mt-6 flex flex-wrap gap-3">

@@ -126,7 +126,7 @@ export const DEFAULT_PPDT_SCENARIOS: PPDTScenario[] = [
 export const DEFAULT_OIR_SETS: OIRSet[] = [
   {
     id: 1,
-    title: 'OIR Speed Set 01 — Stage-1 Screening Benchmark (20 Qs)',
+    title: 'OIR Speed Set 01 — Benchmark (20 Qs)',
     is_free: true,
     duration_seconds: 600,
     questions: [
