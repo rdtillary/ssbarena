@@ -18,7 +18,7 @@ const REVIEWS = [
     hue: 'from-sky-300 to-sky-600',
   },
   {
-    name: 'Reena Mishra',
+    name: 'Amit Kumar',
     tag: 'Fewer filler words',
     quote:
       'I am using SSB Arena for a week. It’s so good, especially the automatic speech recognition. I have reduced the filler words and gaps in my narration. It was worth it.',
