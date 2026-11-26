@@ -27,6 +27,7 @@ import { Carousel } from '@/components/Carousel';
 import { RecommendedSlide } from '@/components/RecommendedSlide';
 import { ReportingTimer } from '@/components/ReportingTimer';
 import { FeatureGrid } from '@/components/FeatureGrid';
+import { Testimonials } from '@/components/Testimonials';
 
 export default function HomePage() {
   const supabase = createClient();
@@ -310,6 +311,8 @@ export default function HomePage() {
             Keep a blank sheet &amp; pen ready before starting PPDT
           </p>
         </div>
+
+        {activeTab === 'home' && <Testimonials />}
 
         {activeTab === 'home' && (
           <div className="grid sm:grid-cols-3 gap-4">
