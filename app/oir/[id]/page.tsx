@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, AlertTriangle, CheckCircle2, Share2 } from 'lucide-react';
+import { ProUpsellPopup } from '@/components/ProUpsellPopup';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_OIR_SETS } from '@/lib/seed-data';
 import { OIRSet } from '@/lib/types';
@@ -131,6 +132,8 @@ export default function OIRDrillPage() {
           {String(totalSecondsLeft % 60).padStart(2, '0')}
         </span>
       </div>
+
+      <ProUpsellPopup show={submitted} />
 
       {!submitted ? (
         <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
