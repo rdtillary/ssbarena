@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { X, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { PRO_PRICE_INR } from '@/lib/config';
@@ -8,10 +9,23 @@ import { ProCheckoutModal } from '@/components/ProCheckoutModal';
 import { AuthModal } from '@/components/AuthModal';
 
 /**
- * Shown after every completed test (OIR, PPDT, WAT, SRT, TAT, Lecturette) to non-Pro users.
- * Render it with `show` = true once the test is finished. Pro users never see it.
+ * Go Pro popup for non-Pro users. A finished test only sets a flag (ProUpsellMarker);
+ * the popup (ProUpsellPopup, mounted once in the layout) appears when the user leaves the
+ * test/result screens, e.g. goes Home or Back. Pro users never see it.
  */
-export function ProUpsellPopup({ show }: { show: boolean }) {
+const FLAG = 'ssb_pro_popup';
+const TEST_PATHS = ['/oir', '/ppdt', '/wat', '/srt', '/tat', '/lecturette'];
+
+/** Render inside a test page; `done` = true once the test is finished. */
+export function ProUpsellMarker({ done }: { done: boolean }) {
+  useEffect(() => {
+    if (!done) return;
+    try { sessionStorage.setItem(FLAG, '1'); } catch {}
+  }, [done]);
+  return null;
+}
+
+function UpsellPopup({ show }: { show: boolean }) {
   const [supabase] = useState(() => createClient());
   const [user, setUser] = useState<any>(null);
   const [isPro, setIsPro] = useState<boolean | null>(null);
@@ -97,4 +111,23 @@ export function ProUpsellPopup({ show }: { show: boolean }) {
       />
     </>
   );
+}
+
+/** Mount once in the root layout. */
+export function ProUpsellPopup() {
+  const pathname = usePathname() || '/';
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const inTest = TEST_PATHS.some((t) => pathname === t || pathname.startsWith(t + '/'));
+    if (inTest) return;
+    try {
+      if (sessionStorage.getItem(FLAG)) {
+        sessionStorage.removeItem(FLAG);
+        setShow(true);
+      }
+    } catch {}
+  }, [pathname]);
+
+  return <UpsellPopup show={show} />;
 }

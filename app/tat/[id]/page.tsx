@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lock, Mic, RotateCcw, Square } from 'lucide-react';
-import { ProUpsellPopup } from '@/components/ProUpsellPopup';
+import { ProUpsellMarker } from '@/components/ProUpsellPopup';
 import { createClient } from '@/lib/supabase/client';
 import {
   getTatSet,
@@ -310,7 +310,7 @@ export default function TatPage() {
 
   return shell(
     <div className="space-y-4 py-8">
-      <ProUpsellPopup show={!pending} />
+      <ProUpsellMarker done={!pending} />
       <h1 className="text-3xl font-black text-white">Mock complete</h1>
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
         {marked.length > 0 ? (

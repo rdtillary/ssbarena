@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ProUpsellPopup } from '@/components/ProUpsellPopup';
+import { ProUpsellMarker } from '@/components/ProUpsellPopup';
 import { createClient } from '@/lib/supabase/client';
 import { getSrtSet, SRT_SECONDS } from '@/lib/srt';
 import { SRT_CSS } from '@/components/srt-styles';
@@ -248,7 +248,7 @@ export default function SrtPage() {
 
   return shell(
     <div style={{ paddingTop: 36 }}>
-      <ProUpsellPopup show />
+      <ProUpsellMarker done={true} />
       <p className="sr-eyebrow">Test complete</p>
       <h1 className="sr-h1">{mode === 'type' ? <><em>{answered}</em> of {total} answered</> : <>Check your <em>sheet</em></>}</h1>
       <p className="sr-lead">

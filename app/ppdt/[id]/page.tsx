@@ -12,7 +12,7 @@ import {
   Sparkles,
   RotateCcw,
 } from 'lucide-react';
-import { ProUpsellPopup } from '@/components/ProUpsellPopup';
+import { ProUpsellMarker } from '@/components/ProUpsellPopup';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS } from '@/lib/seed-data';
 import { CharacterPin, EvaluationResult, PPDTScenario } from '@/lib/types';
@@ -812,7 +812,7 @@ export default function PPDTSimulatorPage() {
         </div>
       )}
 
-      <ProUpsellPopup show={phase === 'REPORT' && !evaluating} />
+      <ProUpsellMarker done={phase === 'REPORT' && !evaluating} />
 
       {phase === 'REPORT' && (
         <div className="space-y-5">

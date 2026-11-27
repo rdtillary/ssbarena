@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, AlertTriangle, ChevronDown, ChevronUp, Mic, RotateCcw, Sparkles } from 'lucide-react';
-import { ProUpsellPopup } from '@/components/ProUpsellPopup';
+import { ProUpsellMarker } from '@/components/ProUpsellPopup';
 import { createClient } from '@/lib/supabase/client';
 import { SpinWheel } from '@/components/SpinWheel';
 import { VoiceWave } from '@/components/VoiceWave';
@@ -519,7 +519,7 @@ export default function LecturettePage() {
         </div>
       )}
 
-      <ProUpsellPopup show={phase === 'RESULT'} />
+      <ProUpsellMarker done={phase === 'RESULT'} />
 
       {phase === 'RESULT' && (
         <div className="space-y-4">

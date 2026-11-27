@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Keyboard, PenTool, Lock, CheckCircle2, RotateCcw } from 'lucide-react';
-import { ProUpsellPopup } from '@/components/ProUpsellPopup';
+import { ProUpsellMarker } from '@/components/ProUpsellPopup';
 import { createClient } from '@/lib/supabase/client';
 import { getWatSet, WAT_SECONDS, WAT_SETS } from '@/lib/wat-words';
 import { GATE_CSS } from '@/components/gate-styles';
@@ -323,7 +323,7 @@ export default function WatPage() {
   return shell(
     <>
       {top}
-      <ProUpsellPopup show />
+      <ProUpsellMarker done={true} />
       <div className="py-8">
         <div className="gt-in flex items-center gap-2 text-emerald-400">
           <CheckCircle2 className="h-5 w-5" />

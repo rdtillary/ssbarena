@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { ReferralClaim } from '@/components/ReferralClaim';
 import { VisitTracker } from '@/components/VisitTracker';
 import { AuthGate } from '@/components/onboarding/AuthGate';
+import { ProUpsellPopup } from '@/components/ProUpsellPopup';
 import { FloatingContact } from '@/components/FloatingContact';
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthGate>
             {children}
             <FloatingContact />
+            <ProUpsellPopup />
           </AuthGate>
         </div>
         <Footer />
