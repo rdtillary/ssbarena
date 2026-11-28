@@ -259,7 +259,7 @@ export function ProCheckoutModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full max-h-[90dvh] overflow-y-auto p-6 relative shadow-2xl">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full max-h-[92dvh] overflow-y-auto p-5 relative shadow-2xl">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
@@ -268,11 +268,11 @@ export function ProCheckoutModal({
           <X className="w-5 h-5" />
         </button>
 
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-semibold mb-3">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-semibold mb-2">
           <Sparkles className="w-3.5 h-3.5" /> PRO SUBSCRIPTION
         </div>
 
-        <h2 className="text-2xl font-black text-white">
+        <h2 className="text-xl font-black text-white">
           {showManage ? 'Your Pro Subscription' : 'Unlock All SSB Drills'}
         </h2>
         <p className="text-slate-400 text-sm mt-1">
@@ -288,11 +288,11 @@ export function ProCheckoutModal({
               : `Autopay is on: ₹${priceInr} is charged every month.${
                   sub!.current_end ? ` Next renewal around ${fmtDate(sub!.current_end)}.` : ''
                 }`
-            : 'Choose monthly autopay or a one-time Lifetime Pass.'}
+            : 'Pick a plan.'}
         </p>
 
         {!showManage && (
-          <div className="my-5 grid grid-cols-2 gap-3">
+          <div className="mt-3 grid grid-cols-2 gap-3">
             {(
               [
                 { id: 'monthly', price: priceInr, note: 'per month • autopay' },
@@ -307,59 +307,43 @@ export function ProCheckoutModal({
                   setError('');
                 }}
                 aria-pressed={plan === o.id}
-                className={`p-4 rounded-xl bg-slate-950 border text-left transition ${
+                className={`p-3 rounded-xl bg-slate-950 border text-left transition ${
                   plan === o.id ? 'border-amber-500' : 'border-slate-800 hover:border-slate-600'
                 }`}
               >
-                <span className="block text-3xl font-black text-amber-400">₹{o.price}</span>
+                <span className="block text-2xl font-black text-amber-400">₹{o.price}</span>
                 <span className="block text-slate-400 text-xs mt-1">{o.note}</span>
               </button>
             ))}
           </div>
         )}
 
-        <ul className="space-y-2.5 text-sm text-slate-300 my-5">
+        <ul className="space-y-1.5 text-[13px] text-slate-300 my-3">
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            All 50+ Real Hazy PPDT Scenes &amp; Recommended Stories
+            PPDT: 50+ scenes, stories &amp; narration transcripts
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            Unlimited 1-Min Narration Audio Storage &amp; Transcripts
+            OLQ report on all 15 qualities
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            OLQ Analysis Report on all 15 Officer Like Qualities
+            All OIR, TAT, WAT &amp; SRT sets
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            Full OIR Verbal &amp; Non-Verbal Speed Sets with Solutions
-          </li>
-          <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            All 5 TAT Mocks with story assessment
-          </li>
-          <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            All WAT practice sets (60 words each)
-          </li>
-          <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            All SRT sets (60 situations each)
-          </li>
-          <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            Unlimited Lecturette practice with assessment
+            Unlimited Lecturette practice
           </li>
           {!isLifetime && (showManage || lifetimeSelected) && (
             <>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                Lifetime Pass: personal mentor (a recommended candidate) till you become an officer
+                Lifetime: recommended-candidate mentor till you become an officer
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-                Lifetime Pass: lifetime access, no renewals
+                Lifetime access, no renewals
               </li>
             </>
           )}
@@ -381,7 +365,7 @@ export function ProCheckoutModal({
             <button
               onClick={handleLifetime}
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base transition disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base transition disabled:opacity-50"
             >
               {loading ? 'Opening Razorpay...' : `Get Lifetime Pass ₹${LIFETIME_PRICE_INR}`}
             </button>
@@ -404,7 +388,7 @@ export function ProCheckoutModal({
             <button
               onClick={handlePay}
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base transition disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base transition disabled:opacity-50"
             >
               {loading ? 'Opening Razorpay...' : `Subscribe ₹${priceInr}/month`}
             </button>
