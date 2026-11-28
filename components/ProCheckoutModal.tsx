@@ -259,7 +259,7 @@ export function ProCheckoutModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full max-h-[90dvh] overflow-y-auto p-6 relative shadow-2xl">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
@@ -273,7 +273,7 @@ export function ProCheckoutModal({
         </div>
 
         <h2 className="text-2xl font-black text-white">
-          {showManage ? 'Your Pro Subscription' : 'Unlock All PPDT & OIR Drills'}
+          {showManage ? 'Your Pro Subscription' : 'Unlock All SSB Drills'}
         </h2>
         <p className="text-slate-400 text-sm mt-1">
           {isLifetime
@@ -329,7 +329,27 @@ export function ProCheckoutModal({
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            OLQ Analysis Report on all 15 Officer Like Qualities
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             Full OIR Verbal &amp; Non-Verbal Speed Sets with Solutions
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            All 5 TAT Mocks with story assessment
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            All WAT practice sets (60 words each)
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            All SRT sets (60 situations each)
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            Unlimited Lecturette practice with assessment
           </li>
           {!isLifetime && (showManage || lifetimeSelected) && (
             <>

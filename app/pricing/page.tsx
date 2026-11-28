@@ -12,8 +12,9 @@ export default function PricingPage() {
         <div className="p-5 rounded-2xl bg-slate-900 border border-amber-500/50 space-y-2">
           <h2 className="text-lg font-bold text-amber-400">Pro Subscription — ₹{PRO_PRICE_INR} per month</h2>
           <p className="text-xs text-slate-300">
-            Full access to all PPDT scenarios, recommended candidate responses, voice narration
-            storage, OLQ analysis, and all OIR sets. Billed every month via UPI AutoPay or card
+            Full access to all PPDT scenarios and recommended responses, voice narration
+            storage, OLQ analysis, all OIR sets, TAT mocks, WAT and SRT sets, and unlimited
+            Lecturette practice. Billed every month via UPI AutoPay or card
             until you cancel. Cancel any time from the Pro screen on the website; you keep access
             until the end of the month you have paid for.
           </p>
