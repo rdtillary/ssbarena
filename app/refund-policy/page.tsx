@@ -1,4 +1,4 @@
-import { PRO_PRICE_INR } from '@/lib/pricing';
+import { PRO_PRICE_INR, LIFETIME_PRICE_INR } from '@/lib/pricing';
 
 export default function RefundPolicyPage() {
   return (
@@ -12,6 +12,10 @@ export default function RefundPolicyPage() {
         You can cancel autopay at any time from the Pro screen on the website. Cancelling stops
         future charges; you keep access until the end of the month you have already paid for. To
         avoid the next charge, cancel before your renewal date.
+      </p>
+      <p>
+        The ₹{LIFETIME_PRICE_INR} Lifetime Pass is a one-time payment and is generally
+        non-refundable once activated.
       </p>
       <p>
         If you experience a duplicate payment or a technical failure where your Pro Pass did not

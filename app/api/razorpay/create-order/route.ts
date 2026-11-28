@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createAdminSupabase } from '@/lib/supabase/admin';
-import { PRO_PRICE_INR } from '@/lib/config';
+import { LIFETIME_PRICE_INR } from '@/lib/config';
 
 const MIN_AMOUNT_PAISE = 100;
 
@@ -21,9 +21,19 @@ export async function POST() {
     return NextResponse.json({ error: 'Payments are not configured on the server.' }, { status: 500 });
   }
 
-  const amountPaise = Math.round(PRO_PRICE_INR * 100);
+  const amountPaise = Math.round(LIFETIME_PRICE_INR * 100);
   if (!Number.isFinite(amountPaise) || amountPaise < MIN_AMOUNT_PAISE) {
     return NextResponse.json({ error: 'Invalid amount (minimum is 100 paise).' }, { status: 400 });
+  }
+
+  const admin = createAdminSupabase();
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('is_pro, pro_expires_at')
+    .eq('id', user.id)
+    .single();
+  if (profile?.is_pro && !profile.pro_expires_at) {
+    return NextResponse.json({ error: 'You already have lifetime access.' }, { status: 409 });
   }
 
   let order;
@@ -42,12 +52,12 @@ export async function POST() {
     return NextResponse.json({ error: 'Could not create the payment order. Please try again.' }, { status: 500 });
   }
 
-  const admin = createAdminSupabase();
   const { error: insertError } = await admin.from('payment_orders').insert({
     user_id: user.id,
     razorpay_order_id: order.id,
     amount_paise: amountPaise,
     status: 'created',
+    plan: 'lifetime',
   });
   if (insertError) {
     console.error('Saving payment order failed', insertError.message);

@@ -1,6 +1,6 @@
 # SSB Arena — SSB Simulator
 
-Mobile-first SSB simulator built with **Next.js 14 (App Router), TypeScript, Tailwind CSS, Supabase, and Razorpay (₹99/month autopay Pro subscription)**.
+Mobile-first SSB simulator built with **Next.js 14 (App Router), TypeScript, Tailwind CSS, Supabase, and Razorpay (₹99/month autopay Pro subscription or ₹999 one-time Lifetime Pass)**.
 
 ## Features
 - **Strict 4-Phase PPDT Simulator:**

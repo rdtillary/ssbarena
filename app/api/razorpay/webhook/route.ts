@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createAdminSupabase } from '@/lib/supabase/admin';
-import { grantProPeriod, paidUntil, setProUntil } from '@/lib/pro';
+import { grantLifetime, grantProPeriod, paidUntil, setProUntil } from '@/lib/pro';
 import { recordCommission } from '@/lib/referral';
 
 export const runtime = 'nodejs';
@@ -43,7 +43,19 @@ export async function POST(req: Request) {
       .eq('razorpay_order_id', payment.order_id)
       .or('status.is.null,status.neq.paid')
       .select('user_id');
-    if (claimed && claimed.length > 0 && claimed[0].user_id) {
+
+    // Subscription charges have no row here, so they are skipped.
+    const { data: order, error: orderErr } = await admin
+      .from('payment_orders')
+      .select('user_id, plan')
+      .eq('razorpay_order_id', payment.order_id)
+      .maybeSingle();
+    if (orderErr) return NextResponse.json({ error: orderErr.message }, { status: 500 });
+
+    if (order?.plan === 'lifetime' && order.user_id) {
+      await grantLifetime(admin, order.user_id, payment.order_id);
+      await recordCommission(admin, order.user_id, payment.id, payment.amount);
+    } else if (claimed && claimed.length > 0 && claimed[0].user_id) {
       await grantProPeriod(admin, claimed[0].user_id);
       await recordCommission(admin, claimed[0].user_id, payment.id, payment.amount);
     }

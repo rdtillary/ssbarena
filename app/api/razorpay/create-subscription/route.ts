@@ -13,6 +13,15 @@ export async function POST() {
 
   const admin = createAdminSupabase();
 
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('is_pro, pro_expires_at')
+    .eq('id', user.id)
+    .single();
+  if (profile?.is_pro && !profile.pro_expires_at) {
+    return NextResponse.json({ error: 'You already have lifetime access.' }, { status: 409 });
+  }
+
   // One live subscription per account.
   const { data: existing } = await admin
     .from('subscriptions')

@@ -1,4 +1,4 @@
-import { PRO_PRICE_INR } from '@/lib/pricing';
+import { PRO_PRICE_INR, LIFETIME_PRICE_INR } from '@/lib/pricing';
 
 export default function TermsPage() {
   return (
@@ -14,6 +14,13 @@ export default function TermsPage() {
         you cancel. It grants personal, non-transferable digital access for each paid month. You
         can cancel at any time from the Pro screen; access continues until the end of the paid
         month. Sharing accounts or scraping test content is prohibited.
+      </p>
+      <p>
+        The Lifetime Pass is a one-time payment of ₹{LIFETIME_PRICE_INR}. It grants personal,
+        non-transferable access with no expiry for as long as SSB Arena operates, and a personal
+        mentor who is a recommended candidate until you become an officer. The mentor is assigned
+        after purchase and may be replaced if unavailable. Mentoring is guidance only; selection is
+        not guaranteed.
       </p>
     </main>
   );
