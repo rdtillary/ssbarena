@@ -1,4 +1,5 @@
 import { PRO_PERIOD_DAYS } from '@/lib/pricing';
+import { getRazorpay } from '@/lib/razorpay-sub';
 
 const DAY = 24 * 60 * 60 * 1000;
 // Small cushion so access never lapses a day before the next monthly charge lands.
@@ -22,7 +23,9 @@ export async function grantProPeriod(admin: any, userId: string) {
   if (cur.lifetime) return;
   const base = cur.end > Date.now() ? cur.end : Date.now();
   const newEnd = new Date(base + PRO_PERIOD_DAYS * DAY).toISOString();
-  await admin.from('profiles').update({ is_pro: true, pro_expires_at: newEnd }).eq('id', userId);
+  await admin.from('profiles').update({ is_pro: true, pro_expires_at: newEnd })
+    .eq('id', userId)
+    .or('is_pro.is.null,is_pro.eq.false,pro_expires_at.not.is.null');
 }
 
 /** Pro until the end of the paid cycle (plus a short grace). Never shortens existing access. */
@@ -30,7 +33,53 @@ export async function setProUntil(admin: any, userId: string, until: Date) {
   const cur = await readPro(admin, userId);
   if (cur.lifetime) return;
   const end = new Date(Math.max(cur.end, until.getTime())).toISOString();
-  await admin.from('profiles').update({ is_pro: true, pro_expires_at: end }).eq('id', userId);
+  await admin.from('profiles').update({ is_pro: true, pro_expires_at: end })
+    .eq('id', userId)
+    .or('is_pro.is.null,is_pro.eq.false,pro_expires_at.not.is.null');
+}
+
+/**
+ * Grants the paid Lifetime Pass for an order, once. Safe to call again (verify and webhook
+ * both do): `granted_at` is only set after access is saved, so a failure gets retried.
+ * Also stops monthly autopay so the user is not charged again.
+ */
+export async function grantLifetime(admin: any, userId: string, orderId: string) {
+  const { data: order, error: orderErr } = await admin
+    .from('payment_orders')
+    .select('granted_at')
+    .eq('razorpay_order_id', orderId)
+    .single();
+  if (orderErr) throw new Error(orderErr.message);
+  if (order.granted_at) return;
+
+  const { error } = await admin
+    .from('profiles')
+    .update({ is_pro: true, pro_expires_at: null, lifetime_pass_at: new Date().toISOString() })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+
+  const { data: subs } = await admin
+    .from('subscriptions')
+    .select('razorpay_subscription_id')
+    .eq('user_id', userId)
+    .in('status', ['created', 'authenticated', 'active', 'pending', 'halted', 'paused', 'cancelling']);
+  for (const s of subs || []) {
+    try {
+      await getRazorpay().subscriptions.cancel(s.razorpay_subscription_id, false); // false = right away
+      await admin
+        .from('subscriptions')
+        .update({ status: 'cancelled' })
+        .eq('razorpay_subscription_id', s.razorpay_subscription_id);
+    } catch (err: any) {
+      // The user can still cancel from the Pro screen.
+      console.error('Could not cancel autopay after lifetime purchase', s.razorpay_subscription_id, err?.error || err);
+    }
+  }
+
+  await admin
+    .from('payment_orders')
+    .update({ granted_at: new Date().toISOString() })
+    .eq('razorpay_order_id', orderId);
 }
 
 /** End date of a paid subscription cycle from Razorpay's `current_end` (unix seconds). */

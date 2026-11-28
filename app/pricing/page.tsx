@@ -1,4 +1,4 @@
-import { PRO_PRICE_INR } from '@/lib/pricing';
+import { PRO_PRICE_INR, LIFETIME_PRICE_INR } from '@/lib/pricing';
 
 export default function PricingPage() {
   return (
@@ -16,6 +16,13 @@ export default function PricingPage() {
             storage, OLQ analysis, and all OIR sets. Billed every month via UPI AutoPay or card
             until you cancel. Cancel any time from the Pro screen on the website; you keep access
             until the end of the month you have paid for.
+          </p>
+        </div>
+        <div className="p-5 rounded-2xl bg-slate-900 border border-amber-500/50 space-y-2">
+          <h2 className="text-lg font-bold text-amber-400">Lifetime Pass — ₹{LIFETIME_PRICE_INR} one-time</h2>
+          <p className="text-xs text-slate-300">
+            Everything in Pro with lifetime access and no renewals, plus a personal mentor who is a
+            recommended candidate, till you become an officer. Selection is not guaranteed.
           </p>
         </div>
       </div>

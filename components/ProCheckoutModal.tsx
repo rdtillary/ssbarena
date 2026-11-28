@@ -3,7 +3,8 @@
 import { isPhoneLogin } from '@/lib/login-id';
 import React, { useEffect, useState } from 'react';
 import { X, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
-import { PRO_PRICE_INR } from '@/lib/config';
+import { PRO_PRICE_INR, LIFETIME_PRICE_INR } from '@/lib/config';
+import { createClient } from '@/lib/supabase/client';
 
 declare global {
   interface Window {
@@ -41,6 +42,33 @@ export function ProCheckoutModal({
   const [sub, setSub] = useState<SubInfo | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const priceInr = PRO_PRICE_INR;
+  const [plan, setPlan] = useState<'monthly' | 'lifetime'>('monthly');
+  // Set only for people who bought the Lifetime Pass.
+  const [mentor, setMentor] = useState<string | null>(null);
+
+  const loadMentor = async () => {
+    try {
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth?.user) return;
+      const { data: p } = await supabase
+        .from('profiles')
+        .select('lifetime_pass_at, mentor_candidate_id')
+        .eq('id', auth.user.id)
+        .maybeSingle();
+      if (!p?.lifetime_pass_at) return;
+      const { data: c } = p.mentor_candidate_id
+        ? await supabase
+            .from('recommended_candidates')
+            .select('name, ssb_name')
+            .eq('id', p.mentor_candidate_id)
+            .maybeSingle()
+        : { data: null };
+      setMentor(c ? `Your mentor: ${c.name} (${c.ssb_name}).` : 'Your mentor will be assigned soon.');
+    } catch {
+      setMentor(null);
+    }
+  };
 
   const loadSub = async () => {
     try {
@@ -56,8 +84,12 @@ export function ProCheckoutModal({
     if (!open) return;
     setError('');
     setNotice('');
-    if (userEmail) loadSub();
-    else setSub(null);
+    setPlan('monthly');
+    setMentor(null);
+    if (userEmail) {
+      loadSub();
+      loadMentor();
+    } else setSub(null);
   }, [open, userEmail]);
 
   if (!open) return null;
@@ -139,6 +171,66 @@ export function ProCheckoutModal({
     }
   };
 
+  const handleLifetime = async () => {
+    if (!userEmail) {
+      onClose();
+      onRequireAuth();
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setNotice('');
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error('Could not load Razorpay checkout. Check your connection.');
+
+      const res = await fetch('/api/razorpay/create-order', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not start the payment');
+
+      const rzp = new window.Razorpay({
+        key: data.keyId,
+        order_id: data.orderId,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'SSB Arena',
+        description: `Lifetime Pass: ₹${LIFETIME_PRICE_INR} one-time`,
+        prefill: isPhoneLogin(userEmail) ? { contact: userEmail!.split('@')[0] } : { email: userEmail },
+        theme: { color: '#F59E0B' },
+        modal: {
+          ondismiss: () => setError('Payment cancelled. You can try again any time.'),
+        },
+        handler: async function (response: any) {
+          setError('');
+          try {
+            const verifyRes = await fetch('/api/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(response),
+            });
+            if (verifyRes.ok) {
+              onSuccess();
+              onClose();
+            } else {
+              setError('Payment received, activation pending. Refresh in 10 seconds.');
+            }
+          } catch {
+            setError('Payment received, activation pending. Refresh in 10 seconds.');
+          }
+        },
+      });
+      rzp.on('payment.failed', (resp: any) => {
+        setError(resp?.error?.description || 'Payment failed. Please try again.');
+      });
+      rzp.open();
+    } catch (err: any) {
+      setError(err.message || 'Payment initialization failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCancel = async () => {
     if (!confirm('Cancel autopay? You keep Pro until the end of the month you have paid for.')) return;
     setCancelling(true);
@@ -162,6 +254,8 @@ export function ProCheckoutModal({
   // Pro without a subscription row (manual grant or an earlier one-time payment): info only.
   const proInfoOnly = isPro && !hasSub;
   const showManage = hasSub || isPro;
+  const isLifetime = isPro && !proUntil;
+  const lifetimeSelected = plan === 'lifetime';
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -182,7 +276,9 @@ export function ProCheckoutModal({
           {showManage ? 'Your Pro Subscription' : 'Unlock All PPDT & OIR Drills'}
         </h2>
         <p className="text-slate-400 text-sm mt-1">
-          {proInfoOnly
+          {isLifetime
+            ? `Lifetime access is active.${mentor ? ` ${mentor}` : ''}`
+            : proInfoOnly
             ? proUntil
               ? `Pro is active until ${fmtDate(proUntil)}.`
               : 'Pro is active on your account.'
@@ -192,16 +288,33 @@ export function ProCheckoutModal({
               : `Autopay is on: ₹${priceInr} is charged every month.${
                   sub!.current_end ? ` Next renewal around ${fmtDate(sub!.current_end)}.` : ''
                 }`
-            : `₹${priceInr} per month via UPI AutoPay or card. Cancel any time.`}
+            : 'Choose monthly autopay or a one-time Lifetime Pass.'}
         </p>
 
         {!showManage && (
-          <div className="my-5 p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-baseline justify-between">
-            <div>
-              <span className="text-3xl font-black text-amber-400">₹{priceInr}</span>
-              <span className="text-slate-400 text-xs ml-2">per month • autopay</span>
-            </div>
-            <span className="text-xs text-emerald-400 font-medium">Instant Activation</span>
+          <div className="my-5 grid grid-cols-2 gap-3">
+            {(
+              [
+                { id: 'monthly', price: priceInr, note: 'per month • autopay' },
+                { id: 'lifetime', price: LIFETIME_PRICE_INR, note: 'Lifetime Pass • one-time' },
+              ] as const
+            ).map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  setPlan(o.id);
+                  setError('');
+                }}
+                aria-pressed={plan === o.id}
+                className={`p-4 rounded-xl bg-slate-950 border text-left transition ${
+                  plan === o.id ? 'border-amber-500' : 'border-slate-800 hover:border-slate-600'
+                }`}
+              >
+                <span className="block text-3xl font-black text-amber-400">₹{o.price}</span>
+                <span className="block text-slate-400 text-xs mt-1">{o.note}</span>
+              </button>
+            ))}
           </div>
         )}
 
@@ -218,6 +331,18 @@ export function ProCheckoutModal({
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             Full OIR Verbal &amp; Non-Verbal Speed Sets with Solutions
           </li>
+          {!isLifetime && (showManage || lifetimeSelected) && (
+            <>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                Lifetime Pass: personal mentor (a recommended candidate) till you become an officer
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                Lifetime Pass: lifetime access, no renewals
+              </li>
+            </>
+          )}
         </ul>
 
         {error && (
@@ -231,7 +356,20 @@ export function ProCheckoutModal({
           </p>
         )}
 
-        {proInfoOnly ? null : hasSub ? (
+        {proInfoOnly ? null : !showManage && lifetimeSelected ? (
+          <>
+            <button
+              onClick={handleLifetime}
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base transition disabled:opacity-50"
+            >
+              {loading ? 'Opening Razorpay...' : `Get Lifetime Pass ₹${LIFETIME_PRICE_INR}`}
+            </button>
+            <p className="text-[11px] text-slate-500 text-center mt-2">
+              One-time payment. Selection is not guaranteed.
+            </p>
+          </>
+        ) : hasSub ? (
           !isCancelling && (
             <button
               onClick={handleCancel}
@@ -252,6 +390,21 @@ export function ProCheckoutModal({
             </button>
             <p className="text-[11px] text-slate-500 text-center mt-2">
               By subscribing you authorise a recurring monthly charge of ₹{priceInr} until you cancel.
+            </p>
+          </>
+        )}
+
+        {showManage && !isLifetime && (
+          <>
+            <button
+              onClick={handleLifetime}
+              disabled={loading}
+              className="w-full mt-3 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition disabled:opacity-50"
+            >
+              {loading ? 'Opening Razorpay...' : `Upgrade to Lifetime ₹${LIFETIME_PRICE_INR}`}
+            </button>
+            <p className="text-[11px] text-slate-500 text-center mt-2">
+              One-time payment. Monthly autopay is cancelled after you upgrade. Selection is not guaranteed.
             </p>
           </>
         )}

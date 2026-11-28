@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createAdminSupabase } from '@/lib/supabase/admin';
-import { grantProPeriod } from '@/lib/pro';
+import { grantLifetime, grantProPeriod } from '@/lib/pro';
+import { recordCommission } from '@/lib/referral';
 
 export async function POST(req: Request) {
   let body: any;
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
   // Only the user who created this order may claim the pass it paid for.
   const { data: order } = await admin
     .from('payment_orders')
-    .select('user_id')
+    .select('user_id, plan, amount_paise')
     .eq('razorpay_order_id', razorpay_order_id)
     .single();
   if (!order || order.user_id !== auth.user.id) {
@@ -66,7 +67,10 @@ export async function POST(req: Request) {
     .or('status.is.null,status.neq.paid')
     .select('user_id');
 
-  if (claimed && claimed.length > 0) {
+  if (order.plan === 'lifetime') {
+    await grantLifetime(admin, auth.user.id, razorpay_order_id);
+    await recordCommission(admin, auth.user.id, razorpay_payment_id, order.amount_paise);
+  } else if (claimed && claimed.length > 0) {
     await grantProPeriod(admin, auth.user.id);
   }
 
