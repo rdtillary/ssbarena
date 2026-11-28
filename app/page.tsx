@@ -13,10 +13,10 @@ import {
   ListChecks,
   Archive,
   Shield,
-  LogOut,
   CheckCircle2,
   Sparkles,
   RotateCcw,
+  UserRound,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_PPDT_SCENARIOS, DEFAULT_OIR_SETS } from '@/lib/seed-data';
@@ -153,12 +153,6 @@ export default function HomePage() {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsPro(false);
-  };
-
   const heroSlide = (
     <section className="relative isolate overflow-hidden h-full flex flex-col justify-center p-6 sm:p-8 pb-10 sm:pb-12 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800">
       <div aria-hidden className="hero-photo absolute inset-0 -z-10" />
@@ -273,13 +267,14 @@ export default function HomePage() {
             )}
 
             {user ? (
-              <button
-                onClick={handleSignOut}
-                title="Sign Out"
-                className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+              <Link
+                href="/profile"
+                title="My Profile"
+                aria-label="My Profile"
+                className="w-9 h-9 shrink-0 rounded-full bg-slate-900 border border-amber-500/50 text-amber-400 flex items-center justify-center hover:bg-slate-800"
               >
-                <LogOut className="w-4 h-4" />
-              </button>
+                <UserRound className="w-4 h-4" />
+              </Link>
             ) : (
               <button
                 onClick={() => setAuthOpen(true)}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, AlertTriangle, CheckCircle2, Share2 } from 'lucide-react';
@@ -84,6 +84,30 @@ export default function OIRDrillPage() {
   useEffect(() => {
     if (oirSet && !submitted && totalSecondsLeft === 0) setSubmitted(true);
   }, [totalSecondsLeft, oirSet, submitted]);
+
+  // Save each submitted drill once, so it shows in the profile.
+  const savedRef = useRef(false);
+  useEffect(() => {
+    if (!submitted || !oirSet || savedRef.current) return;
+    savedRef.current = true;
+    (async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth?.user) return;
+      const correct = oirSet.questions.filter((q, i) => answers[i] === q.correct_index).length;
+      const { error } = await supabase.from('user_attempts').insert({
+        user_id: auth.user.id,
+        attempt_type: 'OIR',
+        scenario_id: oirSet.id,
+        scenario_title: oirSet.title,
+        story_score: 0,
+        narration_score: 0,
+        total_score: correct,
+        max_score: oirSet.questions.length,
+        payload: { secondsUsed: oirSet.duration_seconds - totalSecondsLeft },
+      });
+      if (error) console.error('Could not save OIR attempt', error.message);
+    })();
+  }, [submitted]);
 
   if (loadError) {
     return (

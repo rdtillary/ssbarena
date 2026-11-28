@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { ReferralClaim } from '@/components/ReferralClaim';
 import { VisitTracker } from '@/components/VisitTracker';
 import { AuthGate } from '@/components/onboarding/AuthGate';
+import { ActivityTracker } from '@/components/ActivityTracker';
 import { ProUpsellPopup } from '@/components/ProUpsellPopup';
 import { FloatingContact } from '@/components/FloatingContact';
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             <FloatingContact />
             <ProUpsellPopup />
+            <ActivityTracker />
           </AuthGate>
         </div>
         <Footer />
